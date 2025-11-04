@@ -3,13 +3,15 @@ Tests para el modelo Venta de KATITA-POS
 
 Tests completos para verificar:
 - Creación de ventas con diferentes métodos de pago
-- Cálculo de totales (subtotal, IGV 18%, total)
+- Cálculo de totales (subtotal, descuento, total)
 - Cálculo de cambio solo para efectivo
 - Validación de pagos digitales sin cambio
 - Generación de número de venta único
 - Cancelación de ventas
 - Búsquedas y estadísticas
 - Propiedades calculadas
+
+NOTA: Los precios YA INCLUYEN IGV - no se calcula por separado
 """
 
 import pytest
@@ -60,11 +62,10 @@ class TestVentaModel:
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('0.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('150.00'),
-                cambio=Decimal('32.00'),
+                cambio=Decimal('50.00'),
                 vendedor_id=user.id
             )
 
@@ -74,7 +75,7 @@ class TestVentaModel:
             assert venta.id is not None
             assert venta.metodo_pago == 'efectivo'
             assert venta.monto_recibido == Decimal('150.00')
-            assert venta.cambio == Decimal('32.00')
+            assert venta.cambio == Decimal('50.00')
 
     def test_crear_venta_yape(self, app, vendedor):
         """Test: Crear una venta con Yape"""
@@ -84,8 +85,7 @@ class TestVentaModel:
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('0.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='yape',
                 vendedor_id=user.id
             )
@@ -106,8 +106,7 @@ class TestVentaModel:
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('0.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='plin',
                 vendedor_id=user.id
             )
@@ -126,8 +125,7 @@ class TestVentaModel:
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('0.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='transferencia',
                 vendedor_id=user.id
             )
@@ -145,8 +143,7 @@ class TestVentaModel:
 
             venta = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
                 vendedor_id=user.id
@@ -167,8 +164,7 @@ class TestVentaModel:
             with pytest.raises(ValueError, match='método de pago debe ser uno de'):
                 venta = Venta(
                     subtotal=Decimal('100.00'),
-                    igv=Decimal('18.00'),
-                    total=Decimal('118.00'),
+                    total=Decimal('100.00'),
                     metodo_pago='tarjeta',  # NO es válido
                     vendedor_id=user.id
                 )
@@ -182,8 +178,7 @@ class TestVentaModel:
             with pytest.raises(ValueError):
                 venta = Venta(
                     subtotal=Decimal('100.00'),
-                    igv=Decimal('18.00'),
-                    total=Decimal('118.00'),
+                    total=Decimal('100.00'),
                     metodo_pago='tarjeta',
                     vendedor_id=user.id
                 )
@@ -196,8 +191,7 @@ class TestVentaModel:
             with pytest.raises(ValueError, match='estado debe ser uno de'):
                 venta = Venta(
                     subtotal=Decimal('100.00'),
-                    igv=Decimal('18.00'),
-                    total=Decimal('118.00'),
+                    total=Decimal('100.00'),
                     metodo_pago='efectivo',
                     monto_recibido=Decimal('120.00'),
                     vendedor_id=user.id,
@@ -212,7 +206,6 @@ class TestVentaModel:
             with pytest.raises(ValueError, match='total debe ser mayor a 0'):
                 venta = Venta(
                     subtotal=Decimal('100.00'),
-                    igv=Decimal('0.00'),
                     total=Decimal('0.00'),  # Total cero no es válido
                     metodo_pago='efectivo',
                     vendedor_id=user.id
@@ -226,8 +219,7 @@ class TestVentaModel:
             with pytest.raises(ValueError, match='subtotal no puede ser negativo'):
                 venta = Venta(
                     subtotal=Decimal('-100.00'),  # Subtotal negativo
-                    igv=Decimal('18.00'),
-                    total=Decimal('118.00'),
+                    total=Decimal('100.00'),
                     metodo_pago='efectivo',
                     vendedor_id=user.id
                 )
@@ -241,8 +233,7 @@ class TestVentaModel:
                 venta = Venta(
                     subtotal=Decimal('100.00'),
                     descuento=Decimal('-10.00'),  # Descuento negativo
-                    igv=Decimal('18.00'),
-                    total=Decimal('118.00'),
+                    total=Decimal('100.00'),
                     metodo_pago='efectivo',
                     vendedor_id=user.id
                 )
@@ -257,8 +248,7 @@ class TestVentaModel:
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('0.00'),
-                igv=Decimal('18.00'),  # Valor inicial temporal
-                total=Decimal('118.00'),  # Valor inicial temporal
+                total=Decimal('100.00'),  # Valor inicial temporal
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
                 vendedor_id=user.id
@@ -266,10 +256,8 @@ class TestVentaModel:
 
             venta.calcular_totales()
 
-            # IGV = 100 * 0.18 = 18
-            assert venta.igv == Decimal('18.00')
-            # Total = 100 - 0 + 18 = 118
-            assert venta.total == Decimal('118.00')
+            # Total = 100 - 0 = 100 (sin IGV por separado)
+            assert venta.total == Decimal('100.00')
 
     def test_calcular_totales_con_descuento(self, app, vendedor):
         """Test: Calcular totales con descuento"""
@@ -279,8 +267,7 @@ class TestVentaModel:
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('10.00'),
-                igv=Decimal('16.20'),  # Valor inicial temporal
-                total=Decimal('106.20'),  # Valor inicial temporal
+                total=Decimal('90.00'),  # Valor inicial temporal
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
                 vendedor_id=user.id
@@ -288,46 +275,42 @@ class TestVentaModel:
 
             venta.calcular_totales()
 
-            # IGV = (100 - 10) * 0.18 = 90 * 0.18 = 16.20
-            assert venta.igv == Decimal('16.20')
-            # Total = 100 - 10 + 16.20 = 106.20
-            assert venta.total == Decimal('106.20')
+            # Total = 100 - 10 = 90 (sin IGV por separado)
+            assert venta.total == Decimal('90.00')
 
-    def test_validar_igv_correcto(self, app, vendedor):
-        """Test: Validar que el IGV sea correcto (18%)"""
+    def test_validar_total_correcto(self, app, vendedor):
+        """Test: Validar que el total sea correcto"""
         with app.app_context():
             user = db.session.merge(vendedor)
 
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('0.00'),
-                igv=Decimal('18.00'),  # Correcto
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
-                cambio=Decimal('2.00'),  # Debe incluir cambio
+                cambio=Decimal('20.00'),
                 vendedor_id=user.id
             )
 
             venta.validar()  # No debe lanzar error
 
-    def test_validar_igv_incorrecto(self, app, vendedor):
-        """Test: Validar que IGV incorrecto falle"""
+    def test_validar_total_incorrecto(self, app, vendedor):
+        """Test: Validar que total incorrecto falle"""
         with app.app_context():
             user = db.session.merge(vendedor)
 
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('0.00'),
-                igv=Decimal('20.00'),  # Incorrecto (debería ser 18)
-                total=Decimal('120.00'),
+                total=Decimal('120.00'),  # Incorrecto (debería ser 100)
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('150.00'),
                 cambio=Decimal('30.00'),
                 vendedor_id=user.id
             )
 
-            with pytest.raises(ValueError, match='IGV calculado'):
+            with pytest.raises(ValueError, match='total calculado'):
                 venta.validar()
 
     # === TESTS DE CÁLCULO DE CAMBIO ===
@@ -340,8 +323,7 @@ class TestVentaModel:
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('0.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('150.00'),
                 vendedor_id=user.id
@@ -349,7 +331,7 @@ class TestVentaModel:
 
             venta.calcular_cambio()
 
-            assert venta.cambio == Decimal('32.00')
+            assert venta.cambio == Decimal('50.00')
 
     def test_calcular_cambio_efectivo_exacto(self, app, vendedor):
         """Test: Pago exacto en efectivo (sin cambio)"""
@@ -359,10 +341,9 @@ class TestVentaModel:
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('0.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
-                monto_recibido=Decimal('118.00'),
+                monto_recibido=Decimal('100.00'),
                 vendedor_id=user.id
             )
 
@@ -378,10 +359,9 @@ class TestVentaModel:
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('0.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
-                monto_recibido=Decimal('100.00'),  # Insuficiente
+                monto_recibido=Decimal('90.00'),  # Insuficiente
                 vendedor_id=user.id
             )
 
@@ -397,8 +377,7 @@ class TestVentaModel:
                 venta = Venta(
                     subtotal=Decimal('100.00'),
                     descuento=Decimal('0.00'),
-                    igv=Decimal('18.00'),
-                    total=Decimal('118.00'),
+                    total=Decimal('100.00'),
                     metodo_pago=metodo,
                     vendedor_id=user.id
                 )
@@ -416,10 +395,9 @@ class TestVentaModel:
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('0.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='yape',
-                monto_recibido=Decimal('118.00'),  # NO debe tener
+                monto_recibido=Decimal('100.00'),  # NO debe tener
                 cambio=Decimal('0.00'),
                 vendedor_id=user.id
             )
@@ -435,8 +413,7 @@ class TestVentaModel:
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('0.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='plin',
                 monto_recibido=None,
                 cambio=Decimal('10.00'),  # NO debe tener cambio
@@ -455,8 +432,7 @@ class TestVentaModel:
 
             venta_yape = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='yape',
                 vendedor_id=user.id
             )
@@ -465,8 +441,7 @@ class TestVentaModel:
 
             venta_plin = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='plin',
                 vendedor_id=user.id
             )
@@ -474,8 +449,7 @@ class TestVentaModel:
 
             venta_transferencia = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='transferencia',
                 vendedor_id=user.id
             )
@@ -488,8 +462,7 @@ class TestVentaModel:
 
             venta_efectivo = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
                 vendedor_id=user.id
@@ -504,11 +477,10 @@ class TestVentaModel:
 
             venta = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
-                cambio=Decimal('2.00'),
+                cambio=Decimal('20.00'),
                 vendedor_id=user.id
             )
             venta.generar_numero_venta()  # Generar número único
@@ -525,8 +497,7 @@ class TestVentaModel:
             # Venta de hoy
             venta_hoy = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
                 vendedor_id=user.id
@@ -537,8 +508,7 @@ class TestVentaModel:
             venta_antigua = Venta(
                 fecha=datetime.now(timezone.utc) - timedelta(days=5),
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
                 vendedor_id=user.id
@@ -552,8 +522,7 @@ class TestVentaModel:
 
             venta_pendiente = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
                 vendedor_id=user.id,
@@ -564,8 +533,7 @@ class TestVentaModel:
 
             venta_sincronizada = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
                 vendedor_id=user.id,
@@ -583,11 +551,10 @@ class TestVentaModel:
 
             venta = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
-                cambio=Decimal('2.00'),
+                cambio=Decimal('20.00'),
                 vendedor_id=user.id
             )
 
@@ -605,11 +572,10 @@ class TestVentaModel:
 
             venta1 = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
-                cambio=Decimal('2.00'),
+                cambio=Decimal('20.00'),
                 vendedor_id=user.id
             )
             venta1.generar_numero_venta()
@@ -618,8 +584,7 @@ class TestVentaModel:
 
             venta2 = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='yape',
                 vendedor_id=user.id
             )
@@ -642,11 +607,10 @@ class TestVentaModel:
 
             venta = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
-                cambio=Decimal('2.00'),
+                cambio=Decimal('20.00'),
                 vendedor_id=user.id
             )
 
@@ -663,11 +627,10 @@ class TestVentaModel:
 
             venta = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
-                cambio=Decimal('2.00'),
+                cambio=Decimal('20.00'),
                 vendedor_id=user.id,
                 created_offline=True,
                 synced=False
@@ -689,8 +652,7 @@ class TestVentaModel:
             venta = Venta(
                 subtotal=Decimal('100.00'),
                 descuento=Decimal('10.00'),
-                igv=Decimal('16.20'),
-                total=Decimal('106.20'),
+                total=Decimal('90.00'),
                 metodo_pago='yape',
                 cliente_nombre='Juan Pérez',
                 cliente_dni='12345678',
@@ -701,8 +663,7 @@ class TestVentaModel:
 
             assert data['subtotal'] == 100.0
             assert data['descuento'] == 10.0
-            assert data['igv'] == 16.2
-            assert data['total'] == 106.2
+            assert data['total'] == 90.0
             assert data['metodo_pago'] == 'yape'
             assert data['cliente_nombre'] == 'Juan Pérez'
             assert data['cliente_dni'] == '12345678'
@@ -717,11 +678,10 @@ class TestVentaModel:
 
             venta_hoy = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
-                cambio=Decimal('2.00'),
+                cambio=Decimal('20.00'),
                 vendedor_id=user.id
             )
             venta_hoy.generar_numero_venta()
@@ -741,8 +701,7 @@ class TestVentaModel:
 
             venta = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='yape',
                 vendedor_id=user.id
             )
@@ -763,8 +722,7 @@ class TestVentaModel:
 
             venta_yape = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='yape',
                 vendedor_id=user.id
             )
@@ -786,8 +744,7 @@ class TestVentaModel:
             for metodo in ['yape', 'plin', 'transferencia']:
                 venta = Venta(
                     subtotal=Decimal('100.00'),
-                    igv=Decimal('18.00'),
-                    total=Decimal('118.00'),
+                    total=Decimal('100.00'),
                     metodo_pago=metodo,
                     vendedor_id=user.id
                 )
@@ -808,11 +765,10 @@ class TestVentaModel:
 
             venta = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
-                cambio=Decimal('2.00'),
+                cambio=Decimal('20.00'),
                 vendedor_id=user.id
             )
             venta.generar_numero_venta()
@@ -832,11 +788,10 @@ class TestVentaModel:
 
             venta_pendiente = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
-                cambio=Decimal('2.00'),
+                cambio=Decimal('20.00'),
                 vendedor_id=user.id,
                 created_offline=True,
                 synced=False
@@ -858,31 +813,29 @@ class TestVentaModel:
 
             venta1 = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
-                cambio=Decimal('2.00'),
+                cambio=Decimal('20.00'),
                 vendedor_id=user.id
             )
             venta1.generar_numero_venta()
             db.session.add(venta1)
-            db.session.commit()  # Commit first venta
 
             venta2 = Venta(
                 subtotal=Decimal('50.00'),
-                igv=Decimal('9.00'),
-                total=Decimal('59.00'),
+                total=Decimal('50.00'),
                 metodo_pago='yape',
                 vendedor_id=user.id
             )
-            venta2.generar_numero_venta()  # Now will generate 0002
+            venta2.generar_numero_venta()
             db.session.add(venta2)
+
             db.session.commit()
 
             total = Venta.total_ventas_dia()
 
-            assert total >= Decimal('177.00')  # 118 + 59
+            assert total >= Decimal('150.00')  # 100 + 50
 
     def test_cantidad_ventas_dia(self, app, vendedor):
         """Test: Cantidad de ventas del día"""
@@ -891,26 +844,24 @@ class TestVentaModel:
 
             venta1 = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='efectivo',
                 monto_recibido=Decimal('120.00'),
-                cambio=Decimal('2.00'),
+                cambio=Decimal('20.00'),
                 vendedor_id=user.id
             )
             venta1.generar_numero_venta()
             db.session.add(venta1)
-            db.session.commit()  # Commit first venta
 
             venta2 = Venta(
                 subtotal=Decimal('50.00'),
-                igv=Decimal('9.00'),
-                total=Decimal('59.00'),
+                total=Decimal('50.00'),
                 metodo_pago='yape',
                 vendedor_id=user.id
             )
-            venta2.generar_numero_venta()  # Now will generate 0002
+            venta2.generar_numero_venta()
             db.session.add(venta2)
+
             db.session.commit()
 
             cantidad = Venta.cantidad_ventas_dia()
@@ -924,8 +875,7 @@ class TestVentaModel:
 
             venta = Venta(
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='yape',
                 vendedor_id=user.id
             )
@@ -947,8 +897,7 @@ class TestVentaModel:
             for i in range(5):
                 venta = Venta(
                     subtotal=Decimal('100.00'),
-                    igv=Decimal('18.00'),
-                    total=Decimal('118.00'),
+                    total=Decimal('100.00'),
                     metodo_pago='yape',
                     vendedor_id=user.id
                 )
@@ -971,14 +920,13 @@ class TestVentaModel:
             venta = Venta(
                 numero_venta='V-20251101-0001',
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='yape',
                 vendedor_id=user.id
             )
 
             assert 'V-20251101-0001' in repr(venta)
-            assert '118' in repr(venta)
+            assert '100' in repr(venta)
             assert 'yape' in repr(venta)
 
     def test_str(self, app, vendedor):
@@ -989,8 +937,7 @@ class TestVentaModel:
             venta = Venta(
                 numero_venta='V-20251101-0001',
                 subtotal=Decimal('100.00'),
-                igv=Decimal('18.00'),
-                total=Decimal('118.00'),
+                total=Decimal('100.00'),
                 metodo_pago='yape',
                 estado='completada',
                 vendedor_id=user.id

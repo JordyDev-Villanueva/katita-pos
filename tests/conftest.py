@@ -16,6 +16,9 @@ def app():
     app = create_app('testing')
 
     with app.app_context():
+        # Importar todos los modelos para asegurar que estén registrados
+        from app.models import Product, Lote, User, Venta, DetalleVenta, MovimientoStock, SyncQueue
+
         db.create_all()
         yield app
         db.session.remove()

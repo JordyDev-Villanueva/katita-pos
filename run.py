@@ -17,13 +17,13 @@ if __name__ == '__main__':
     debug = os.environ.get('FLASK_ENV', 'development') == 'development'
 
     print(f"""
-    ╔═══════════════════════════════════════╗
-    ║       KATITA-POS - Backend API        ║
-    ╚═══════════════════════════════════════╝
+    ==========================================
+          KATITA-POS - Backend API
+    ==========================================
 
-    🚀 Server running on: http://{host}:{port}
-    📊 Database Mode: {app.config['DATABASE_MODE']}
-    🔧 Environment: {os.environ.get('FLASK_ENV', 'development')}
+    Server running on: http://{host}:{port}
+    Database Mode: {app.config['DATABASE_MODE']}
+    Environment: {os.environ.get('FLASK_ENV', 'development')}
 
     Press CTRL+C to quit
     """)

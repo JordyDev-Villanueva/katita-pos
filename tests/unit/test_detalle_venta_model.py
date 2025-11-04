@@ -72,11 +72,10 @@ def venta(app, vendedor):
 
         v = Venta(
             subtotal=Decimal('100.00'),
-            igv=Decimal('18.00'),
-            total=Decimal('118.00'),
+            total=Decimal('100.00'),
             metodo_pago='efectivo',
             monto_recibido=Decimal('150.00'),
-            cambio=Decimal('32.00'),
+            cambio=Decimal('50.00'),
             vendedor_id=user.id
         )
         v.generar_numero_venta()

@@ -60,9 +60,9 @@ def create_app(config_name=None):
     # Registrar handlers de errores
     register_error_handlers(app)
 
-    # Crear tablas de base de datos (solo en desarrollo)
+    # Crear tablas de base de datos (solo en desarrollo, NO en testing)
     with app.app_context():
-        if app.config['DEBUG']:
+        if app.config['DEBUG'] and not app.config['TESTING']:
             db.create_all()
             app.logger.info(f"Database initialized: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
@@ -117,15 +117,18 @@ def register_blueprints(app):
     Args:
         app (Flask): Instancia de la aplicación
     """
-    # TODO: Registrar blueprints aquí cuando se creen
+    # Registrar blueprint de productos
+    from app.blueprints.products import products_bp
+    app.register_blueprint(products_bp)
+
+    # Registrar blueprint de lotes
+    from app.blueprints.lotes import lotes_bp
+    app.register_blueprint(lotes_bp)
+
+    # TODO: Registrar más blueprints aquí cuando se creen
     # Ejemplo:
     # from app.blueprints.auth import auth_bp
-    # app.register_blueprint(auth_bp, url_prefix='/api/auth')
-
-    # from app.blueprints.products import products_bp
-    # app.register_blueprint(products_bp, url_prefix='/api/products')
-
-    pass
+    # app.register_blueprint(auth_bp)
 
 
 def register_error_handlers(app):

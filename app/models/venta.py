@@ -3,7 +3,8 @@ Modelo Venta para KATITA-POS
 
 Define la estructura de ventas del sistema POS.
 Incluye métodos de pago específicos de Perú (Yape/Plin/Transferencia via QR).
-Gestiona cálculo de totales, IGV 18%, y cambio solo para efectivo.
+Gestiona cálculo de totales y cambio solo para efectivo.
+Los precios YA INCLUYEN IGV - no se calcula por separado.
 """
 
 from datetime import datetime, timezone, date, timedelta
@@ -25,7 +26,7 @@ class Venta(db.Model):
     - Efectivo: Calcula cambio
     - Yape/Plin/Transferencia: Cliente escanea QR, sin cambio
 
-    IGV: 18% del (subtotal - descuento)
+    Total: subtotal - descuento (precios ya incluyen IGV)
     """
 
     __tablename__ = 'ventas'
@@ -41,7 +42,6 @@ class Venta(db.Model):
     # Montos
     subtotal = db.Column(Numeric(10, 2), nullable=False)
     descuento = db.Column(Numeric(10, 2), default=Decimal('0.00'), nullable=False)
-    igv = db.Column(Numeric(10, 2), nullable=False)
     total = db.Column(Numeric(10, 2), nullable=False)
 
     # Pago
@@ -219,13 +219,9 @@ class Venta(db.Model):
         if not self.fecha:
             return 0
 
-        # Detectar si fecha es timezone-aware o naive
-        if self.fecha.tzinfo is not None:
-            hoy = datetime.now(timezone.utc)
-        else:
-            hoy = datetime.now()
-
-        delta = hoy - self.fecha
+        hoy = datetime.now(timezone.utc)
+        fecha_aware = self.fecha.replace(tzinfo=timezone.utc) if self.fecha.tzinfo is None else self.fecha
+        delta = hoy - fecha_aware
         return delta.days
 
     @hybrid_property
@@ -247,13 +243,13 @@ class Venta(db.Model):
 
     def calcular_totales(self):
         """
-        Calcula subtotal, IGV y total desde los detalles
+        Calcula subtotal y total desde los detalles
 
         El subtotal es la suma de (precio * cantidad) de todos los detalles
-        IGV = (subtotal - descuento) * 0.18
-        Total = subtotal - descuento + igv
+        Total = subtotal - descuento
 
-        Si no hay detalles, calcula IGV y total basándose en el subtotal actual.
+        Los precios de venta YA INCLUYEN el IGV implícitamente.
+        No se calcula ni muestra IGV por separado (práctica común en minimarkets peruanos).
         """
         # Si hay detalles, calcular subtotal desde ellos
         if hasattr(self, 'detalles') and self.detalles:
@@ -263,12 +259,8 @@ class Venta(db.Model):
                 for detalle in self.detalles
             )
 
-        # Calcular IGV (18% del subtotal después de descuento)
-        base_imponible = (self.subtotal or Decimal('0.00')) - (self.descuento or Decimal('0.00'))
-        self.igv = (base_imponible * Decimal('0.18')).quantize(Decimal('0.01'))
-
-        # Calcular total
-        self.total = ((self.subtotal or Decimal('0.00')) - (self.descuento or Decimal('0.00')) + self.igv).quantize(Decimal('0.01'))
+        # Calcular total (sin IGV por separado - ya está incluido en los precios)
+        self.total = ((self.subtotal or Decimal('0.00')) - (self.descuento or Decimal('0.00'))).quantize(Decimal('0.01'))
 
     def calcular_cambio(self):
         """
@@ -336,7 +328,6 @@ class Venta(db.Model):
         - Totales correctos
         - Descuento válido
         - Cambio correcto (si es efectivo)
-        - IGV correcto (18%)
 
         Raises:
             ValueError: Si alguna validación falla
@@ -345,15 +336,8 @@ class Venta(db.Model):
         if self.descuento and self.descuento > self.subtotal:
             raise ValueError('El descuento no puede ser mayor que el subtotal')
 
-        # Validar IGV (18%)
-        base_imponible = self.subtotal - (self.descuento or Decimal('0.00'))
-        igv_esperado = (base_imponible * Decimal('0.18')).quantize(Decimal('0.01'))
-
-        if abs(self.igv - igv_esperado) > Decimal('0.02'):  # Tolerancia de 2 centavos
-            raise ValueError(f'El IGV calculado ({igv_esperado}) no coincide con el IGV de la venta ({self.igv})')
-
-        # Validar total
-        total_esperado = (self.subtotal - (self.descuento or Decimal('0.00')) + self.igv).quantize(Decimal('0.01'))
+        # Validar total (sin IGV - ya incluido en precios)
+        total_esperado = (self.subtotal - (self.descuento or Decimal('0.00'))).quantize(Decimal('0.01'))
 
         if abs(self.total - total_esperado) > Decimal('0.02'):
             raise ValueError(f'El total calculado ({total_esperado}) no coincide con el total de la venta ({self.total})')
@@ -430,7 +414,6 @@ class Venta(db.Model):
             'fecha': self.fecha.isoformat() if self.fecha else None,
             'subtotal': float(self.subtotal) if self.subtotal else 0.0,
             'descuento': float(self.descuento) if self.descuento else 0.0,
-            'igv': float(self.igv) if self.igv else 0.0,
             'total': float(self.total) if self.total else 0.0,
             'metodo_pago': self.metodo_pago,
             'monto_recibido': float(self.monto_recibido) if self.monto_recibido else None,
@@ -467,15 +450,16 @@ class Venta(db.Model):
         Retorna todas las ventas de un día específico
 
         Args:
-            fecha (date): Fecha a buscar (default: hoy)
+            fecha (date): Fecha a buscar (default: hoy en UTC)
 
         Returns:
             list[Venta]: Lista de ventas del día
         """
         if fecha is None:
-            fecha = date.today()
+            # Usar fecha UTC porque las ventas se guardan en UTC
+            fecha = datetime.now(timezone.utc).date()
 
-        # Convertir fecha a datetime para comparar
+        # Convertir fecha a datetime UTC naive (SQLite no guarda tzinfo)
         inicio = datetime.combine(fecha, datetime.min.time())
         fin = datetime.combine(fecha, datetime.max.time())
 
@@ -492,17 +476,19 @@ class Venta(db.Model):
 
         Args:
             vendedor_id (int): ID del vendedor
-            fecha_inicio (date): Fecha de inicio (default: hoy)
-            fecha_fin (date): Fecha de fin (default: hoy)
+            fecha_inicio (date): Fecha de inicio (default: hoy en UTC)
+            fecha_fin (date): Fecha de fin (default: hoy en UTC)
 
         Returns:
             list[Venta]: Lista de ventas del vendedor
         """
         if fecha_inicio is None:
-            fecha_inicio = date.today()
+            # Usar fecha UTC porque las ventas se guardan en UTC
+            fecha_inicio = datetime.now(timezone.utc).date()
         if fecha_fin is None:
-            fecha_fin = date.today()
+            fecha_fin = datetime.now(timezone.utc).date()
 
+        # Convertir a datetime UTC naive (SQLite no guarda tzinfo)
         inicio = datetime.combine(fecha_inicio, datetime.min.time())
         fin = datetime.combine(fecha_fin, datetime.max.time())
 
@@ -580,14 +566,16 @@ class Venta(db.Model):
         Retorna el total de ventas de un día
 
         Args:
-            fecha (date): Fecha a buscar (default: hoy)
+            fecha (date): Fecha a buscar (default: hoy en UTC)
 
         Returns:
             Decimal: Suma total de ventas del día
         """
         if fecha is None:
-            fecha = date.today()
+            # Usar fecha UTC porque las ventas se guardan en UTC
+            fecha = datetime.now(timezone.utc).date()
 
+        # Convertir a datetime UTC naive (SQLite no guarda tzinfo)
         inicio = datetime.combine(fecha, datetime.min.time())
         fin = datetime.combine(fecha, datetime.max.time())
 
@@ -605,14 +593,16 @@ class Venta(db.Model):
         Retorna la cantidad de ventas de un día
 
         Args:
-            fecha (date): Fecha a buscar (default: hoy)
+            fecha (date): Fecha a buscar (default: hoy en UTC)
 
         Returns:
             int: Cantidad de ventas del día
         """
         if fecha is None:
-            fecha = date.today()
+            # Usar fecha UTC porque las ventas se guardan en UTC
+            fecha = datetime.now(timezone.utc).date()
 
+        # Convertir a datetime UTC naive (SQLite no guarda tzinfo)
         inicio = datetime.combine(fecha, datetime.min.time())
         fin = datetime.combine(fecha, datetime.max.time())
 
