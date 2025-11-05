@@ -125,6 +125,10 @@ def register_blueprints(app):
     from app.blueprints.lotes import lotes_bp
     app.register_blueprint(lotes_bp)
 
+    # Registrar blueprint de ventas
+    from app.blueprints.ventas import ventas_bp
+    app.register_blueprint(ventas_bp)
+
     # TODO: Registrar más blueprints aquí cuando se creen
     # Ejemplo:
     # from app.blueprints.auth import auth_bp
