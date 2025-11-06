@@ -159,12 +159,13 @@ def validation_error_response(errors, message="Error de validacion"):
     return error_response(message, status_code=422, errors=errors)
 
 
-def unauthorized_response(message="No autorizado"):
+def unauthorized_response(message="No autorizado", errors=None):
     """
     Genera una respuesta JSON de no autorizado (401 Unauthorized)
 
     Args:
         message (str): Mensaje descriptivo de la falta de autorizacion
+        errors (dict): Detalles adicionales del error (opcional)
 
     Returns:
         tuple: (response_json, 401)
@@ -178,15 +179,16 @@ def unauthorized_response(message="No autorizado"):
             "message": "Token invalido o expirado"
         }
     """
-    return error_response(message, status_code=401)
+    return error_response(message, status_code=401, errors=errors)
 
 
-def forbidden_response(message="Acceso prohibido"):
+def forbidden_response(message="Acceso prohibido", errors=None):
     """
     Genera una respuesta JSON de acceso prohibido (403 Forbidden)
 
     Args:
         message (str): Mensaje descriptivo del acceso prohibido
+        errors (dict): Detalles adicionales del error (opcional)
 
     Returns:
         tuple: (response_json, 403)
@@ -200,7 +202,7 @@ def forbidden_response(message="Acceso prohibido"):
             "message": "No tienes permisos para eliminar productos"
         }
     """
-    return error_response(message, status_code=403)
+    return error_response(message, status_code=403, errors=errors)
 
 
 def conflict_response(message="Conflicto de recursos", errors=None):

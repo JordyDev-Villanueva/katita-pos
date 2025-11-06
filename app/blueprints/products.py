@@ -22,6 +22,7 @@ from app.utils.responses import (
     success_response, error_response, created_response,
     not_found_response, validation_error_response, conflict_response
 )
+from app.decorators.auth_decorators import login_required, role_required
 
 # Crear el blueprint
 products_bp = Blueprint('products', __name__, url_prefix='/api/products')
@@ -54,6 +55,8 @@ def health_check():
 # ============================================================================
 
 @products_bp.route('', methods=['POST'])
+@login_required
+@role_required('admin', 'bodeguero')
 def crear_producto():
     """
     Crea un nuevo producto en el sistema
@@ -194,6 +197,7 @@ def crear_producto():
 # ============================================================================
 
 @products_bp.route('', methods=['GET'])
+@login_required
 def listar_productos():
     """
     Lista todos los productos con filtros opcionales
@@ -298,6 +302,7 @@ def listar_productos():
 # ============================================================================
 
 @products_bp.route('/barcode/<codigo_barras>', methods=['GET'])
+@login_required
 def buscar_por_codigo_barras(codigo_barras):
     """
     Buscar producto por codigo de barras para sistema POS
@@ -433,6 +438,7 @@ def buscar_por_codigo_barras(codigo_barras):
 # ============================================================================
 
 @products_bp.route('/<int:id>', methods=['GET'])
+@login_required
 def obtener_producto(id):
     """
     Obtiene un producto específico por su ID
@@ -478,6 +484,8 @@ def obtener_producto(id):
 # ============================================================================
 
 @products_bp.route('/<int:id>', methods=['PUT'])
+@login_required
+@role_required('admin', 'bodeguero')
 def actualizar_producto(id):
     """
     Actualiza un producto existente

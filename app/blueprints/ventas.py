@@ -18,7 +18,7 @@ El sistema FIFO es CRITICO:
 - Atomicidad total: todo o nada (rollback en errores)
 """
 
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func, and_
 from decimal import Decimal
@@ -34,6 +34,7 @@ from app.utils.responses import (
     success_response, error_response, created_response,
     not_found_response, validation_error_response
 )
+from app.decorators.auth_decorators import login_required, role_required
 
 # Crear Blueprint con prefijo /api/ventas
 ventas_bp = Blueprint('ventas', __name__, url_prefix='/api/ventas')
@@ -44,6 +45,8 @@ ventas_bp = Blueprint('ventas', __name__, url_prefix='/api/ventas')
 # ==================================================================================
 
 @ventas_bp.route('', methods=['POST'])
+@login_required
+@role_required('admin', 'vendedor')
 def procesar_venta():
     """
     Procesar una nueva venta con descuento automatico FIFO de lotes
@@ -134,10 +137,10 @@ def procesar_venta():
         # ========== VALIDACIONES INICIALES ==========
         errores = {}
 
-        # Validar campos requeridos
-        if not data.get('vendedor_id'):
-            errores['vendedor_id'] = 'El vendedor_id es requerido'
+        # Obtener vendedor_id del usuario autenticado (del token JWT)
+        vendedor_id = g.current_user['user_id']
 
+        # Validar campos requeridos
         if not data.get('items') or len(data.get('items', [])) == 0:
             errores['items'] = 'Debe incluir al menos un item'
 
@@ -148,9 +151,9 @@ def procesar_venta():
             return validation_error_response(errores)
 
         # Validar vendedor existe y esta activo
-        vendedor = User.query.get(data['vendedor_id'])
+        vendedor = User.query.get(vendedor_id)
         if not vendedor:
-            return not_found_response(f"Vendedor con ID {data['vendedor_id']} no encontrado")
+            return not_found_response(f"Vendedor con ID {vendedor_id} no encontrado")
 
         if not vendedor.activo:
             return error_response('El vendedor no esta activo', status_code=400)
@@ -266,7 +269,7 @@ def procesar_venta():
         total_temp = (subtotal_temp - descuento).quantize(Decimal('0.01'))
 
         nueva_venta = Venta(
-            vendedor_id=data['vendedor_id'],
+            vendedor_id=vendedor_id,
             metodo_pago=metodo_pago,
             monto_recibido=monto_recibido,
             cliente_nombre=data.get('cliente_nombre', ''),
@@ -336,7 +339,7 @@ def procesar_venta():
                     tipo='venta',
                     producto_id=producto.id,
                     lote_id=lote.id,
-                    usuario_id=data['vendedor_id'],
+                    usuario_id=vendedor_id,
                     venta_id=nueva_venta.id,
                     cantidad=-cantidad_a_descontar,  # Negativo porque es salida
                     stock_anterior=stock_anterior,
@@ -411,6 +414,7 @@ def procesar_venta():
 # ==================================================================================
 
 @ventas_bp.route('', methods=['GET'])
+@login_required
 def listar_ventas():
     """
     Listar ventas con filtros opcionales
@@ -564,6 +568,7 @@ def listar_ventas():
 # ==================================================================================
 
 @ventas_bp.route('/<int:id>', methods=['GET'])
+@login_required
 def obtener_venta(id):
     """
     Obtener detalle completo de una venta
@@ -683,6 +688,7 @@ def obtener_venta(id):
 # ==================================================================================
 
 @ventas_bp.route('/dia', methods=['GET'])
+@login_required
 def ventas_del_dia():
     """
     Obtener resumen de ventas del dia actual
@@ -799,6 +805,8 @@ def ventas_del_dia():
 # ==================================================================================
 
 @ventas_bp.route('/<int:id>/cancelar', methods=['POST'])
+@login_required
+@role_required('admin')
 def cancelar_venta(id):
     """
     Cancelar una venta y revertir stock
@@ -932,6 +940,8 @@ def cancelar_venta(id):
 # ==================================================================================
 
 @ventas_bp.route('/reportes/resumen', methods=['GET'])
+@login_required
+@role_required('admin')
 def resumen_ventas():
     """
     Obtener resumen estadistico de ventas

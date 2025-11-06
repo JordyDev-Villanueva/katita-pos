@@ -117,6 +117,10 @@ def register_blueprints(app):
     Args:
         app (Flask): Instancia de la aplicación
     """
+    # Registrar blueprint de autenticacion (primero, sin proteccion)
+    from app.blueprints.auth import auth_bp
+    app.register_blueprint(auth_bp)
+
     # Registrar blueprint de productos
     from app.blueprints.products import products_bp
     app.register_blueprint(products_bp)
@@ -128,11 +132,6 @@ def register_blueprints(app):
     # Registrar blueprint de ventas
     from app.blueprints.ventas import ventas_bp
     app.register_blueprint(ventas_bp)
-
-    # TODO: Registrar más blueprints aquí cuando se creen
-    # Ejemplo:
-    # from app.blueprints.auth import auth_bp
-    # app.register_blueprint(auth_bp)
 
 
 def register_error_handlers(app):

@@ -18,7 +18,7 @@ El sistema de lotes es CRITICO para:
 - Gestion de fechas de vencimiento
 """
 
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_
 from decimal import Decimal
@@ -31,6 +31,7 @@ from app.utils.responses import (
     success_response, error_response, created_response,
     not_found_response, validation_error_response, conflict_response
 )
+from app.decorators.auth_decorators import login_required, role_required
 
 # Crear Blueprint con prefijo /api/lotes
 lotes_bp = Blueprint('lotes', __name__, url_prefix='/api/lotes')
@@ -41,6 +42,8 @@ lotes_bp = Blueprint('lotes', __name__, url_prefix='/api/lotes')
 # ==================================================================================
 
 @lotes_bp.route('', methods=['POST'])
+@login_required
+@role_required('admin', 'bodeguero')
 def crear_lote():
     """
     Crear un nuevo lote de mercaderia (ingreso de inventario)
@@ -185,8 +188,9 @@ def crear_lote():
         stock_nuevo = producto.stock_total
 
         # ========== CREAR MOVIMIENTO DE STOCK ==========
-        # NOTA: usuario_id es obligatorio pero aun no hay autenticacion
-        # Temporalmente usamos un usuario fijo ID=1 (debe existir en BD)
+        # Obtener usuario_id del token JWT (g.current_user establecido por @login_required)
+        user_id = g.current_user['user_id']
+
         movimiento = MovimientoStock(
             producto_id=producto.id,
             lote_id=nuevo_lote.id,
@@ -194,7 +198,7 @@ def crear_lote():
             cantidad=cantidad_inicial,
             stock_anterior=stock_anterior,
             stock_nuevo=stock_nuevo,
-            usuario_id=1,  # TODO: Obtener de JWT cuando se implemente auth
+            usuario_id=user_id,
             referencia=f'Ingreso de mercaderia - {codigo_lote}',
             motivo=f'Proveedor: {nuevo_lote.proveedor}' if nuevo_lote.proveedor else 'Compra'
         )
@@ -237,6 +241,7 @@ def crear_lote():
 # ==================================================================================
 
 @lotes_bp.route('', methods=['GET'])
+@login_required
 def listar_lotes():
     """
     Listar lotes con filtros opcionales
@@ -361,6 +366,7 @@ def listar_lotes():
 # ==================================================================================
 
 @lotes_bp.route('/producto/<int:producto_id>', methods=['GET'])
+@login_required
 def lotes_producto(producto_id):
     """
     Obtener lotes disponibles de un producto ordenados FIFO
@@ -463,6 +469,8 @@ def lotes_producto(producto_id):
 # ==================================================================================
 
 @lotes_bp.route('/alertas', methods=['GET'])
+@login_required
+@role_required('admin')
 def alertas_vencimiento():
     """
     Obtener alertas de productos proximos a vencer
@@ -609,6 +617,8 @@ def alertas_vencimiento():
 # ==================================================================================
 
 @lotes_bp.route('/<int:id>', methods=['PUT'])
+@login_required
+@role_required('admin', 'bodeguero')
 def actualizar_lote(id):
     """
     Actualizar informacion de un lote existente
@@ -708,6 +718,8 @@ def actualizar_lote(id):
 # ==================================================================================
 
 @lotes_bp.route('/vencidos', methods=['GET'])
+@login_required
+@role_required('admin')
 def reporte_vencidos():
     """
     Obtener reporte de lotes vencidos
