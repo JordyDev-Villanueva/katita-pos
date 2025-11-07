@@ -49,7 +49,15 @@ def create_app(config_name=None):
     # Inicializar extensiones con la app
     db.init_app(app)
     jwt.init_app(app)
-    CORS(app, origins=app.config['CORS_ORIGINS'])
+
+    # Configurar CORS de forma robusta para permitir peticiones del frontend
+    CORS(
+        app,
+        resources={r"/api/*": {"origins": "*"}},
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+        supports_credentials=False
+    )
 
     # Configurar logging
     configure_logging(app)
