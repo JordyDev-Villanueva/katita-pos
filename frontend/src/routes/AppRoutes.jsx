@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from '../pages/Login';
 import { Dashboard } from '../pages/Dashboard';
+import { POS } from '../pages/POS';
 import { PrivateRoute } from './PrivateRoute';
 import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
@@ -24,6 +25,15 @@ export const AppRoutes = () => {
           element={
             <PrivateRoute>
               <Dashboard />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/pos"
+          element={
+            <PrivateRoute requiredRoles={['admin', 'vendedor']}>
+              <POS />
             </PrivateRoute>
           }
         />
