@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from '../pages/Login';
 import { Dashboard } from '../pages/Dashboard';
 import { POS } from '../pages/POS';
+import { Productos } from '../pages/Productos';
 import { PrivateRoute } from './PrivateRoute';
 import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
@@ -34,6 +35,15 @@ export const AppRoutes = () => {
           element={
             <PrivateRoute requiredRoles={['admin', 'vendedor']}>
               <POS />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/productos"
+          element={
+            <PrivateRoute requiredRoles={['admin', 'bodeguero']}>
+              <Productos />
             </PrivateRoute>
           }
         />

@@ -93,6 +93,11 @@ def crear_producto():
         }
     """
     try:
+        # LOG: Inicio de creación de producto
+        print("\n" + "="*60)
+        print("[DEBUG] POST /api/products - Crear producto")
+        print("="*60)
+
         # Validar que request.json exista
         if not request.json:
             return validation_error_response(
@@ -101,6 +106,14 @@ def crear_producto():
             )
 
         data = request.json
+        print(f"Datos recibidos:")
+        print(f"  - codigo_barras: {data.get('codigo_barras')}")
+        print(f"  - nombre: {data.get('nombre')}")
+        print(f"  - categoria: {data.get('categoria')}")
+        print(f"  - precio_compra: {data.get('precio_compra')}")
+        print(f"  - precio_venta: {data.get('precio_venta')}")
+        print(f"  - stock_minimo: {data.get('stock_minimo')}")
+
         errores = {}
 
         # Validar campos requeridos
@@ -155,6 +168,7 @@ def crear_producto():
             )
 
         # Crear nuevo producto
+        print(f"\nCreando nuevo producto...")
         nuevo_producto = Product(
             codigo_barras=data['codigo_barras'],
             nombre=data['nombre'],
@@ -168,7 +182,13 @@ def crear_producto():
         )
 
         db.session.add(nuevo_producto)
+        print(f"  - Producto agregado a la sesion")
+
         db.session.commit()
+        print(f"  - COMMIT realizado exitosamente")
+        print(f"  - ID asignado: {nuevo_producto.id}")
+        print(f"  - Producto guardado: {nuevo_producto.nombre}")
+        print("="*60 + "\n")
 
         return created_response(
             {"producto": nuevo_producto.to_dict()},
@@ -235,11 +255,22 @@ def listar_productos():
         }
     """
     try:
+        # LOG: Parámetros recibidos
+        print("\n" + "="*60)
+        print("[DEBUG] GET /api/products - Solicitud recibida")
+        print("="*60)
+
         # Obtener parámetros de query
         activo_param = request.args.get('activo')
         categoria = request.args.get('categoria')
         bajo_stock_param = request.args.get('bajo_stock')
         buscar = request.args.get('buscar')
+
+        print(f"Parametros recibidos:")
+        print(f"  - activo: {activo_param}")
+        print(f"  - categoria: {categoria}")
+        print(f"  - bajo_stock: {bajo_stock_param}")
+        print(f"  - buscar: {buscar}")
 
         # Paginación
         try:
@@ -248,6 +279,9 @@ def listar_productos():
         except ValueError:
             limit = 100
             offset = 0
+
+        print(f"  - limit: {limit}")
+        print(f"  - offset: {offset}")
 
         # Crear query base
         query = Product.query
@@ -276,20 +310,40 @@ def listar_productos():
 
         # Obtener total ANTES de aplicar limit/offset
         total = query.count()
+        print(f"\nTotal de productos encontrados (sin paginacion): {total}")
 
         # Aplicar paginación y ejecutar query
         productos = query.order_by(Product.nombre).limit(limit).offset(offset).all()
+        print(f"Productos retornados (con paginacion): {len(productos)}")
 
         # Convertir a diccionarios
         productos_dict = [producto.to_dict() for producto in productos]
 
+        # LOG: Primeros productos
+        if productos_dict:
+            print(f"\nPrimeros productos:")
+            for i, p in enumerate(productos_dict[:3], 1):
+                print(f"  {i}. {p['nombre']} ({p['codigo_barras']}) - Activo: {p['activo']}")
+        else:
+            print("\n  ⚠ ADVERTENCIA: Array de productos VACIO")
+
+        # ESTRUCTURA DE RESPUESTA CORRECTA
+        # Para el frontend, retornar directamente el array en "data"
+        response_data = {
+            "productos": productos_dict,
+            "total": total,
+            "limit": limit,
+            "offset": offset
+        }
+
+        print(f"\nEstructura de respuesta:")
+        print(f"  - success: true")
+        print(f"  - data.productos: array con {len(productos_dict)} elementos")
+        print(f"  - data.total: {total}")
+        print("="*60 + "\n")
+
         return success_response(
-            {
-                "productos": productos_dict,
-                "total": total,
-                "limit": limit,
-                "offset": offset
-            },
+            response_data,
             f"{len(productos_dict)} productos obtenidos exitosamente"
         )
 
