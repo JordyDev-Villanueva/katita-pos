@@ -3,6 +3,7 @@ import { Login } from '../pages/Login';
 import { Dashboard } from '../pages/Dashboard';
 import { POS } from '../pages/POS';
 import { Productos } from '../pages/Productos';
+import { Lotes } from '../pages/Lotes';
 import { PrivateRoute } from './PrivateRoute';
 import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
@@ -44,6 +45,15 @@ export const AppRoutes = () => {
           element={
             <PrivateRoute requiredRoles={['admin', 'bodeguero']}>
               <Productos />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/lotes"
+          element={
+            <PrivateRoute requiredRoles={['admin', 'bodeguero']}>
+              <Lotes />
             </PrivateRoute>
           }
         />
