@@ -20,6 +20,10 @@ Sistema JWT:
 from flask import Blueprint, request, g
 from sqlalchemy.exc import IntegrityError
 import jwt
+from flask_jwt_extended import (
+    create_access_token, create_refresh_token,
+    jwt_required, get_jwt_identity, get_jwt
+)
 from app import db
 from app.models.user import User
 from app.utils.responses import (
@@ -27,7 +31,6 @@ from app.utils.responses import (
     not_found_response, validation_error_response,
     unauthorized_response, forbidden_response
 )
-from app.utils.jwt_utils import generar_token, refrescar_token
 from app.decorators.auth_decorators import login_required
 
 # Crear Blueprint con prefijo /api/auth
@@ -153,12 +156,27 @@ def login():
         user.registrar_acceso()
         db.session.commit()
 
-        # Generar tokens JWT
-        tokens = generar_token(
-            user_id=user.id,
-            username=user.username,
-            rol=user.rol
+        # Generar tokens JWT usando Flask-JWT-Extended
+        access_token = create_access_token(
+            identity=str(user.id),  # Convertir a string (requerido por Flask-JWT-Extended)
+            additional_claims={
+                'username': user.username,
+                'rol': user.rol
+            }
         )
+
+        refresh_token = create_refresh_token(identity=str(user.id))
+
+        # ========== DEBUGGING: Información del token ==========
+        print(f'\n🔐 TOKEN GENERADO PARA: {username}')
+        print(f'   Identity (user_id): {user.id}')
+        print(f'   Username: {user.username}')
+        print(f'   Rol: {user.rol}')
+        print(f'   ✅ Access token válido por 8 horas')
+        print(f'   ✅ Refresh token válido por 7 días')
+
+        print(f'\n✅ Login exitoso: {username} (Rol: {user.rol})')
+        print(f'✅ Tokens JWT generados correctamente')
 
         # ========== RESPUESTA EXITOSA ==========
         return success_response(
@@ -172,7 +190,10 @@ def login():
                     'activo': user.activo,
                     'ultimo_acceso': user.ultimo_acceso.isoformat() if user.ultimo_acceso else None
                 },
-                **tokens  # Incluir access_token, refresh_token, expires_in, token_type
+                'access_token': access_token,
+                'refresh_token': refresh_token,
+                'token_type': 'Bearer',
+                'expires_in': 28800  # 8 horas en segundos
             },
             message='Login exitoso'
         )
@@ -251,6 +272,7 @@ def logout():
 # ==================================================================================
 
 @auth_bp.route('/refresh', methods=['POST'])
+@jwt_required(refresh=True)
 def refresh():
     """
     Refrescar access token usando refresh token
@@ -263,19 +285,16 @@ def refresh():
     1. Cliente hace request con access token expirado
     2. Servidor responde 401 con mensaje "Token expirado"
     3. Cliente detecta token expirado
-    4. Cliente envia refresh token a este endpoint
+    4. Cliente envia refresh token en el header Authorization
     5. Servidor genera nuevo access token
     6. Cliente guarda nuevo token y reintenta request original
 
-    Request body:
-        {
-            "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGc..."
-        }
+    Headers requeridos:
+        Authorization: Bearer <refresh_token>
 
     Returns:
         200: Nuevo access token generado
         401: Refresh token invalido o expirado
-        422: Refresh token faltante
 
     Ejemplo de respuesta exitosa:
         {
@@ -289,38 +308,40 @@ def refresh():
         }
     """
     try:
-        data = request.json
+        # Obtener identidad del usuario desde el refresh token (es string)
+        current_user_id_str = get_jwt_identity()
+        current_user_id = int(current_user_id_str)  # Convertir a int para consulta DB
 
-        # ========== VALIDAR REFRESH TOKEN ==========
-        if not data or not data.get('refresh_token'):
-            return validation_error_response(
-                errors={'refresh_token': 'El refresh_token es requerido'},
-                message='Refresh token no proporcionado'
-            )
+        print(f'🔄 Refrescando token para usuario ID: {current_user_id}')
 
-        refresh_token_str = data['refresh_token']
+        # Buscar usuario para incluir claims adicionales
+        user = User.query.get(current_user_id)
+
+        if not user:
+            return not_found_response('Usuario no encontrado')
+
+        if not user.activo:
+            return unauthorized_response('Usuario inactivo')
 
         # ========== GENERAR NUEVO ACCESS TOKEN ==========
-        try:
-            new_tokens = refrescar_token(refresh_token_str)
+        new_access_token = create_access_token(
+            identity=str(user.id),  # Convertir a string
+            additional_claims={
+                'username': user.username,
+                'rol': user.rol
+            }
+        )
 
-            return success_response(
-                data=new_tokens,
-                message='Token refrescado exitosamente'
-            )
+        print(f'✅ Token refrescado para usuario: {user.username}')
 
-        except jwt.ExpiredSignatureError:
-            return unauthorized_response(
-                'Refresh token expirado. Por favor, inicie sesion nuevamente.'
-            )
-
-        except jwt.InvalidTokenError as e:
-            return unauthorized_response(
-                f'Refresh token invalido: {str(e)}'
-            )
-
-        except ValueError as e:
-            return unauthorized_response(str(e))
+        return success_response(
+            data={
+                'access_token': new_access_token,
+                'token_type': 'Bearer',
+                'expires_in': 28800  # 8 horas en segundos
+            },
+            message='Token refrescado exitosamente'
+        )
 
     except Exception as e:
         return error_response(

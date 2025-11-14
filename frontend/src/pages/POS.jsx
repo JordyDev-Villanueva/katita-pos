@@ -127,14 +127,30 @@ export const POS = () => {
       toast.success('Cantidad actualizada');
     } else {
       // Agregar nuevo item
-      setCart([...cart, {
+      console.log('➕ Agregando producto al carrito:', producto);
+      console.log('Precio venta:', producto.precio_venta);
+      console.log('Precio compra:', producto.precio_compra);
+
+      // CORRECCIÓN: Incluir precio_compra del producto
+      const precioCompra = producto.precio_compra || (producto.precio_venta * 0.60);
+
+      if (!producto.precio_compra) {
+        console.warn(`⚠️ Producto "${producto.nombre}" sin precio_compra, estimando: S/ ${precioCompra.toFixed(2)}`);
+      }
+
+      const nuevoItem = {
         producto_id: producto.id,
         nombre: producto.nombre,
         precio_unitario: producto.precio_venta,
+        precio_compra: precioCompra,  // ✅ AGREGADO
         cantidad: 1,
         stock_disponible: producto.stock_total,
         imagen_url: producto.imagen_url,
-      }]);
+      };
+
+      console.log('Item agregado:', nuevoItem);
+
+      setCart([...cart, nuevoItem]);
       toast.success(`${producto.nombre} agregado`);
     }
   };
@@ -185,16 +201,34 @@ export const POS = () => {
   // Procesar venta
   const handleConfirmPayment = async (paymentData) => {
     try {
+      console.log('💳 Preparando venta...');
+      console.log('Carrito completo:', cart);
+
       // Preparar datos de la venta
       const ventaData = {
-        items: cart.map(item => ({
-          producto_id: item.producto_id,
-          cantidad: item.cantidad,
-          precio_unitario: item.precio_unitario,
-        })),
+        items: cart.map((item, idx) => {
+          console.log(`--- Item ${idx + 1} ---`);
+          console.log('  Item completo:', item);
+          console.log('  precio_unitario:', item.precio_unitario);
+          console.log('  precio_compra:', item.precio_compra);
+
+          // CORRECCIÓN CRÍTICA: Incluir precio_compra_unitario
+          const precioCompra = item.precio_compra || item.precio_compra_unitario || (item.precio_unitario * 0.60);
+
+          console.log('  precio_compra_unitario a usar:', precioCompra);
+
+          return {
+            producto_id: item.producto_id,
+            cantidad: item.cantidad,
+            precio_unitario: item.precio_unitario,
+            precio_compra_unitario: precioCompra  // ✅ AGREGADO
+          };
+        }),
         metodo_pago: paymentData.metodo_pago,
         monto_recibido: paymentData.monto_recibido || null,
       };
+
+      console.log('📦 ventaData construido:', ventaData);
 
       // Enviar al backend
       const response = await ventasAPI.createVenta(ventaData);

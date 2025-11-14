@@ -17,6 +17,9 @@ from sqlalchemy.orm import validates, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 from app import db
 
+# Zona horaria de Perú (UTC-5)
+PERU_TZ = timezone(timedelta(hours=-5))
+
 
 class Venta(db.Model):
     """
@@ -37,7 +40,7 @@ class Venta(db.Model):
 
     # Identificación
     numero_venta = db.Column(String(20), unique=True, nullable=False, index=True)
-    fecha = db.Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, index=True)
+    fecha = db.Column(DateTime, default=lambda: datetime.now(PERU_TZ), nullable=False, index=True)
 
     # Montos
     subtotal = db.Column(Numeric(10, 2), nullable=False)
@@ -65,7 +68,7 @@ class Venta(db.Model):
     # Timestamps
     created_at = db.Column(
         DateTime,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
         nullable=False
     )
     updated_at = db.Column(
@@ -199,29 +202,34 @@ class Venta(db.Model):
 
     @hybrid_property
     def fue_creada_hoy(self):
-        """Verifica si la venta fue creada hoy"""
+        """Verifica si la venta fue creada hoy (en zona horaria de Perú)"""
         if not self.fecha:
             return False
 
+        # Obtener fecha de hoy en zona horaria de Perú
+        hoy_peru = datetime.now(PERU_TZ).date()
+
         # Detectar si fecha es timezone-aware o naive
         if self.fecha.tzinfo is not None:
-            hoy = datetime.now(timezone.utc).date()
-            fecha_venta = self.fecha.date()
+            # Convertir a zona horaria de Perú
+            fecha_peru = self.fecha.astimezone(PERU_TZ).date()
         else:
-            hoy = datetime.now().date()
+            # Asumir que ya está en zona horaria de Perú
             fecha_venta = self.fecha.date() if isinstance(self.fecha, datetime) else self.fecha
+            return fecha_venta == hoy_peru
 
-        return fecha_venta == hoy
+        return fecha_peru == hoy_peru
 
     @hybrid_property
     def dias_desde_venta(self):
-        """Retorna los días transcurridos desde la venta"""
+        """Retorna los días transcurridos desde la venta (en zona horaria de Perú)"""
         if not self.fecha:
             return 0
 
-        hoy = datetime.now(timezone.utc)
-        fecha_aware = self.fecha.replace(tzinfo=timezone.utc) if self.fecha.tzinfo is None else self.fecha
-        delta = hoy - fecha_aware
+        hoy_peru = datetime.now(PERU_TZ)
+        # Convertir fecha a timezone-aware de Perú si es naive
+        fecha_aware = self.fecha.replace(tzinfo=PERU_TZ) if self.fecha.tzinfo is None else self.fecha.astimezone(PERU_TZ)
+        delta = hoy_peru - fecha_aware
         return delta.days
 
     @hybrid_property
@@ -412,6 +420,7 @@ class Venta(db.Model):
             'id': self.id,
             'numero_venta': self.numero_venta,
             'fecha': self.fecha.isoformat() if self.fecha else None,
+            'fecha_venta': self.fecha.isoformat() if self.fecha else None,  # Alias para compatibilidad
             'subtotal': float(self.subtotal) if self.subtotal else 0.0,
             'descuento': float(self.descuento) if self.descuento else 0.0,
             'total': float(self.total) if self.total else 0.0,
@@ -435,9 +444,18 @@ class Venta(db.Model):
             'dias_desde_venta': self.dias_desde_venta,
         }
 
+        # Incluir información del vendedor si existe
+        if self.vendedor:
+            data['vendedor_nombre'] = self.vendedor.nombre_completo
+            data['vendedor_username'] = self.vendedor.username
+        else:
+            data['vendedor_nombre'] = None
+            data['vendedor_username'] = None
+
         if include_detalles and hasattr(self, 'detalles'):
+            # CORRECCIÓN: Incluir relaciones (producto con categoria y precio_compra)
             data['detalles'] = [
-                detalle.to_dict() for detalle in self.detalles
+                detalle.to_dict(include_relations=True) for detalle in self.detalles
             ] if self.detalles else []
 
         return data
@@ -447,19 +465,19 @@ class Venta(db.Model):
     @classmethod
     def ventas_del_dia(cls, fecha=None):
         """
-        Retorna todas las ventas de un día específico
+        Retorna todas las ventas de un día específico (en zona horaria de Perú)
 
         Args:
-            fecha (date): Fecha a buscar (default: hoy en UTC)
+            fecha (date): Fecha a buscar (default: hoy en Perú)
 
         Returns:
             list[Venta]: Lista de ventas del día
         """
         if fecha is None:
-            # Usar fecha UTC porque las ventas se guardan en UTC
-            fecha = datetime.now(timezone.utc).date()
+            # Usar fecha de Perú porque las ventas se guardan en zona horaria de Perú
+            fecha = datetime.now(PERU_TZ).date()
 
-        # Convertir fecha a datetime UTC naive (SQLite no guarda tzinfo)
+        # Convertir fecha a datetime (SQLite guarda sin tzinfo, pero representa hora de Perú)
         inicio = datetime.combine(fecha, datetime.min.time())
         fin = datetime.combine(fecha, datetime.max.time())
 
@@ -472,23 +490,23 @@ class Venta(db.Model):
     @classmethod
     def ventas_por_vendedor(cls, vendedor_id, fecha_inicio=None, fecha_fin=None):
         """
-        Retorna ventas de un vendedor en un periodo
+        Retorna ventas de un vendedor en un periodo (en zona horaria de Perú)
 
         Args:
             vendedor_id (int): ID del vendedor
-            fecha_inicio (date): Fecha de inicio (default: hoy en UTC)
-            fecha_fin (date): Fecha de fin (default: hoy en UTC)
+            fecha_inicio (date): Fecha de inicio (default: hoy en Perú)
+            fecha_fin (date): Fecha de fin (default: hoy en Perú)
 
         Returns:
             list[Venta]: Lista de ventas del vendedor
         """
         if fecha_inicio is None:
-            # Usar fecha UTC porque las ventas se guardan en UTC
-            fecha_inicio = datetime.now(timezone.utc).date()
+            # Usar fecha de Perú
+            fecha_inicio = datetime.now(PERU_TZ).date()
         if fecha_fin is None:
-            fecha_fin = datetime.now(timezone.utc).date()
+            fecha_fin = datetime.now(PERU_TZ).date()
 
-        # Convertir a datetime UTC naive (SQLite no guarda tzinfo)
+        # Convertir a datetime
         inicio = datetime.combine(fecha_inicio, datetime.min.time())
         fin = datetime.combine(fecha_fin, datetime.max.time())
 
@@ -563,19 +581,19 @@ class Venta(db.Model):
     @classmethod
     def total_ventas_dia(cls, fecha=None):
         """
-        Retorna el total de ventas de un día
+        Retorna el total de ventas de un día (en zona horaria de Perú)
 
         Args:
-            fecha (date): Fecha a buscar (default: hoy en UTC)
+            fecha (date): Fecha a buscar (default: hoy en Perú)
 
         Returns:
             Decimal: Suma total de ventas del día
         """
         if fecha is None:
-            # Usar fecha UTC porque las ventas se guardan en UTC
-            fecha = datetime.now(timezone.utc).date()
+            # Usar fecha de Perú
+            fecha = datetime.now(PERU_TZ).date()
 
-        # Convertir a datetime UTC naive (SQLite no guarda tzinfo)
+        # Convertir a datetime
         inicio = datetime.combine(fecha, datetime.min.time())
         fin = datetime.combine(fecha, datetime.max.time())
 
@@ -590,19 +608,19 @@ class Venta(db.Model):
     @classmethod
     def cantidad_ventas_dia(cls, fecha=None):
         """
-        Retorna la cantidad de ventas de un día
+        Retorna la cantidad de ventas de un día (en zona horaria de Perú)
 
         Args:
-            fecha (date): Fecha a buscar (default: hoy en UTC)
+            fecha (date): Fecha a buscar (default: hoy en Perú)
 
         Returns:
             int: Cantidad de ventas del día
         """
         if fecha is None:
-            # Usar fecha UTC porque las ventas se guardan en UTC
-            fecha = datetime.now(timezone.utc).date()
+            # Usar fecha de Perú
+            fecha = datetime.now(PERU_TZ).date()
 
-        # Convertir a datetime UTC naive (SQLite no guarda tzinfo)
+        # Convertir a datetime
         inicio = datetime.combine(fecha, datetime.min.time())
         fin = datetime.combine(fecha, datetime.max.time())
 

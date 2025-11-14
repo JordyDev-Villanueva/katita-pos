@@ -13,6 +13,7 @@ Endpoints:
 """
 
 from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from sqlalchemy.exc import IntegrityError
 from decimal import Decimal
 from app import db
@@ -55,8 +56,7 @@ def health_check():
 # ============================================================================
 
 @products_bp.route('', methods=['POST'])
-@login_required
-@role_required('admin', 'bodeguero')
+@jwt_required()
 def crear_producto():
     """
     Crea un nuevo producto en el sistema
@@ -217,7 +217,7 @@ def crear_producto():
 # ============================================================================
 
 @products_bp.route('', methods=['GET'])
-@login_required
+@jwt_required()
 def listar_productos():
     """
     Lista todos los productos con filtros opcionales
@@ -255,9 +255,14 @@ def listar_productos():
         }
     """
     try:
+        # Obtener usuario autenticado
+        current_user_id_str = get_jwt_identity()
+        current_user_id = int(current_user_id_str) if current_user_id_str else None
+
         # LOG: Parámetros recibidos
         print("\n" + "="*60)
         print("[DEBUG] GET /api/products - Solicitud recibida")
+        print(f"Usuario autenticado: {current_user_id}")
         print("="*60)
 
         # Obtener parámetros de query
@@ -356,7 +361,7 @@ def listar_productos():
 # ============================================================================
 
 @products_bp.route('/barcode/<codigo_barras>', methods=['GET'])
-@login_required
+@jwt_required()
 def buscar_por_codigo_barras(codigo_barras):
     """
     Buscar producto por codigo de barras para sistema POS
@@ -492,7 +497,7 @@ def buscar_por_codigo_barras(codigo_barras):
 # ============================================================================
 
 @products_bp.route('/<int:id>', methods=['GET'])
-@login_required
+@jwt_required()
 def obtener_producto(id):
     """
     Obtiene un producto específico por su ID
@@ -538,8 +543,7 @@ def obtener_producto(id):
 # ============================================================================
 
 @products_bp.route('/<int:id>', methods=['PUT'])
-@login_required
-@role_required('admin', 'bodeguero')
+@jwt_required()
 def actualizar_producto(id):
     """
     Actualiza un producto existente

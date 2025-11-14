@@ -19,6 +19,7 @@ El sistema de lotes es CRITICO para:
 """
 
 from flask import Blueprint, request, g
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_
 from decimal import Decimal
@@ -42,8 +43,7 @@ lotes_bp = Blueprint('lotes', __name__, url_prefix='/api/lotes')
 # ==================================================================================
 
 @lotes_bp.route('', methods=['POST'])
-@login_required
-@role_required('admin', 'bodeguero')
+@jwt_required()
 def crear_lote():
     """
     Crear un nuevo lote de mercaderia (ingreso de inventario)
@@ -97,6 +97,10 @@ def crear_lote():
         }
     """
     try:
+        # Obtener usuario autenticado desde JWT
+        current_user_id_str = get_jwt_identity()
+        current_user_id = int(current_user_id_str) if current_user_id_str else None
+
         data = request.json
 
         # ========== VALIDACIONES DE CAMPOS REQUERIDOS ==========
@@ -188,9 +192,6 @@ def crear_lote():
         stock_nuevo = producto.stock_total
 
         # ========== CREAR MOVIMIENTO DE STOCK ==========
-        # Obtener usuario_id del token JWT (g.current_user establecido por @login_required)
-        user_id = g.current_user['user_id']
-
         movimiento = MovimientoStock(
             producto_id=producto.id,
             lote_id=nuevo_lote.id,
@@ -198,7 +199,7 @@ def crear_lote():
             cantidad=cantidad_inicial,
             stock_anterior=stock_anterior,
             stock_nuevo=stock_nuevo,
-            usuario_id=user_id,
+            usuario_id=current_user_id,
             referencia=f'Ingreso de mercaderia - {codigo_lote}',
             motivo=f'Proveedor: {nuevo_lote.proveedor}' if nuevo_lote.proveedor else 'Compra'
         )
@@ -241,7 +242,7 @@ def crear_lote():
 # ==================================================================================
 
 @lotes_bp.route('', methods=['GET'])
-@login_required
+@jwt_required()
 def listar_lotes():
     """
     Listar lotes con filtros opcionales
@@ -337,9 +338,8 @@ def listar_lotes():
         # ========== ENRIQUECER DATOS DE RESPUESTA ==========
         lotes_dict = []
         for lote in lotes:
-            lote_data = lote.to_dict()
-            # Agregar nombre del producto
-            lote_data['producto_nombre'] = lote.producto.nombre if lote.producto else None
+            # BUG 3 CORREGIDO: Incluir información del producto
+            lote_data = lote.to_dict(include_producto=True)
             lotes_dict.append(lote_data)
 
         # ========== RESPUESTA EXITOSA ==========
@@ -366,7 +366,7 @@ def listar_lotes():
 # ==================================================================================
 
 @lotes_bp.route('/producto/<int:producto_id>', methods=['GET'])
-@login_required
+@jwt_required()
 def lotes_producto(producto_id):
     """
     Obtener lotes disponibles de un producto ordenados FIFO
@@ -469,8 +469,7 @@ def lotes_producto(producto_id):
 # ==================================================================================
 
 @lotes_bp.route('/alertas', methods=['GET'])
-@login_required
-@role_required('admin')
+@jwt_required()
 def alertas_vencimiento():
     """
     Obtener alertas de productos proximos a vencer
@@ -567,10 +566,10 @@ def alertas_vencimiento():
             else:
                 urgencia = 'baja'
 
-            # Serializar lotes
+            # Serializar lotes (BUG 3 CORREGIDO)
             lotes_dict = []
             for lote in lotes:
-                lote_data = lote.to_dict()
+                lote_data = lote.to_dict(include_producto=True)
                 lote_data['dias_hasta_vencimiento'] = lote.dias_hasta_vencimiento
                 lote_data['esta_vencido'] = lote.esta_vencido
                 lotes_dict.append(lote_data)
@@ -617,8 +616,7 @@ def alertas_vencimiento():
 # ==================================================================================
 
 @lotes_bp.route('/<int:id>', methods=['PUT'])
-@login_required
-@role_required('admin', 'bodeguero')
+@jwt_required()
 def actualizar_lote(id):
     """
     Actualizar informacion de un lote existente
@@ -718,8 +716,7 @@ def actualizar_lote(id):
 # ==================================================================================
 
 @lotes_bp.route('/vencidos', methods=['GET'])
-@login_required
-@role_required('admin')
+@jwt_required()
 def reporte_vencidos():
     """
     Obtener reporte de lotes vencidos
@@ -808,10 +805,9 @@ def reporte_vencidos():
 
         lotes_dict = []
         for lote in lotes_vencidos:
-            lote_data = lote.to_dict()
+            # BUG 3 CORREGIDO: Incluir información del producto
+            lote_data = lote.to_dict(include_producto=True)
             lote_data['dias_vencido'] = abs(lote.dias_hasta_vencimiento)
-            lote_data['producto_nombre'] = lote.producto.nombre if lote.producto else None
-            lote_data['producto_categoria'] = lote.producto.categoria if lote.producto else None
 
             # Calcular valor perdido (cantidad * precio_compra)
             valor_lote_perdido = lote.cantidad_actual * lote.precio_compra_lote

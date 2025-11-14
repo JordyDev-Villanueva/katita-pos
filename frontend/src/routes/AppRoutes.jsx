@@ -4,6 +4,7 @@ import { Dashboard } from '../pages/Dashboard';
 import { POS } from '../pages/POS';
 import { Productos } from '../pages/Productos';
 import { Lotes } from '../pages/Lotes';
+import Reportes from '../pages/Reportes';
 import { PrivateRoute } from './PrivateRoute';
 import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
@@ -54,6 +55,15 @@ export const AppRoutes = () => {
           element={
             <PrivateRoute requiredRoles={['admin', 'bodeguero']}>
               <Lotes />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/reportes"
+          element={
+            <PrivateRoute requiredRoles={['admin']}>
+              <Reportes />
             </PrivateRoute>
           }
         />

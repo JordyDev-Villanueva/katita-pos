@@ -5,11 +5,24 @@ import { LoadingSpinner } from '../components/common/LoadingSpinner';
 export const PrivateRoute = ({ children, requiredRoles = [] }) => {
   const { isAuthenticated, loading, user } = useAuth();
 
+  // Verificar también localStorage para casos donde el estado aún no se actualizó
+  const hasToken = localStorage.getItem('access_token');
+
+  console.log('🔒 PrivateRoute verificando acceso:', {
+    isAuthenticated,
+    hasToken: !!hasToken,
+    loading,
+    user: user?.username || 'sin usuario'
+  });
+
   if (loading) {
+    console.log('⏳ PrivateRoute: Cargando...');
     return <LoadingSpinner fullScreen />;
   }
 
-  if (!isAuthenticated) {
+  // CORRECCIÓN: Verificar AMBOS - contexto Y localStorage
+  if (!isAuthenticated && !hasToken) {
+    console.log('❌ PrivateRoute: No autenticado, redirigiendo a login');
     return <Navigate to="/login" replace />;
   }
 

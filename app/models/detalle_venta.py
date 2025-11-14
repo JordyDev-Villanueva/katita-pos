@@ -276,7 +276,12 @@ class DetalleVenta(db.Model):
                     'id': self.producto.id,
                     'nombre': self.producto.nombre,
                     'codigo_barras': self.producto.codigo_barras,
+                    # CORRECCIÓN: Incluir precio_compra y categoria para cálculo de ganancias
+                    'precio_compra': float(self.producto.precio_compra) if self.producto.precio_compra else 0.0,
+                    'categoria': self.producto.categoria if hasattr(self.producto, 'categoria') else None,
                 }
+                # Alias para compatibilidad
+                data['producto_nombre'] = self.producto.nombre
             if self.lote:
                 data['lote'] = {
                     'id': self.lote.id,

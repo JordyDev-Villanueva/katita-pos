@@ -39,15 +39,30 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
+      console.log('🔐 Iniciando login...');
       const response = await authAPI.login(username, password);
 
+      console.log('📦 Respuesta del backend:', response);
+
       if (response.success) {
+        // CORRECCIÓN: Los datos están en response.data, no en response directamente
         const { user, access_token, refresh_token } = response.data;
+
+        console.log('✅ Datos extraídos:', { user: user?.username, hasAccessToken: !!access_token, hasRefreshToken: !!refresh_token });
+
+        if (!access_token || !refresh_token) {
+          console.error('❌ Tokens faltantes en la respuesta');
+          throw new Error('No se recibieron los tokens de autenticación');
+        }
 
         // Guardar en localStorage
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
         localStorage.setItem('user', JSON.stringify(user));
+
+        console.log('✅ Tokens guardados en localStorage');
+        console.log('   access_token:', localStorage.getItem('access_token') ? 'OK' : 'FALTA');
+        console.log('   refresh_token:', localStorage.getItem('refresh_token') ? 'OK' : 'FALTA');
 
         // Actualizar estado
         setUser(user);
@@ -55,9 +70,12 @@ export const AuthProvider = ({ children }) => {
 
         toast.success(`¡Bienvenido, ${user.nombre_completo}!`);
         return { success: true };
+      } else {
+        throw new Error(response.message || 'Login falló');
       }
     } catch (error) {
-      const message = error.response?.data?.message || 'Error al iniciar sesión';
+      console.error('❌ Error en login:', error);
+      const message = error.response?.data?.message || error.message || 'Error al iniciar sesión';
       toast.error(message);
       return { success: false, message };
     }

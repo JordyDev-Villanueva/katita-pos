@@ -38,8 +38,8 @@ class Config:
 
     # JWT Configuration
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-key-change-in-production'
-    JWT_ACCESS_TOKEN_EXPIRES = int(os.environ.get('JWT_ACCESS_TOKEN_EXPIRES', 28800))  # 8 horas
-    JWT_REFRESH_TOKEN_EXPIRES = int(os.environ.get('JWT_REFRESH_TOKEN_EXPIRES', 604800))  # 7 dias
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)  # 8 horas
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)  # 7 días
     JWT_TOKEN_LOCATION = ['headers']
     JWT_HEADER_NAME = 'Authorization'
     JWT_HEADER_TYPE = 'Bearer'

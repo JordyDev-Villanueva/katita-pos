@@ -10,6 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from config import get_config
+from datetime import timedelta
 import logging
 from logging.handlers import RotatingFileHandler
 import os
@@ -50,6 +51,9 @@ def create_app(config_name=None):
     db.init_app(app)
     jwt.init_app(app)
 
+    # Configurar callbacks de JWT
+    configure_jwt_callbacks(app)
+
     # Configurar CORS de forma robusta para permitir peticiones del frontend
     CORS(
         app,
@@ -88,6 +92,50 @@ def create_app(config_name=None):
     app.logger.info(f"KATITA-POS started in {app.config['DATABASE_MODE']} mode")
 
     return app
+
+
+def configure_jwt_callbacks(app):
+    """
+    Configura callbacks personalizados para JWT
+
+    Args:
+        app (Flask): Instancia de la aplicación
+    """
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        """Callback cuando el token ha expirado"""
+        return jsonify({
+            'success': False,
+            'message': 'El token ha expirado',
+            'error': 'token_expired'
+        }), 401
+
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error):
+        """Callback cuando el token es inválido"""
+        return jsonify({
+            'success': False,
+            'message': 'Token inválido',
+            'error': 'invalid_token'
+        }), 401
+
+    @jwt.unauthorized_loader
+    def missing_token_callback(error):
+        """Callback cuando no se proporciona token"""
+        return jsonify({
+            'success': False,
+            'message': 'Token de autenticación requerido',
+            'error': 'authorization_required'
+        }), 401
+
+    @jwt.revoked_token_loader
+    def revoked_token_callback(jwt_header, jwt_payload):
+        """Callback cuando el token ha sido revocado"""
+        return jsonify({
+            'success': False,
+            'message': 'El token ha sido revocado',
+            'error': 'token_revoked'
+        }), 401
 
 
 def configure_logging(app):

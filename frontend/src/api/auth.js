@@ -1,11 +1,19 @@
+import axios from 'axios';
 import axiosInstance from './axios';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000/api';
 
 export const authAPI = {
   login: async (username, password) => {
-    const response = await axiosInstance.post('/auth/login', {
+    console.log('📤 Enviando login al backend...');
+
+    // NO usar axiosInstance aquí porque no tenemos token todavía
+    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
       username,
       password,
     });
+
+    console.log('📥 Respuesta recibida del backend:', response.data);
     return response.data;
   },
 

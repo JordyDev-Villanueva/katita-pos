@@ -19,6 +19,7 @@ El sistema FIFO es CRITICO:
 """
 
 from flask import Blueprint, request, g
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func, and_
 from decimal import Decimal
@@ -45,8 +46,7 @@ ventas_bp = Blueprint('ventas', __name__, url_prefix='/api/ventas')
 # ==================================================================================
 
 @ventas_bp.route('', methods=['POST'])
-@login_required
-@role_required('admin', 'vendedor')
+@jwt_required()
 def procesar_venta():
     """
     Procesar una nueva venta con descuento automatico FIFO de lotes
@@ -132,22 +132,41 @@ def procesar_venta():
         }
     """
     try:
+        print('\n' + '='*70)
+        print('📥 RECIBIDA PETICIÓN: POST /api/ventas')
+        print('='*70)
+
         data = request.json
+
+        print('📦 DATOS RECIBIDOS (RAW):')
+        import json
+        print(json.dumps(data, indent=2, ensure_ascii=False))
+
+        print(f'\n🔑 Campos recibidos: {list(data.keys())}')
+        print(f'📊 Tiene "items": {"items" in data}')
+        print(f'📊 Tiene "detalles": {"detalles" in data}')
 
         # ========== VALIDACIONES INICIALES ==========
         errores = {}
 
         # Obtener vendedor_id del usuario autenticado (del token JWT)
-        vendedor_id = g.current_user['user_id']
+        current_user_id_str = get_jwt_identity()
+        vendedor_id = int(current_user_id_str) if current_user_id_str else None
+        print(f'👤 Vendedor ID (del token JWT): {vendedor_id}')
 
-        # Validar campos requeridos
-        if not data.get('items') or len(data.get('items', [])) == 0:
+        # Validar campos requeridos (aceptar tanto "items" como "detalles")
+        items = data.get('items') or data.get('detalles')
+        if not items or len(items) == 0:
+            print('❌ ERROR: Falta campo "items"/"detalles" o está vacío')
             errores['items'] = 'Debe incluir al menos un item'
 
         if not data.get('metodo_pago'):
+            print('❌ ERROR: Falta campo "metodo_pago"')
             errores['metodo_pago'] = 'El metodo de pago es requerido'
 
         if errores:
+            print(f'❌ ERRORES DE VALIDACIÓN INICIALES: {errores}')
+            print('='*70 + '\n')
             return validation_error_response(errores)
 
         # Validar vendedor existe y esta activo
@@ -189,7 +208,7 @@ def procesar_venta():
         # ========== VALIDAR ITEMS Y VERIFICAR STOCK DISPONIBLE ==========
         items_validados = []
 
-        for idx, item in enumerate(data['items']):
+        for idx, item in enumerate(items):
             item_errores = {}
 
             # Validar campos del item
@@ -414,7 +433,7 @@ def procesar_venta():
 # ==================================================================================
 
 @ventas_bp.route('', methods=['GET'])
-@login_required
+@jwt_required()
 def listar_ventas():
     """
     Listar ventas con filtros opcionales
@@ -457,12 +476,18 @@ def listar_ventas():
         }
     """
     try:
+        # ========== LOGS DE DEBUGGING ==========
+        print('[DEBUG] === GET /api/ventas ===')
+        print(f'[DEBUG] Query params: {dict(request.args)}')
+        print(f'[DEBUG] Headers: {dict(request.headers)}')
+
         # ========== CONSTRUIR QUERY BASE ==========
         query = Venta.query
 
         # ========== FILTRO POR FECHA ESPECIFICA ==========
         fecha_str = request.args.get('fecha')
         if fecha_str:
+            print(f'[DEBUG] Filtrando por fecha: {fecha_str}')
             try:
                 fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
                 # Filtrar por fecha (dia completo)
@@ -528,21 +553,46 @@ def listar_ventas():
             limit = 50
 
         # Contar total antes de paginar
+        print(f'[DEBUG] Contando ventas...')
         total = query.count()
+        print(f'[DEBUG] Total ventas encontradas: {total}')
 
         # Aplicar paginacion
+        print(f'[DEBUG] Aplicando paginación: limit={limit}, offset={offset}')
         ventas = query.limit(limit).offset(offset).all()
+        print(f'[DEBUG] Ventas a serializar: {len(ventas)}')
 
         # ========== ENRIQUECER DATOS ==========
         ventas_dict = []
-        for venta in ventas:
-            venta_data = venta.to_dict()
-            # Agregar nombre del vendedor
-            if venta.vendedor:
-                venta_data['vendedor_nombre'] = venta.vendedor.nombre_completo
-            # Agregar cantidad de items
-            venta_data['cantidad_items'] = len(venta.detalles)
-            ventas_dict.append(venta_data)
+        for idx, venta in enumerate(ventas):
+            print(f'[DEBUG] Serializando venta {idx+1}/{len(ventas)}: ID={venta.id}')
+            try:
+                # CORRECCIÓN: Incluir detalles con precio_compra_unitario
+                venta_data = venta.to_dict(include_detalles=True)
+                # Agregar nombre del vendedor
+                if venta.vendedor:
+                    venta_data['vendedor_nombre'] = venta.vendedor.nombre_completo
+                # Agregar cantidad de items
+                venta_data['cantidad_items'] = len(venta.detalles) if venta.detalles else 0
+
+                # Agregar alias para compatibilidad
+                if 'fecha' in venta_data and venta_data['fecha']:
+                    venta_data['fecha_venta'] = venta_data['fecha']
+
+                ventas_dict.append(venta_data)
+            except Exception as detalle_error:
+                # Si falla una venta, loguear pero continuar con las demás
+                print(f'[ERROR] Error al serializar venta {venta.id}: {str(detalle_error)}')
+                import traceback
+                traceback.print_exc()
+                # Agregar versión simplificada sin detalles
+                try:
+                    venta_data_simple = venta.to_dict(include_detalles=False)
+                    venta_data_simple['detalles'] = []
+                    venta_data_simple['error'] = 'Error al cargar detalles'
+                    ventas_dict.append(venta_data_simple)
+                except:
+                    pass
 
         # ========== RESPUESTA EXITOSA ==========
         return success_response(
@@ -806,7 +856,6 @@ def ventas_del_dia():
 
 @ventas_bp.route('/<int:id>/cancelar', methods=['POST'])
 @login_required
-@role_required('admin')
 def cancelar_venta(id):
     """
     Cancelar una venta y revertir stock
@@ -941,7 +990,6 @@ def cancelar_venta(id):
 
 @ventas_bp.route('/reportes/resumen', methods=['GET'])
 @login_required
-@role_required('admin')
 def resumen_ventas():
     """
     Obtener resumen estadistico de ventas

@@ -132,23 +132,46 @@ export const Login = () => {
 
           {/* Usuarios de prueba */}
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center mb-2 font-medium">
-              Usuarios de prueba:
+            <p className="text-xs text-gray-500 text-center mb-3 font-semibold">
+              👥 Usuarios de prueba:
             </p>
-            <div className="space-y-1.5 text-xs">
-              <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
-                <p className="text-gray-600">
-                  👤 <span className="font-medium">Admin:</span>{' '}
-                  <span className="font-mono text-primary-600">admin1</span> /{' '}
-                  <span className="font-mono text-primary-600">admin123</span>
+            <div className="space-y-2 text-xs">
+              <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-2.5 border border-purple-200">
+                <p className="text-gray-700">
+                  <span className="font-semibold text-purple-900">👤 Admin:</span>{' '}
+                  <span className="font-mono text-purple-700 font-medium">admin1</span> /{' '}
+                  <span className="font-mono text-purple-700 font-medium">admin123</span>
                 </p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
-                <p className="text-gray-600">
-                  👤 <span className="font-medium">Vendedor:</span>{' '}
-                  <span className="font-mono text-primary-600">vendedor1</span> /{' '}
-                  <span className="font-mono text-primary-600">vendedor123</span>
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-2.5 border border-blue-200">
+                <p className="text-gray-700">
+                  <span className="font-semibold text-blue-900">👤 Vendedor (Mañana):</span>{' '}
+                  <span className="font-mono text-blue-700 font-medium">vendedor1</span> /{' '}
+                  <span className="font-mono text-blue-700 font-medium">vendedor123</span>
                 </p>
+              </div>
+              <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-2.5 border border-green-200">
+                <p className="text-gray-700">
+                  <span className="font-semibold text-green-900">👤 Vendedor (Tarde):</span>{' '}
+                  <span className="font-mono text-green-700 font-medium">vendedor2</span> /{' '}
+                  <span className="font-mono text-green-700 font-medium">vendedor456</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <p className="text-xs text-gray-600 font-semibold mb-1.5">
+                ⏰ Turnos:
+              </p>
+              <div className="space-y-1 text-xs text-gray-600">
+                <div className="flex items-center gap-2">
+                  <span className="text-blue-600">🌅</span>
+                  <span>Mañana: 7 AM - 2 PM (vendedor1)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-green-600">🌙</span>
+                  <span>Tarde: 2 PM - 10 PM (vendedor2)</span>
+                </div>
               </div>
             </div>
           </div>
