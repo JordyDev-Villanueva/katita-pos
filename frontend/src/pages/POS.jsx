@@ -17,6 +17,17 @@ export const POS = () => {
   const [loading, setLoading] = useState(false);
   const [cart, setCart] = useState([]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [customToast, setCustomToast] = useState({ show: false, message: '' });
+
+  // Función para mostrar toast personalizado
+  const showCustomToast = (message) => {
+    setCustomToast({ show: true, message });
+
+    // Auto-ocultar después de 2 segundos
+    setTimeout(() => {
+      setCustomToast({ show: false, message: '' });
+    }, 2000);
+  };
 
   // Cargar productos al iniciar
   useEffect(() => {
@@ -66,7 +77,7 @@ export const POS = () => {
         if (response.success && response.data) {
           // Agregar automáticamente al carrito
           addToCart(response.data);
-          toast.success(`${response.data.nombre} agregado al carrito`);
+          // NO mostrar toast aquí - addToCart ya lo muestra
         } else {
           toast.error('Producto no encontrado');
         }
@@ -124,7 +135,7 @@ export const POS = () => {
           ? { ...item, cantidad: item.cantidad + 1 }
           : item
       ));
-      toast.success('Cantidad actualizada');
+      showCustomToast('Cantidad actualizada');
     } else {
       // Agregar nuevo item
       console.log('➕ Agregando producto al carrito:', producto);
@@ -151,7 +162,7 @@ export const POS = () => {
       console.log('Item agregado:', nuevoItem);
 
       setCart([...cart, nuevoItem]);
-      toast.success(`${producto.nombre} agregado`);
+      showCustomToast(`${producto.nombre} agregado`);
     }
   };
 
@@ -178,14 +189,14 @@ export const POS = () => {
   // Eliminar item del carrito
   const removeFromCart = (productoId) => {
     setCart(cart.filter(item => item.producto_id !== productoId));
-    toast.success('Producto eliminado del carrito');
+    showCustomToast('Producto eliminado del carrito');
   };
 
   // Limpiar carrito
   const clearCart = () => {
     if (window.confirm('¿Estás seguro de limpiar el carrito?')) {
       setCart([]);
-      toast.success('Carrito limpiado');
+      showCustomToast('Carrito limpiado');
     }
   };
 
@@ -264,14 +275,26 @@ export const POS = () => {
         {/* Área principal de productos */}
         <div className="flex-1 p-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Punto de Venta
-              </h1>
-              <p className="text-gray-600">
-                Vendedor: <span className="font-semibold">{user?.nombre_completo}</span>
-              </p>
+            {/* Header con Toast Personalizado */}
+            <div className="mb-6 flex items-start justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Punto de Venta
+                </h1>
+                <p className="text-gray-600">
+                  Vendedor: <span className="font-semibold">{user?.nombre_completo}</span>
+                </p>
+              </div>
+
+              {/* TOAST PERSONALIZADO - Exactamente donde el usuario lo marcó */}
+              {customToast.show && (
+                <div className="px-4 py-2 bg-green-500 text-white rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="font-medium">{customToast.message}</span>
+                </div>
+              )}
             </div>
 
             {/* Barra de búsqueda */}

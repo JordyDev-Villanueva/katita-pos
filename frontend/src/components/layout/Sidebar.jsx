@@ -52,7 +52,7 @@ export const Sidebar = () => {
   );
 
   return (
-    <div className="w-64 bg-sidebar min-h-screen flex flex-col">
+    <div className="fixed left-0 top-0 h-screen w-64 bg-sidebar flex flex-col overflow-hidden z-50">
       {/* Logo */}
       <div className="p-6 border-b border-primary-800">
         <div className="flex items-center gap-3">
@@ -66,8 +66,8 @@ export const Sidebar = () => {
         </div>
       </div>
 
-      {/* Menu Items */}
-      <nav className="flex-1 p-4 space-y-1">
+      {/* Menu Items - Scrollable */}
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {filteredMenuItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -89,8 +89,8 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      {/* User Info y Logout */}
-      <div className="p-4 border-t border-primary-800">
+      {/* User Info y Logout - Sticky at Bottom */}
+      <div className="p-4 border-t border-primary-800 bg-sidebar">
         <div className="bg-primary-800 rounded-lg p-3 mb-3">
           <p className="text-xs text-primary-200 mb-1">Usuario</p>
           <p className="text-sm font-medium text-white">{user?.nombre_completo}</p>

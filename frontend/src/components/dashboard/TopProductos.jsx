@@ -3,12 +3,12 @@ import { TrendingUp, Award } from 'lucide-react';
 export const TopProductos = ({ productos }) => {
   if (!productos || productos.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full flex flex-col">
         <div className="flex items-center gap-2 mb-4">
           <Award className="h-5 w-5 text-gray-600" />
           <h3 className="font-semibold text-gray-900">Top 10 Productos Más Vendidos</h3>
         </div>
-        <div className="flex items-center justify-center h-64">
+        <div className="flex items-center justify-center flex-1">
           <div className="text-center">
             <div className="text-gray-400 mb-2">
               <Award className="h-12 w-12 mx-auto" />
@@ -38,7 +38,7 @@ export const TopProductos = ({ productos }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Award className="h-5 w-5 text-gray-600" />
@@ -47,7 +47,7 @@ export const TopProductos = ({ productos }) => {
         <TrendingUp className="h-4 w-4 text-green-600" />
       </div>
 
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="space-y-3 flex-1 overflow-y-auto">
         {productos.map((producto, index) => (
           <div
             key={producto.producto_id || index}

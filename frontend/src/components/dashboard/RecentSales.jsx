@@ -52,15 +52,18 @@ export const RecentSales = ({ ventas }) => {
         <span className="text-sm text-gray-500">{ventas.length} ventas</span>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 N° Venta
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Fecha/Hora
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Productos
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Total
@@ -94,12 +97,30 @@ export const RecentSales = ({ ventas }) => {
                       <Clock className="h-3 w-3 text-gray-400" />
                       <div>
                         <div className="font-medium">
-                          {formatPeruDate(fechaCompleta, 'dd MMM yyyy')}
+                          {formatPeruDate(fechaCompleta, 'dd/MM/yyyy')}
                         </div>
                         <div className="text-xs text-gray-500">
                           {formatPeruDate(fechaCompleta, 'HH:mm')}
                         </div>
                       </div>
+                    </div>
+                  </td>
+
+                  {/* Productos vendidos */}
+                  <td className="px-4 py-3">
+                    <div className="text-sm text-gray-900">
+                      {venta.detalles && venta.detalles.length > 0 ? (
+                        <div className="space-y-1 max-w-xs">
+                          {venta.detalles.map((detalle, idx) => (
+                            <div key={idx} className="flex items-center justify-between gap-2">
+                              <span className="truncate">{detalle.producto?.nombre || detalle.producto_nombre || 'Producto'}</span>
+                              <span className="text-gray-500 text-xs whitespace-nowrap">x{detalle.cantidad}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-xs">Sin detalles</span>
+                      )}
                     </div>
                   </td>
 

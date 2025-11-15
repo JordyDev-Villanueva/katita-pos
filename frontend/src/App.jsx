@@ -7,14 +7,15 @@ function App() {
     <AuthProvider>
       <AppRoutes />
       <Toaster
-        position="top-right"
+        position="top-center"
         toastOptions={{
-          duration: 3000,
+          duration: 2000,
           style: {
             background: '#363636',
             color: '#fff',
             padding: '16px',
             borderRadius: '8px',
+            marginTop: '80px',
           },
           success: {
             iconTheme: {

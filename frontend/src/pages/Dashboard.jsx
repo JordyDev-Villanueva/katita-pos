@@ -65,15 +65,11 @@ export const Dashboard = () => {
         console.log('📈 Stats actualizados:', statsData);
       }
 
-      // Cargar otros datos en paralelo
-      const [ventasChartResponse, topProductosResponse] = await Promise.all([
-        reportesAPI.getVentasUltimos7Dias(),
-        reportesAPI.getTopProductos(10),
-      ]);
+      // Cargar gráfico de ventas
+      const ventasChartResponse = await reportesAPI.getVentasUltimos7Dias();
 
       console.log('✅ Datos cargados:', {
         ventasChart: ventasChartResponse,
-        topProductos: topProductosResponse,
       });
 
       // Establecer gráfico de ventas
@@ -81,14 +77,11 @@ export const Dashboard = () => {
         setVentasChart(ventasChartResponse.data);
       }
 
-      // Establecer top productos
-      if (topProductosResponse.success && topProductosResponse.data) {
-        setTopProductos(topProductosResponse.data);
-      }
-
-      // Establecer últimas ventas desde el resumen
+      // Establecer últimas ventas desde el resumen y calcular top productos
       if (resumenResponse.data?.todasVentas) {
-        const ultimas = resumenResponse.data.todasVentas
+        const todasLasVentas = resumenResponse.data.todasVentas;
+
+        const ultimas = todasLasVentas
           .slice()
           .sort((a, b) => {
             const fechaA = new Date(a.fecha_venta || a.fecha || a.created_at);
@@ -99,6 +92,47 @@ export const Dashboard = () => {
 
         console.log('📋 Últimas 10 ventas:', ultimas);
         setRecentSales(ultimas);
+
+        // Calcular top productos desde las ventas
+        const productosMap = {};
+
+        todasLasVentas.forEach(venta => {
+          if (venta.detalles && Array.isArray(venta.detalles)) {
+            venta.detalles.forEach(detalle => {
+              const key = detalle.producto_id || detalle.producto?.id;
+
+              if (key && !productosMap[key]) {
+                productosMap[key] = {
+                  producto_id: key,
+                  nombre: detalle.producto?.nombre || detalle.producto_nombre || 'Producto Sin Nombre',
+                  codigo_barras: detalle.producto?.codigo_barras || 'N/A',
+                  cantidadVendida: 0,
+                  totalVendido: 0
+                };
+              }
+
+              if (key) {
+                productosMap[key].cantidadVendida += parseInt(detalle.cantidad) || 0;
+                productosMap[key].totalVendido += parseFloat(detalle.subtotal_final || detalle.subtotal) || 0;
+              }
+            });
+          }
+        });
+
+        // Convertir a array y ordenar por cantidad vendida
+        const topProductosArray = Object.values(productosMap)
+          .sort((a, b) => b.cantidadVendida - a.cantidadVendida)
+          .slice(0, 10);
+
+        // Calcular porcentajes para la barra de progreso
+        const maxCantidad = topProductosArray[0]?.cantidadVendida || 1;
+        const topProductosConPorcentaje = topProductosArray.map(producto => ({
+          ...producto,
+          porcentaje: (producto.cantidadVendida / maxCantidad) * 100
+        }));
+
+        console.log('📊 Top 10 Productos calculados:', topProductosConPorcentaje);
+        setTopProductos(topProductosConPorcentaje);
       }
     } catch (error) {
       console.error('❌ Error cargando datos del dashboard:', error);
@@ -148,86 +182,31 @@ export const Dashboard = () => {
           </button>
         </div>
 
-        {/* Tarjetas de Estadísticas */}
+        {/* Row 1: Tarjetas de Estadísticas */}
         <StatsCards stats={stats} />
 
-        {/* Grid Principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Columna Izquierda - 2/3 del ancho */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Gráfico de Ventas */}
-            <VentasChart data={ventasChart} />
-
-            {/* Top Productos */}
-            <TopProductos productos={topProductos} />
-
-            {/* Últimas Ventas */}
-            <RecentSales ventas={recentSales} />
-          </div>
-
-          {/* Columna Derecha - 1/3 del ancho */}
-          <div className="space-y-6">
-            {/* Panel de Alertas */}
-            <AlertsPanel alertas={alertas} />
-
-            {/* Accesos Rápidos */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Accesos Rápidos</h3>
-
-              <div className="space-y-3">
-                {user?.rol !== 'bodeguero' && (
-                  <a
-                    href="/pos"
-                    className="w-full flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200 group"
-                  >
-                    <div className="bg-blue-600 p-2 rounded-lg group-hover:scale-110 transition-transform duration-200">
-                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    </div>
-                    <div className="text-left flex-1">
-                      <p className="font-medium text-gray-900">Punto de Venta</p>
-                      <p className="text-xs text-gray-600">Procesar ventas</p>
-                    </div>
-                  </a>
-                )}
-
-                {(user?.rol === 'admin' || user?.rol === 'bodeguero') && (
-                  <>
-                    <a
-                      href="/productos"
-                      className="w-full flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors duration-200 group"
-                    >
-                      <div className="bg-green-600 p-2 rounded-lg group-hover:scale-110 transition-transform duration-200">
-                        <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                        </svg>
-                      </div>
-                      <div className="text-left flex-1">
-                        <p className="font-medium text-gray-900">Productos</p>
-                        <p className="text-xs text-gray-600">Gestionar inventario</p>
-                      </div>
-                    </a>
-
-                    <a
-                      href="/lotes"
-                      className="w-full flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors duration-200 group"
-                    >
-                      <div className="bg-purple-600 p-2 rounded-lg group-hover:scale-110 transition-transform duration-200">
-                        <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <div className="text-left flex-1">
-                        <p className="font-medium text-gray-900">Lotes</p>
-                        <p className="text-xs text-gray-600">Gestionar vencimientos</p>
-                      </div>
-                    </a>
-                  </>
-                )}
-              </div>
+        {/* Row 2: Gráfico (66%) + Alertas (33%) - Misma altura */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="lg:col-span-2">
+            <div className="h-[450px]">
+              <VentasChart data={ventasChart} />
             </div>
           </div>
+          <div className="lg:col-span-1">
+            <div className="h-[450px]">
+              <AlertsPanel alertas={alertas} />
+            </div>
+          </div>
+        </div>
+
+        {/* Row 3: Top 10 Productos - FULL WIDTH */}
+        <div className="w-full mb-6">
+          <TopProductos productos={topProductos} />
+        </div>
+
+        {/* Row 4: Últimas Ventas - FULL WIDTH (fuera del grid) */}
+        <div className="w-full">
+          <RecentSales ventas={recentSales} />
         </div>
       </div>
     </Layout>

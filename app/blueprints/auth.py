@@ -356,7 +356,7 @@ def refresh():
 # ==================================================================================
 
 @auth_bp.route('/me', methods=['GET'])
-@login_required
+@jwt_required()
 def get_current_user():
     """
     Obtener informacion del usuario autenticado
@@ -394,9 +394,12 @@ def get_current_user():
         }
     """
     try:
-        # El decorador @login_required ya verifico el token
-        # Los datos del usuario estan en g.current_user
-        user_id = g.current_user['user_id']
+        # Obtener ID del usuario del token JWT
+        current_user_id_str = get_jwt_identity()
+        user_id = int(current_user_id_str)
+
+        print(f'\n👤 GET /api/auth/me')
+        print(f'   Usuario autenticado: {user_id}')
 
         # Buscar usuario en la base de datos
         user = User.query.get(user_id)
@@ -406,6 +409,8 @@ def get_current_user():
 
         if not user.activo:
             return unauthorized_response('Usuario inactivo')
+
+        print(f'   ✅ Usuario encontrado: {user.username} ({user.rol})')
 
         # ========== RESPUESTA CON INFO COMPLETA DEL USUARIO ==========
         return success_response(

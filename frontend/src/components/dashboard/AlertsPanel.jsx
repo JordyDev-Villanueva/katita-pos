@@ -9,12 +9,12 @@ export const AlertsPanel = ({ alertas }) => {
 
   if (totalAlertas === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full flex flex-col">
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle className="h-5 w-5 text-gray-600" />
           <h3 className="font-semibold text-gray-900">Alertas del Sistema</h3>
         </div>
-        <div className="flex flex-col items-center justify-center py-8">
+        <div className="flex flex-col items-center justify-center flex-1">
           <div className="bg-green-100 p-4 rounded-full mb-3">
             <CheckCircle className="h-8 w-8 text-green-600" />
           </div>
@@ -28,7 +28,7 @@ export const AlertsPanel = ({ alertas }) => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-gray-600" />
@@ -39,7 +39,7 @@ export const AlertsPanel = ({ alertas }) => {
         </span>
       </div>
 
-      <div className="space-y-4 max-h-96 overflow-y-auto">
+      <div className="space-y-4 flex-1 overflow-y-auto">
         {/* Productos bajo stock */}
         {bajoStock.length > 0 && (
           <div className="border-l-4 border-red-500 bg-red-50 rounded-lg p-4">
