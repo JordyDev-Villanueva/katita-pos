@@ -10,22 +10,31 @@ export const SalesReport = ({ data }) => {
     );
   }
 
-  // Calcular ticket promedio - Validar division por cero
+  console.log('📊 SalesReport recibió data:', data);
+
+  // Calcular valores - usar los nombres correctos del backend
   const cantidadVentas = parseInt(data.cantidad_ventas || 0);
-  const totalVentas = parseFloat(data.total_ventas || 0);
-  const ticketPromedio = cantidadVentas > 0 ? totalVentas / cantidadVentas : 0;
+  const totalVendido = parseFloat(data.total_vendido || 0);
+  const ticketPromedio = parseFloat(data.ticket_promedio || 0);
+  const gananciaBruta = parseFloat(data.ganancia_total || 0);
 
-  // Preparar datos para gráfico de métodos de pago
-  const metodosData = Object.entries(data.ventas_por_metodo || {}).map(([metodo, monto]) => ({
-    metodo: metodo.charAt(0).toUpperCase() + metodo.slice(1),
-    total: parseFloat(monto)
+  // Preparar datos para gráfico de métodos de pago (ahora es un array)
+  const metodosData = (data.ventas_por_metodo || []).map(item => ({
+    metodo: item.metodo.charAt(0).toUpperCase() + item.metodo.slice(1),
+    total: parseFloat(item.total || 0),
+    cantidad: item.cantidad
   }));
 
-  // Preparar datos para gráfico de vendedores
-  const vendedoresData = Object.entries(data.ventas_por_vendedor || {}).map(([vendedor, monto]) => ({
-    vendedor,
-    total: parseFloat(monto)
+  console.log('📊 Métodos de pago procesados:', metodosData);
+
+  // Preparar datos para gráfico de vendedores (ahora es un array)
+  const vendedoresData = (data.ventas_por_vendedor || []).map(item => ({
+    vendedor: item.vendedor_nombre,
+    total: parseFloat(item.total || 0),
+    cantidad: item.cantidad
   }));
+
+  console.log('📊 Vendedores procesados:', vendedoresData);
 
   return (
     <div className="space-y-6">
@@ -37,7 +46,7 @@ export const SalesReport = ({ data }) => {
             <div>
               <p className="text-sm text-gray-600">Total Vendido</p>
               <p className="text-2xl font-bold text-gray-900">
-                S/ {parseFloat(data.total_ventas || 0).toFixed(2)}
+                S/ {totalVendido.toFixed(2)}
               </p>
             </div>
             <div className="p-3 bg-blue-100 rounded-full">
@@ -51,7 +60,7 @@ export const SalesReport = ({ data }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Cantidad de Ventas</p>
-              <p className="text-2xl font-bold text-gray-900">{data.cantidad_ventas || 0}</p>
+              <p className="text-2xl font-bold text-gray-900">{cantidadVentas}</p>
             </div>
             <div className="p-3 bg-green-100 rounded-full">
               <ShoppingCart className="h-6 w-6 text-green-600" />
@@ -78,9 +87,9 @@ export const SalesReport = ({ data }) => {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Ganancia Bruta</p>
+              <p className="text-sm text-gray-600">Ganancia Total</p>
               <p className="text-2xl font-bold text-gray-900">
-                S/ {parseFloat(data.ganancia_bruta || 0).toFixed(2)}
+                S/ {gananciaBruta.toFixed(2)}
               </p>
             </div>
             <div className="p-3 bg-purple-100 rounded-full">

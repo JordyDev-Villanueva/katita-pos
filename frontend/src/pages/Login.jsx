@@ -1,184 +1,142 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, ShoppingBag } from 'lucide-react';
+import { User, Lock, ShoppingBag, CheckCircle, LogIn } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { Input } from '../components/common/Input';
-import { Button } from '../components/common/Button';
 
 export const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-  });
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [error, setError] = useState('');
+  const [logoutMessage, setLogoutMessage] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value.trim(),
-    }));
+  // Detectar si acaba de cerrar sesión
+  useEffect(() => {
+    const justLoggedOut = sessionStorage.getItem('justLoggedOut');
+    if (justLoggedOut === 'true') {
+      setLogoutMessage(true);
+      sessionStorage.removeItem('justLoggedOut');
 
-    // Limpiar error del campo
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: '',
-      }));
+      // Ocultar después de 3 segundos
+      setTimeout(() => setLogoutMessage(false), 3000);
     }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.username.trim()) {
-      newErrors.username = 'El usuario es requerido';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'La contraseña es requerida';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) return;
-
+    setError('');
     setLoading(true);
 
-    // Trimear valores antes de enviar
-    const result = await login(
-      formData.username.trim(),
-      formData.password.trim()
-    );
-
-    setLoading(false);
-
-    if (result.success) {
+    try {
+      await login(username, password);
       navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Error al iniciar sesión');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-primary-100 to-primary-200 flex items-center justify-center px-4">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center p-4">
+      {/* Notificación de logout exitoso */}
+      {logoutMessage && (
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-green-100 text-green-700 px-4 py-3 rounded-lg shadow-lg animate-fade-in">
+          <CheckCircle className="w-5 h-5" />
+          <span className="font-medium">Sesión cerrada correctamente</span>
+        </div>
+      )}
+
+      <div className="w-full max-w-md">
         {/* Logo y Header */}
-        <div className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="bg-primary-600 p-4 rounded-2xl shadow-lg">
-              <ShoppingBag className="h-12 w-12 text-white" strokeWidth={2.5} />
-            </div>
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl mb-4 shadow-2xl">
+            <ShoppingBag className="w-10 h-10 text-blue-600" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            KATITA POS
-          </h1>
-          <p className="text-base text-gray-600 font-medium">
-            Sistema de Punto de Venta
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            Minimarket - Guadalupito, Perú
-          </p>
+          <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">KATITA POS</h1>
+          <p className="text-blue-200">Sistema de Punto de Venta</p>
+          <p className="text-sm text-blue-300">Minimarket - Guadalupito, Perú</p>
         </div>
 
-        {/* Card de Login */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+        {/* Formulario de Login */}
+        <div className="bg-white rounded-2xl shadow-2xl p-8">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
             Iniciar Sesión
           </h2>
 
+          {/* Mensaje de error */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
-            <Input
-              label="Usuario"
-              name="username"
-              type="text"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="Ingresa tu usuario"
-              error={errors.username}
-              icon={User}
-              required
-            />
+            {/* Campo Usuario */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Usuario <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Ingresa tu usuario"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  required
+                  autoFocus
+                />
+              </div>
+            </div>
 
-            <Input
-              label="Contraseña"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Ingresa tu contraseña"
-              error={errors.password}
-              icon={Lock}
-              required
-            />
+            {/* Campo Contraseña */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Contraseña <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Ingresa tu contraseña"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  required
+                />
+              </div>
+            </div>
 
-            <Button
+            {/* Botón Login */}
+            <button
               type="submit"
-              fullWidth
-              loading={loading}
               disabled={loading}
-              size="lg"
+              className={`w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg ${
+                loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              Iniciar Sesión
-            </Button>
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span>Iniciando sesión...</span>
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-5 h-5" />
+                  <span>Iniciar Sesión</span>
+                </>
+              )}
+            </button>
           </form>
-
-          {/* Usuarios de prueba */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center mb-3 font-semibold">
-              👥 Usuarios de prueba:
-            </p>
-            <div className="space-y-2 text-xs">
-              <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-2.5 border border-purple-200">
-                <p className="text-gray-700">
-                  <span className="font-semibold text-purple-900">👤 Admin:</span>{' '}
-                  <span className="font-mono text-purple-700 font-medium">admin1</span> /{' '}
-                  <span className="font-mono text-purple-700 font-medium">admin123</span>
-                </p>
-              </div>
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-2.5 border border-blue-200">
-                <p className="text-gray-700">
-                  <span className="font-semibold text-blue-900">👤 Vendedor (Mañana):</span>{' '}
-                  <span className="font-mono text-blue-700 font-medium">vendedor1</span> /{' '}
-                  <span className="font-mono text-blue-700 font-medium">vendedor123</span>
-                </p>
-              </div>
-              <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-2.5 border border-green-200">
-                <p className="text-gray-700">
-                  <span className="font-semibold text-green-900">👤 Vendedor (Tarde):</span>{' '}
-                  <span className="font-mono text-green-700 font-medium">vendedor2</span> /{' '}
-                  <span className="font-mono text-green-700 font-medium">vendedor456</span>
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <p className="text-xs text-gray-600 font-semibold mb-1.5">
-                ⏰ Turnos:
-              </p>
-              <div className="space-y-1 text-xs text-gray-600">
-                <div className="flex items-center gap-2">
-                  <span className="text-blue-600">🌅</span>
-                  <span>Mañana: 7 AM - 2 PM (vendedor1)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-green-600">🌙</span>
-                  <span>Tarde: 2 PM - 10 PM (vendedor2)</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-sm text-blue-200 mt-6">
           © 2025 KATITA POS - Desarrollado por Jordy Villanueva
         </p>
       </div>

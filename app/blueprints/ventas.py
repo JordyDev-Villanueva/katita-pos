@@ -18,12 +18,21 @@ El sistema FIFO es CRITICO:
 - Atomicidad total: todo o nada (rollback en errores)
 """
 
-from flask import Blueprint, request, g
+from flask import Blueprint, request, g, send_file
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func, and_
 from decimal import Decimal
 from datetime import datetime, timezone, date, timedelta
+from io import BytesIO
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from app import db
 from app.models.venta import Venta
 from app.models.detalle_venta import DetalleVenta
@@ -618,7 +627,7 @@ def listar_ventas():
 # ==================================================================================
 
 @ventas_bp.route('/<int:id>', methods=['GET'])
-@login_required
+@jwt_required()
 def obtener_venta(id):
     """
     Obtener detalle completo de una venta
@@ -738,7 +747,7 @@ def obtener_venta(id):
 # ==================================================================================
 
 @ventas_bp.route('/dia', methods=['GET'])
-@login_required
+@jwt_required()
 def ventas_del_dia():
     """
     Obtener resumen de ventas del dia actual
@@ -855,7 +864,7 @@ def ventas_del_dia():
 # ==================================================================================
 
 @ventas_bp.route('/<int:id>/cancelar', methods=['POST'])
-@login_required
+@jwt_required()
 def cancelar_venta(id):
     """
     Cancelar una venta y revertir stock
@@ -989,7 +998,7 @@ def cancelar_venta(id):
 # ==================================================================================
 
 @ventas_bp.route('/reportes/resumen', methods=['GET'])
-@login_required
+@jwt_required()
 def resumen_ventas():
     """
     Obtener resumen estadistico de ventas
@@ -1034,8 +1043,8 @@ def resumen_ventas():
     """
     try:
         # ========== OBTENER PARAMETROS ==========
-        desde_str = request.args.get('desde')
-        hasta_str = request.args.get('hasta')
+        desde_str = request.args.get('fecha_inicio') or request.args.get('desde')
+        hasta_str = request.args.get('fecha_fin') or request.args.get('hasta')
 
         # Defaults: hoy
         hoy = date.today()
@@ -1067,6 +1076,8 @@ def resumen_ventas():
                 status_code=400
             )
 
+        print(f'\n📊 RESUMEN DE VENTAS: {desde} a {hasta}')
+
         # ========== CONSULTAR VENTAS DEL PERIODO ==========
         ventas = Venta.query.filter(
             and_(
@@ -1076,10 +1087,13 @@ def resumen_ventas():
             )
         ).all()
 
+        print(f'📊 Se encontraron {len(ventas)} ventas')
+
         # ========== CALCULAR METRICAS ==========
         total_vendido = Decimal('0')
         ganancia_total = Decimal('0')
         por_metodo_pago = {}
+        por_vendedor = {}
         productos_vendidos = {}  # producto_id: cantidad
 
         for venta in ventas:
@@ -1087,10 +1101,31 @@ def resumen_ventas():
             ganancia_total += venta.ganancia_total
 
             # Contar por metodo de pago
-            if venta.metodo_pago in por_metodo_pago:
-                por_metodo_pago[venta.metodo_pago] += venta.total
+            metodo = venta.metodo_pago or 'sin_especificar'
+            if metodo in por_metodo_pago:
+                por_metodo_pago[metodo]['cantidad'] += 1
+                por_metodo_pago[metodo]['total'] += venta.total
             else:
-                por_metodo_pago[venta.metodo_pago] = venta.total
+                por_metodo_pago[metodo] = {
+                    'metodo': metodo,
+                    'cantidad': 1,
+                    'total': venta.total
+                }
+
+            # Contar por vendedor
+            vendedor_id = venta.vendedor_id
+            if vendedor_id:
+                if vendedor_id in por_vendedor:
+                    por_vendedor[vendedor_id]['cantidad'] += 1
+                    por_vendedor[vendedor_id]['total'] += venta.total
+                else:
+                    vendedor_nombre = venta.vendedor.nombre_completo if venta.vendedor else 'Sin nombre'
+                    por_vendedor[vendedor_id] = {
+                        'vendedor_id': vendedor_id,
+                        'vendedor_nombre': vendedor_nombre,
+                        'cantidad': 1,
+                        'total': venta.total
+                    }
 
             # Contar productos vendidos
             for detalle in venta.detalles:
@@ -1117,8 +1152,30 @@ def resumen_ventas():
                 'cantidad': producto_top[1]['cantidad']
             }
 
-        # Convertir Decimal a string
-        por_metodo_pago_str = {k: str(v) for k, v in por_metodo_pago.items()}
+        # Convertir a listas para JSON
+        ventas_por_metodo = [
+            {
+                'metodo': v['metodo'],
+                'cantidad': v['cantidad'],
+                'total': float(v['total'])
+            }
+            for v in por_metodo_pago.values()
+        ]
+
+        ventas_por_vendedor = [
+            {
+                'vendedor_id': v['vendedor_id'],
+                'vendedor_nombre': v['vendedor_nombre'],
+                'cantidad': v['cantidad'],
+                'total': float(v['total'])
+            }
+            for v in por_vendedor.values()
+        ]
+
+        print(f'📊 Total vendido: S/ {total_vendido}')
+        print(f'📊 Ganancia total: S/ {ganancia_total}')
+        print(f'📊 Ventas por método: {ventas_por_metodo}')
+        print(f'📊 Ventas por vendedor: {ventas_por_vendedor}')
 
         # ========== RESPUESTA EXITOSA ==========
         return success_response(
@@ -1127,12 +1184,13 @@ def resumen_ventas():
                     'desde': desde.isoformat(),
                     'hasta': hasta.isoformat()
                 },
-                'total_vendido': str(total_vendido),
+                'total_vendido': float(total_vendido),
                 'cantidad_ventas': cantidad_ventas,
-                'ticket_promedio': str(ticket_promedio),
-                'ganancia_total': str(ganancia_total),
+                'ticket_promedio': float(ticket_promedio),
+                'ganancia_total': float(ganancia_total),
                 'producto_mas_vendido': producto_mas_vendido,
-                'por_metodo_pago': por_metodo_pago_str,
+                'ventas_por_metodo': ventas_por_metodo,
+                'ventas_por_vendedor': ventas_por_vendedor,
                 'productos_vendidos': len(productos_vendidos)
             },
             message=f'Resumen de ventas del {desde} al {hasta}'
@@ -1141,6 +1199,310 @@ def resumen_ventas():
     except Exception as e:
         return error_response(
             message='Error al generar resumen de ventas',
+            status_code=500,
+            errors={'exception': str(e)}
+        )
+
+
+# ==================================================================================
+# ENDPOINT: GET /api/ventas/reportes/pdf - Exportar reporte a PDF
+# ==================================================================================
+
+@ventas_bp.route('/reportes/pdf', methods=['GET'])
+@jwt_required()
+def exportar_reporte_pdf():
+    """
+    Genera un reporte de ventas en formato PDF.
+
+    Query Parameters:
+        - fecha_inicio: Fecha inicio (YYYY-MM-DD)
+        - fecha_fin: Fecha fin (YYYY-MM-DD)
+
+    Returns:
+        PDF file con el reporte de ventas
+    """
+    try:
+        # Obtener parámetros
+        fecha_inicio_str = request.args.get('fecha_inicio')
+        fecha_fin_str = request.args.get('fecha_fin')
+
+        # Defaults: hoy
+        hoy = date.today()
+        fecha_inicio = hoy
+        fecha_fin = hoy
+
+        if fecha_inicio_str:
+            fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
+        if fecha_fin_str:
+            fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
+
+        # Consultar ventas
+        ventas = Venta.query.filter(
+            and_(
+                func.date(Venta.created_at) >= fecha_inicio,
+                func.date(Venta.created_at) <= fecha_fin,
+                Venta.estado == 'completada'
+            )
+        ).order_by(Venta.created_at.desc()).all()
+
+        # Calcular totales
+        total_vendido = sum(venta.total for venta in ventas)
+        ganancia_total = sum(venta.ganancia_total for venta in ventas)
+
+        # Crear PDF en memoria
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        elements = []
+
+        # Estilos
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=24,
+            textColor=colors.HexColor('#1e40af'),
+            spaceAfter=30,
+            alignment=TA_CENTER
+        )
+
+        # Título
+        elements.append(Paragraph('KATITA POS - Reporte de Ventas', title_style))
+        elements.append(Spacer(1, 0.2*inch))
+
+        # Período
+        periodo_text = f'Período: {fecha_inicio.strftime("%d/%m/%Y")} - {fecha_fin.strftime("%d/%m/%Y")}'
+        elements.append(Paragraph(periodo_text, styles['Normal']))
+        elements.append(Spacer(1, 0.3*inch))
+
+        # Resumen de métricas
+        resumen_data = [
+            ['RESUMEN DE VENTAS', ''],
+            ['Total de Ventas:', f'{len(ventas)} ventas'],
+            ['Total Vendido:', f'S/ {total_vendido:.2f}'],
+            ['Ganancia Total:', f'S/ {ganancia_total:.2f}'],
+            ['Ticket Promedio:', f'S/ {(total_vendido / len(ventas)):.2f}' if len(ventas) > 0 else 'S/ 0.00']
+        ]
+
+        resumen_table = Table(resumen_data, colWidths=[3*inch, 2*inch])
+        resumen_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e40af')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 14),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
+        ]))
+
+        elements.append(resumen_table)
+        elements.append(Spacer(1, 0.4*inch))
+
+        # Detalle de ventas
+        if ventas:
+            elements.append(Paragraph('DETALLE DE VENTAS', styles['Heading2']))
+            elements.append(Spacer(1, 0.2*inch))
+
+            ventas_data = [['Fecha', 'ID', 'Método', 'Vendedor', 'Total', 'Ganancia']]
+
+            for venta in ventas:
+                vendedor_nombre = venta.vendedor.nombre_completo if venta.vendedor else 'Sin asignar'
+                ventas_data.append([
+                    venta.created_at.strftime('%d/%m/%Y %H:%M'),
+                    f'#{venta.id}',
+                    venta.metodo_pago.upper(),
+                    vendedor_nombre,
+                    f'S/ {venta.total:.2f}',
+                    f'S/ {venta.ganancia_total:.2f}'
+                ])
+
+            ventas_table = Table(ventas_data, colWidths=[1.3*inch, 0.6*inch, 0.9*inch, 1.5*inch, 0.9*inch, 0.9*inch])
+            ventas_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e40af')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ]))
+
+            elements.append(ventas_table)
+
+        # Generar PDF
+        doc.build(elements)
+        buffer.seek(0)
+
+        # Nombre del archivo
+        filename = f'reporte_ventas_{fecha_inicio}_{fecha_fin}.pdf'
+
+        return send_file(
+            buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=filename
+        )
+
+    except Exception as e:
+        return error_response(
+            message='Error al generar PDF',
+            status_code=500,
+            errors={'exception': str(e)}
+        )
+
+
+# ==================================================================================
+# ENDPOINT: GET /api/ventas/reportes/excel - Exportar reporte a Excel
+# ==================================================================================
+
+@ventas_bp.route('/reportes/excel', methods=['GET'])
+@jwt_required()
+def exportar_reporte_excel():
+    """
+    Genera un reporte de ventas en formato Excel.
+
+    Query Parameters:
+        - fecha_inicio: Fecha inicio (YYYY-MM-DD)
+        - fecha_fin: Fecha fin (YYYY-MM-DD)
+
+    Returns:
+        Excel file con el reporte de ventas
+    """
+    try:
+        # Obtener parámetros
+        fecha_inicio_str = request.args.get('fecha_inicio')
+        fecha_fin_str = request.args.get('fecha_fin')
+
+        # Defaults: hoy
+        hoy = date.today()
+        fecha_inicio = hoy
+        fecha_fin = hoy
+
+        if fecha_inicio_str:
+            fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
+        if fecha_fin_str:
+            fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
+
+        # Consultar ventas
+        ventas = Venta.query.filter(
+            and_(
+                func.date(Venta.created_at) >= fecha_inicio,
+                func.date(Venta.created_at) <= fecha_fin,
+                Venta.estado == 'completada'
+            )
+        ).order_by(Venta.created_at.desc()).all()
+
+        # Calcular totales
+        total_vendido = sum(venta.total for venta in ventas)
+        ganancia_total = sum(venta.ganancia_total for venta in ventas)
+
+        # Crear Excel
+        wb = Workbook()
+        ws = wb.active
+        ws.title = 'Reporte de Ventas'
+
+        # Estilos
+        header_fill = PatternFill(start_color='1e40af', end_color='1e40af', fill_type='solid')
+        header_font = Font(color='FFFFFF', bold=True, size=12)
+        title_font = Font(bold=True, size=16, color='1e40af')
+        border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+
+        # Título
+        ws.merge_cells('A1:F1')
+        ws['A1'] = 'KATITA POS - Reporte de Ventas'
+        ws['A1'].font = title_font
+        ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
+
+        # Período
+        ws.merge_cells('A2:F2')
+        ws['A2'] = f'Período: {fecha_inicio.strftime("%d/%m/%Y")} - {fecha_fin.strftime("%d/%m/%Y")}'
+        ws['A2'].alignment = Alignment(horizontal='center')
+
+        # Resumen de métricas
+        ws['A4'] = 'RESUMEN DE VENTAS'
+        ws['A4'].font = Font(bold=True, size=12)
+
+        ws['A5'] = 'Total de Ventas:'
+        ws['B5'] = f'{len(ventas)} ventas'
+        ws['A6'] = 'Total Vendido:'
+        ws['B6'] = f'S/ {total_vendido:.2f}'
+        ws['A7'] = 'Ganancia Total:'
+        ws['B7'] = f'S/ {ganancia_total:.2f}'
+        ws['A8'] = 'Ticket Promedio:'
+        ws['B8'] = f'S/ {(total_vendido / len(ventas)):.2f}' if len(ventas) > 0 else 'S/ 0.00'
+
+        # Formatear resumen
+        for row in range(5, 9):
+            ws[f'A{row}'].font = Font(bold=True)
+            ws[f'A{row}'].border = border
+            ws[f'B{row}'].border = border
+
+        # Detalle de ventas
+        ws['A10'] = 'DETALLE DE VENTAS'
+        ws['A10'].font = Font(bold=True, size=12)
+
+        # Headers
+        headers = ['Fecha', 'ID Venta', 'Método de Pago', 'Vendedor', 'Total', 'Ganancia']
+        for col, header in enumerate(headers, start=1):
+            cell = ws.cell(row=12, column=col)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+            cell.border = border
+
+        # Datos de ventas
+        row = 13
+        for venta in ventas:
+            vendedor_nombre = venta.vendedor.nombre_completo if venta.vendedor else 'Sin asignar'
+            ws.cell(row=row, column=1, value=venta.created_at.strftime('%d/%m/%Y %H:%M'))
+            ws.cell(row=row, column=2, value=f'#{venta.id}')
+            ws.cell(row=row, column=3, value=venta.metodo_pago.upper())
+            ws.cell(row=row, column=4, value=vendedor_nombre)
+            ws.cell(row=row, column=5, value=f'S/ {venta.total:.2f}')
+            ws.cell(row=row, column=6, value=f'S/ {venta.ganancia_total:.2f}')
+
+            # Aplicar bordes
+            for col in range(1, 7):
+                ws.cell(row=row, column=col).border = border
+                ws.cell(row=row, column=col).alignment = Alignment(horizontal='center')
+
+            row += 1
+
+        # Ajustar anchos de columna
+        ws.column_dimensions['A'].width = 20
+        ws.column_dimensions['B'].width = 12
+        ws.column_dimensions['C'].width = 18
+        ws.column_dimensions['D'].width = 20
+        ws.column_dimensions['E'].width = 15
+        ws.column_dimensions['F'].width = 15
+
+        # Guardar en memoria
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        # Nombre del archivo
+        filename = f'reporte_ventas_{fecha_inicio}_{fecha_fin}.xlsx'
+
+        return send_file(
+            buffer,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+
+    except Exception as e:
+        return error_response(
+            message='Error al generar Excel',
             status_code=500,
             errors={'exception': str(e)}
         )

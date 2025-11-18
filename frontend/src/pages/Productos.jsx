@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw, CheckCircle } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { ProductStats } from '../components/productos/ProductStats';
 import { ProductFilters } from '../components/productos/ProductFilters';
@@ -16,6 +16,7 @@ export const Productos = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [filters, setFilters] = useState({});
+  const [showUpdatedBadge, setShowUpdatedBadge] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     activos: 0,
@@ -193,6 +194,12 @@ export const Productos = () => {
     }
   };
 
+  const handleRefreshProducts = () => {
+    loadProducts(filters);
+    setShowUpdatedBadge(true);
+    setTimeout(() => setShowUpdatedBadge(false), 2000);
+  };
+
   return (
     <Layout>
       <div className="p-6">
@@ -205,22 +212,32 @@ export const Productos = () => {
             </p>
           </div>
 
-          <div className="flex gap-3">
-            <Button
-              onClick={() => loadProducts(filters)}
-              variant="secondary"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Recargar
-            </Button>
+          <div className="flex items-center gap-3">
+            {/* Badge "Datos actualizados" */}
+            {showUpdatedBadge && (
+              <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg animate-fade-in">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-sm font-medium">Datos actualizados</span>
+              </div>
+            )}
 
-            <Button
-              onClick={handleNewProduct}
-              variant="primary"
+            {/* Botón Recargar */}
+            <button
+              onClick={handleRefreshProducts}
+              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Nuevo Producto
-            </Button>
+              <RefreshCw className="w-4 h-4" />
+              <span className="text-sm font-medium">Recargar</span>
+            </button>
+
+            {/* Botón Nuevo Producto */}
+            <button
+              onClick={handleNewProduct}
+              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="text-sm font-medium">Nuevo Producto</span>
+            </button>
           </div>
         </div>
 

@@ -525,6 +525,57 @@ export const reportesAPI = {
   },
 
   /**
+   * Obtiene ventas filtradas por rango de fechas
+   */
+  getVentasPorFecha: async (fechaInicio, fechaFin, limit = 50) => {
+    try {
+      console.log(`📅 Obteniendo ventas desde ${fechaInicio} hasta ${fechaFin}`);
+
+      const response = await axiosInstance.get('/ventas', {
+        params: {
+          desde: fechaInicio,
+          hasta: fechaFin,
+          limit: limit
+        }
+      });
+
+      let ventas = [];
+      if (response.data?.success) {
+        if (Array.isArray(response.data.data)) {
+          ventas = response.data.data;
+        } else if (Array.isArray(response.data.data?.ventas)) {
+          ventas = response.data.data.ventas;
+        }
+      } else if (Array.isArray(response.data)) {
+        ventas = response.data;
+      } else if (Array.isArray(response.data?.data)) {
+        ventas = response.data.data;
+      }
+
+      console.log(`📦 Total ventas encontradas: ${ventas.length}`);
+
+      // Ordenar por fecha descendente
+      ventas.sort((a, b) => {
+        const fechaA = new Date(a.fecha || a.created_at);
+        const fechaB = new Date(b.fecha || b.created_at);
+        return fechaB - fechaA;
+      });
+
+      // Limitar resultados
+      const ventasLimitadas = ventas.slice(0, limit);
+
+      return {
+        success: true,
+        data: ventasLimitadas,
+        total: ventas.length
+      };
+    } catch (error) {
+      console.error('Error obteniendo ventas por fecha:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Cuenta productos con stock > 0 y activos
    */
   getProductosEnStock: async () => {

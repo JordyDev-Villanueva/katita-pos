@@ -179,26 +179,50 @@ def login():
         print(f'✅ Tokens JWT generados correctamente')
 
         # ========== RESPUESTA EXITOSA ==========
-        return success_response(
-            data={
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'nombre_completo': user.nombre_completo,
-                    'email': user.email,
-                    'rol': user.rol,
-                    'activo': user.activo,
-                    'ultimo_acceso': user.ultimo_acceso.isoformat() if user.ultimo_acceso else None
+        try:
+            # Formatear ultimo_acceso de forma segura
+            ultimo_acceso_iso = None
+            if user.ultimo_acceso:
+                try:
+                    # Si es datetime naive, agregar timezone
+                    if user.ultimo_acceso.tzinfo is None:
+                        from datetime import timezone as tz
+                        ultimo_acceso_aware = user.ultimo_acceso.replace(tzinfo=tz.utc)
+                        ultimo_acceso_iso = ultimo_acceso_aware.isoformat()
+                    else:
+                        ultimo_acceso_iso = user.ultimo_acceso.isoformat()
+                except Exception as e:
+                    print(f'⚠️ Error al formatear ultimo_acceso: {str(e)}')
+                    ultimo_acceso_iso = str(user.ultimo_acceso)
+
+            return success_response(
+                data={
+                    'user': {
+                        'id': user.id,
+                        'username': user.username,
+                        'nombre_completo': user.nombre_completo,
+                        'email': user.email,
+                        'rol': user.rol,
+                        'activo': user.activo,
+                        'ultimo_acceso': ultimo_acceso_iso
+                    },
+                    'access_token': access_token,
+                    'refresh_token': refresh_token,
+                    'token_type': 'Bearer',
+                    'expires_in': 28800  # 8 horas en segundos
                 },
-                'access_token': access_token,
-                'refresh_token': refresh_token,
-                'token_type': 'Bearer',
-                'expires_in': 28800  # 8 horas en segundos
-            },
-            message='Login exitoso'
-        )
+                message='Login exitoso'
+            )
+        except Exception as e:
+            print(f'❌ ERROR al construir respuesta de login: {str(e)}')
+            import traceback
+            traceback.print_exc()
+            raise
 
     except Exception as e:
+        print(f'❌ ERROR GENERAL EN LOGIN: {str(e)}')
+        import traceback
+        traceback.print_exc()
         db.session.rollback()
         return error_response(
             message='Error al procesar login',

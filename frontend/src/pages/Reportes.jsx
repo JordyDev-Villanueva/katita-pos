@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { FileText, TrendingUp, Package, DollarSign, Calendar, FileDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { FileText, TrendingUp, Package, DollarSign, FileDown, FileSpreadsheet } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { SalesReport } from '../components/reportes/SalesReport';
 import { InventoryReport } from '../components/reportes/InventoryReport';
@@ -18,6 +18,13 @@ const Reportes = () => {
   const [fechaFin, setFechaFin] = useState(() => format(new Date(), 'yyyy-MM-dd'));
   const [loading, setLoading] = useState(false);
   const [salesData, setSalesData] = useState(null);
+
+  // Cargar reporte automáticamente cuando cambian los filtros
+  useEffect(() => {
+    if (tipoReporte === 'ventas') {
+      loadSalesReport();
+    }
+  }, [tipoReporte, fechaInicio, fechaFin]);
 
   const loadSalesReport = async () => {
     try {
@@ -45,19 +52,48 @@ const Reportes = () => {
     }
   };
 
-  const handleGenerarReporte = () => {
-    if (tipoReporte === 'ventas') {
-      loadSalesReport();
+  const exportarPDF = async () => {
+    try {
+      const response = await axiosInstance.get('/ventas/reportes/pdf', {
+        params: { fecha_inicio: fechaInicio, fecha_fin: fechaFin },
+        responseType: 'blob'
+      });
+
+      // Crear enlace de descarga
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `reporte_${tipoReporte}_${new Date().toISOString().split('T')[0]}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success('PDF descargado exitosamente');
+    } catch (error) {
+      console.error('Error al exportar PDF:', error);
+      toast.error('Error al exportar PDF. Verifica que haya datos para exportar.');
     }
-    // Inventario y Ganancias cargan sus propios datos internamente
   };
 
-  const handleExportPDF = () => {
-    toast('Exportación a PDF en desarrollo');
-  };
+  const exportarExcel = async () => {
+    try {
+      const response = await axiosInstance.get('/ventas/reportes/excel', {
+        params: { fecha_inicio: fechaInicio, fecha_fin: fechaFin },
+        responseType: 'blob'
+      });
 
-  const handleExportExcel = () => {
-    toast('Exportación a Excel en desarrollo');
+      // Crear enlace de descarga
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `reporte_${tipoReporte}_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success('Excel descargado exitosamente');
+    } catch (error) {
+      console.error('Error al exportar Excel:', error);
+      toast.error('Error al exportar Excel. Verifica que haya datos para exportar.');
+    }
   };
 
   const tabs = [
@@ -66,24 +102,49 @@ const Reportes = () => {
     { id: 'ganancias', label: 'Ganancias', icon: DollarSign },
   ];
 
+  // Determinar si hay datos para mostrar botones de exportación
+  const tieneDatos = (tipoReporte === 'ventas' && salesData) ||
+                     tipoReporte === 'inventario' ||
+                     tipoReporte === 'ganancias';
+
   return (
     <Layout>
       <div className="p-6">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-3 mb-2">
-            <FileText className="h-8 w-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Reportes y Analytics</h1>
+        {/* Header con botones de exportación */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              <FileText className="w-7 h-7 text-blue-600" />
+              Reportes y Analytics
+            </h1>
+            <p className="text-gray-600 mt-1">Visualiza y analiza los datos de tu negocio</p>
           </div>
-          <p className="text-gray-600">
-            Visualiza y analiza los datos de tu negocio
-          </p>
+
+          {/* Botones de exportación (solo aparecen si hay datos) */}
+          {tieneDatos && (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={exportarPDF}
+                className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center gap-2 shadow-md"
+              >
+                <FileDown className="w-4 h-4" />
+                Exportar PDF
+              </button>
+              <button
+                onClick={exportarExcel}
+                className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2 shadow-md"
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                Exportar Excel
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Filtros y Controles */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            {/* Selector de Tipo de Reporte */}
+        {/* Filtros */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Tipo de Reporte */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Tipo de Reporte
@@ -91,7 +152,7 @@ const Reportes = () => {
               <select
                 value={tipoReporte}
                 onChange={(e) => setTipoReporte(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="ventas">Ventas</option>
                 <option value="inventario">Inventario</option>
@@ -104,15 +165,12 @@ const Reportes = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Fecha Inicio
               </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={fechaInicio}
-                  onChange={(e) => setFechaInicio(e.target.value)}
-                  className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              </div>
+              <input
+                type="date"
+                value={fechaInicio}
+                onChange={(e) => setFechaInicio(e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
             </div>
 
             {/* Fecha Fin */}
@@ -120,61 +178,18 @@ const Reportes = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Fecha Fin
               </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={fechaFin}
-                  onChange={(e) => setFechaFin(e.target.value)}
-                  className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              </div>
+              <input
+                type="date"
+                value={fechaFin}
+                onChange={(e) => setFechaFin(e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
             </div>
-          </div>
-
-          {/* Botones de Acción */}
-          <div className="flex flex-wrap gap-3">
-            {/* Botón Generar Reporte */}
-            <button
-              onClick={handleGenerarReporte}
-              disabled={loading}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Generando...</span>
-                </>
-              ) : (
-                <>
-                  <FileText className="h-5 w-5" />
-                  <span>Generar Reporte</span>
-                </>
-              )}
-            </button>
-
-            {/* Botón Exportar PDF */}
-            <button
-              onClick={handleExportPDF}
-              className="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
-            >
-              <FileDown className="h-5 w-5" />
-              <span>Exportar PDF</span>
-            </button>
-
-            {/* Botón Exportar Excel */}
-            <button
-              onClick={handleExportExcel}
-              className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-            >
-              <FileDown className="h-5 w-5" />
-              <span>Exportar Excel</span>
-            </button>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow mb-6">
+        <div className="bg-white rounded-lg shadow-sm mb-6 border border-gray-200">
           <div className="border-b border-gray-200">
             <nav className="flex -mb-px">
               {tabs.map((tab) => {
@@ -207,24 +222,18 @@ const Reportes = () => {
           {tipoReporte === 'ventas' && (
             <div>
               {loading ? (
-                <div className="bg-white rounded-lg shadow p-12 text-center">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
                   <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
                   <p className="text-gray-500">Cargando reporte de ventas...</p>
                 </div>
               ) : salesData ? (
                 <SalesReport data={salesData} />
               ) : (
-                <div className="bg-white rounded-lg shadow p-12 text-center">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
                   <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 mb-4">
-                    Selecciona un rango de fechas y haz clic en "Generar Reporte"
+                  <p className="text-gray-500">
+                    No hay datos disponibles para el rango de fechas seleccionado
                   </p>
-                  <button
-                    onClick={handleGenerarReporte}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Generar Reporte de Ventas
-                  </button>
                 </div>
               )}
             </div>

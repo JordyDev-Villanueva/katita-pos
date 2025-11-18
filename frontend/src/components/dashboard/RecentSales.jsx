@@ -1,7 +1,52 @@
-import { Receipt, Clock } from 'lucide-react';
+import { useState } from 'react';
+import { Receipt, Clock, Calendar } from 'lucide-react';
 import { formatPeruDate } from '../../utils/timezone';
+import { format, subDays } from 'date-fns';
 
-export const RecentSales = ({ ventas }) => {
+export const RecentSales = ({ ventas, onFilterChange }) => {
+  const [filtroActivo, setFiltroActivo] = useState('hoy');
+  const [fechaInicio, setFechaInicio] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [fechaFin, setFechaFin] = useState(format(new Date(), 'yyyy-MM-dd'));
+
+  const handleFiltroRapido = (tipo) => {
+    setFiltroActivo(tipo);
+    const hoy = new Date();
+
+    let inicio, fin;
+
+    switch(tipo) {
+      case 'hoy':
+        inicio = format(hoy, 'yyyy-MM-dd');
+        fin = format(hoy, 'yyyy-MM-dd');
+        break;
+      case 'ayer':
+        const ayer = subDays(hoy, 1);
+        inicio = format(ayer, 'yyyy-MM-dd');
+        fin = format(ayer, 'yyyy-MM-dd');
+        break;
+      case '7dias':
+        inicio = format(subDays(hoy, 7), 'yyyy-MM-dd');
+        fin = format(hoy, 'yyyy-MM-dd');
+        break;
+      default:
+        inicio = format(hoy, 'yyyy-MM-dd');
+        fin = format(hoy, 'yyyy-MM-dd');
+    }
+
+    setFechaInicio(inicio);
+    setFechaFin(fin);
+
+    if (onFilterChange) {
+      onFilterChange(inicio, fin);
+    }
+  };
+
+  const handleFiltroPersonalizado = () => {
+    setFiltroActivo('personalizado');
+    if (onFilterChange) {
+      onFilterChange(fechaInicio, fechaFin);
+    }
+  };
   if (!ventas || ventas.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
@@ -44,12 +89,74 @@ export const RecentSales = ({ ventas }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      {/* Header con título y contador */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Receipt className="h-5 w-5 text-gray-600" />
           <h3 className="font-semibold text-gray-900">Últimas Ventas</h3>
         </div>
         <span className="text-sm text-gray-500">{ventas.length} ventas</span>
+      </div>
+
+      {/* Filtros de fecha - Todo en una línea */}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        {/* Botones rápidos */}
+        <button
+          onClick={() => handleFiltroRapido('hoy')}
+          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filtroActivo === 'hoy'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          Hoy
+        </button>
+        <button
+          onClick={() => handleFiltroRapido('ayer')}
+          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filtroActivo === 'ayer'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          Ayer
+        </button>
+        <button
+          onClick={() => handleFiltroRapido('7dias')}
+          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filtroActivo === '7dias'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          Últimos 7 días
+        </button>
+
+        {/* Separador visual */}
+        <div className="h-8 w-px bg-gray-300"></div>
+
+        {/* Filtro personalizado */}
+        <Calendar className="h-4 w-4 text-gray-500" />
+        <label className="text-sm font-medium text-gray-700">Desde:</label>
+        <input
+          type="date"
+          value={fechaInicio}
+          onChange={(e) => setFechaInicio(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+        <label className="text-sm font-medium text-gray-700">Hasta:</label>
+        <input
+          type="date"
+          value={fechaFin}
+          onChange={(e) => setFechaFin(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+        <button
+          onClick={handleFiltroPersonalizado}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+        >
+          Filtrar
+        </button>
       </div>
 
       <div className="overflow-x-auto max-h-[500px] overflow-y-auto">

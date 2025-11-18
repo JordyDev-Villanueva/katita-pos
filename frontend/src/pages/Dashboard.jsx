@@ -8,7 +8,7 @@ import { RecentSales } from '../components/dashboard/RecentSales';
 import { AlertsPanel } from '../components/dashboard/AlertsPanel';
 import { reportesAPI } from '../api/reportes';
 import toast from 'react-hot-toast';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, CheckCircle, X } from 'lucide-react';
 
 export const Dashboard = () => {
   const { user } = useAuth();
@@ -19,6 +19,8 @@ export const Dashboard = () => {
 
   // Estados
   const [loading, setLoading] = useState(true);
+  const [showUpdatedBadge, setShowUpdatedBadge] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [stats, setStats] = useState({
     ventasHoy: 0,
     gananciaHoy: 0,
@@ -33,6 +35,18 @@ export const Dashboard = () => {
     porVencer: [],
     vencidos: [],
   });
+
+  // Detectar si acaba de hacer login (primera carga)
+  useEffect(() => {
+    const justLoggedIn = sessionStorage.getItem('justLoggedIn');
+    if (justLoggedIn === 'true') {
+      setShowWelcome(true);
+      sessionStorage.removeItem('justLoggedIn');
+
+      // Ocultar después de 3 segundos
+      setTimeout(() => setShowWelcome(false), 3000);
+    }
+  }, []);
 
   useEffect(() => {
     loadDashboardData();
@@ -144,7 +158,27 @@ export const Dashboard = () => {
 
   const handleRefresh = () => {
     loadDashboardData();
-    toast.success('Datos actualizados');
+    setShowUpdatedBadge(true);
+    setTimeout(() => setShowUpdatedBadge(false), 2000);
+  };
+
+  const handleFilterChange = async (fechaInicio, fechaFin) => {
+    try {
+      setLoading(true);
+      console.log(`📅 Filtrando ventas: ${fechaInicio} a ${fechaFin}`);
+
+      const ventasResponse = await reportesAPI.getVentasPorFecha(fechaInicio, fechaFin);
+
+      if (ventasResponse.success) {
+        setRecentSales(ventasResponse.data);
+        console.log(`✅ ${ventasResponse.data.length} ventas filtradas`);
+      }
+    } catch (error) {
+      console.error('Error al filtrar ventas:', error);
+      toast.error('Error al filtrar ventas');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -170,16 +204,40 @@ export const Dashboard = () => {
             <p className="text-gray-600">
               Bienvenido, <span className="font-semibold text-primary-600">{user?.nombre_completo}</span>
             </p>
-            <p className="text-sm text-gray-500 capitalize mt-0.5">Rol: {user?.rol}</p>
           </div>
 
-          <button
-            onClick={handleRefresh}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <RefreshCw className="h-4 w-4" />
-            <span className="text-sm font-medium">Recargar</span>
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Notificación de bienvenida (extremo derecho) */}
+            {showWelcome && (
+              <div className="flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2.5 rounded-lg shadow-md animate-fade-in">
+                <CheckCircle className="w-5 h-5" />
+                <span className="font-medium">¡Bienvenido, {user?.nombre_completo}!</span>
+                <button
+                  onClick={() => setShowWelcome(false)}
+                  className="ml-2 text-green-600 hover:text-green-800 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Badge "Datos actualizados" */}
+            {showUpdatedBadge && (
+              <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg animate-fade-in">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-sm font-medium">Datos actualizados</span>
+              </div>
+            )}
+
+            {/* Botón Recargar */}
+            <button
+              onClick={handleRefresh}
+              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span className="text-sm font-medium">Recargar</span>
+            </button>
+          </div>
         </div>
 
         {/* Row 1: Tarjetas de Estadísticas */}
@@ -206,7 +264,7 @@ export const Dashboard = () => {
 
         {/* Row 4: Últimas Ventas - FULL WIDTH (fuera del grid) */}
         <div className="w-full">
-          <RecentSales ventas={recentSales} />
+          <RecentSales ventas={recentSales} onFilterChange={handleFilterChange} />
         </div>
       </div>
     </Layout>

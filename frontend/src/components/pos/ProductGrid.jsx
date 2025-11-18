@@ -22,11 +22,7 @@ export const ProductGrid = ({ productos, loading, onAddToCart }) => {
   }
 
   if (productos.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">No se encontraron productos</p>
-      </div>
-    );
+    return null; // No mostrar nada cuando no hay productos (el mensaje se maneja en POS.jsx)
   }
 
   return (

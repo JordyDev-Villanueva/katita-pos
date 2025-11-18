@@ -10,6 +10,7 @@ export const ProductStats = ({ stats }) => {
       bgColor: 'bg-blue-50',
       textColor: 'text-blue-600',
       iconBg: 'bg-blue-100',
+      description: 'En catálogo',
     },
     {
       label: 'Productos Activos',
@@ -19,6 +20,7 @@ export const ProductStats = ({ stats }) => {
       bgColor: 'bg-green-50',
       textColor: 'text-green-600',
       iconBg: 'bg-green-100',
+      description: 'Disponibles para venta',
     },
     {
       label: 'Bajo Stock',
@@ -28,6 +30,7 @@ export const ProductStats = ({ stats }) => {
       bgColor: 'bg-yellow-50',
       textColor: 'text-yellow-600',
       iconBg: 'bg-yellow-100',
+      description: 'Requieren reposición',
     },
     {
       label: 'Valor Inventario',
@@ -37,6 +40,7 @@ export const ProductStats = ({ stats }) => {
       bgColor: 'bg-purple-50',
       textColor: 'text-purple-600',
       iconBg: 'bg-purple-100',
+      description: 'Total en stock',
     },
   ];
 
@@ -45,14 +49,18 @@ export const ProductStats = ({ stats }) => {
       {cards.map((card, index) => {
         const Icon = card.icon;
         return (
-          <div key={index} className={`${card.bgColor} rounded-xl p-4 border border-gray-200`}>
+          <div
+            key={index}
+            className={`${card.bgColor} rounded-xl p-5 border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer`}
+          >
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1">
                 <p className="text-sm text-gray-600 mb-1">{card.label}</p>
-                <p className={`text-2xl font-bold ${card.textColor}`}>{card.value}</p>
+                <p className={`text-3xl font-bold ${card.textColor} mb-1`}>{card.value}</p>
+                <p className="text-xs text-gray-500">{card.description}</p>
               </div>
-              <div className={`${card.iconBg} p-3 rounded-lg`}>
-                <Icon className={`h-6 w-6 ${card.textColor}`} />
+              <div className={`${card.iconBg} p-4 rounded-xl`}>
+                <Icon className={`h-7 w-7 ${card.textColor}`} />
               </div>
             </div>
           </div>

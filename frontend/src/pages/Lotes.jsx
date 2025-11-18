@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, RefreshCw, FileText } from 'lucide-react';
+import { Plus, RefreshCw, FileText, CheckCircle } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { LoteStats } from '../components/lotes/LoteStats';
 import { LoteFilters } from '../components/lotes/LoteFilters';
@@ -22,6 +22,7 @@ export const Lotes = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [filters, setFilters] = useState({});
   const [showMermasReport, setShowMermasReport] = useState(false);
+  const [showUpdatedBadge, setShowUpdatedBadge] = useState(false);
 
   const [stats, setStats] = useState({
     totalActivos: 0,
@@ -209,7 +210,8 @@ export const Lotes = () => {
     loadAlertas();
     loadMermas();
     loadProductos();
-    toast.success('Datos actualizados');
+    setShowUpdatedBadge(true);
+    setTimeout(() => setShowUpdatedBadge(false), 2000);
   };
 
   return (
@@ -224,32 +226,45 @@ export const Lotes = () => {
             </p>
           </div>
 
-          <div className="flex gap-3">
-            <Button
-              onClick={handleRefresh}
-              variant="secondary"
-              icon={RefreshCw}
-            >
-              Recargar
-            </Button>
-
-            {mermas.lotes.length > 0 && (
-              <Button
-                onClick={() => setShowMermasReport(!showMermasReport)}
-                variant="danger"
-                icon={FileText}
-              >
-                {showMermasReport ? 'Ocultar' : 'Ver'} Mermas ({mermas.lotes.length})
-              </Button>
+          <div className="flex items-center gap-3">
+            {/* Badge "Datos actualizados" */}
+            {showUpdatedBadge && (
+              <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg animate-fade-in">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-sm font-medium">Datos actualizados</span>
+              </div>
             )}
 
-            <Button
-              onClick={handleNewLote}
-              variant="success"
-              icon={Plus}
+            {/* Botón Recargar */}
+            <button
+              onClick={handleRefresh}
+              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2"
             >
-              Registrar Ingreso
-            </Button>
+              <RefreshCw className="w-4 h-4" />
+              <span className="text-sm font-medium">Recargar</span>
+            </button>
+
+            {/* Botón Mermas */}
+            {mermas.lotes.length > 0 && (
+              <button
+                onClick={() => setShowMermasReport(!showMermasReport)}
+                className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center gap-2"
+              >
+                <FileText className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  {showMermasReport ? 'Ocultar' : 'Ver'} Mermas ({mermas.lotes.length})
+                </span>
+              </button>
+            )}
+
+            {/* Botón Registrar Ingreso */}
+            <button
+              onClick={handleNewLote}
+              className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="text-sm font-medium">Registrar Ingreso</span>
+            </button>
           </div>
         </div>
 

@@ -68,7 +68,9 @@ export const AuthProvider = ({ children }) => {
         setUser(user);
         setIsAuthenticated(true);
 
-        toast.success(`¡Bienvenido, ${user.nombre_completo}!`);
+        // Marcar que acaba de hacer login (para mostrar notificación en Dashboard)
+        sessionStorage.setItem('justLoggedIn', 'true');
+
         return { success: true };
       } else {
         throw new Error(response.message || 'Login falló');
@@ -87,7 +89,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     setUser(null);
     setIsAuthenticated(false);
-    toast.success('Sesión cerrada correctamente');
+
+    // Marcar que acaba de cerrar sesión (para mostrar notificación en Login)
+    sessionStorage.setItem('justLoggedOut', 'true');
   };
 
   const value = {
