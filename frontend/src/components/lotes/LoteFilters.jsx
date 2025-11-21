@@ -28,7 +28,7 @@ export const LoteFilters = ({ productos, onFilterChange, onClearFilters }) => {
     }
 
     if (newFilters.diasVencer) {
-      params.dias_vencer = parseInt(newFilters.diasVencer);
+      params.por_vencer = parseInt(newFilters.diasVencer);
     }
 
     if (newFilters.vencidos) {
@@ -50,13 +50,22 @@ export const LoteFilters = ({ productos, onFilterChange, onClearFilters }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Filter className="h-5 w-5 text-gray-600" />
-        <h3 className="font-semibold text-gray-900">Filtros de Búsqueda</h3>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Filter className="h-5 w-5 text-gray-600" />
+          <h3 className="font-semibold text-gray-900">Filtros de Búsqueda</h3>
+        </div>
+        <button
+          onClick={handleClear}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-gray-300"
+        >
+          <X className="h-4 w-4" />
+          Limpiar Filtros
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Producto */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -65,7 +74,7 @@ export const LoteFilters = ({ productos, onFilterChange, onClearFilters }) => {
           <select
             value={filters.producto_id}
             onChange={(e) => handleChange('producto_id', e.target.value)}
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="">Todos los productos</option>
             {productos.map((prod) => (
@@ -84,7 +93,7 @@ export const LoteFilters = ({ productos, onFilterChange, onClearFilters }) => {
           <select
             value={filters.estado}
             onChange={(e) => handleChange('estado', e.target.value)}
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="todos">Todos</option>
             <option value="activos">Solo Activos</option>
@@ -100,7 +109,7 @@ export const LoteFilters = ({ productos, onFilterChange, onClearFilters }) => {
           <select
             value={filters.diasVencer}
             onChange={(e) => handleChange('diasVencer', e.target.value)}
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="">Todos</option>
             <option value="3">3 días o menos</option>
@@ -111,29 +120,20 @@ export const LoteFilters = ({ productos, onFilterChange, onClearFilters }) => {
         </div>
 
         {/* Checkbox vencidos */}
-        <div className="flex items-end">
-          <label className="flex items-center gap-2 cursor-pointer">
+        <div className="flex flex-col">
+          <label className="block text-sm font-medium text-gray-700 mb-1.5 invisible">
+            Filtro
+          </label>
+          <label className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-50 rounded-lg cursor-pointer transition-colors border border-gray-300 w-full h-[38px]">
             <input
               type="checkbox"
               checked={filters.vencidos}
               onChange={(e) => handleChange('vencidos', e.target.checked)}
-              className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+              className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-2 focus:ring-primary-500"
             />
-            <span className="text-sm text-gray-700">Solo lotes vencidos</span>
+            <span className="text-sm font-medium text-gray-700">Solo vencidos</span>
           </label>
         </div>
-      </div>
-
-      {/* Botón limpiar */}
-      <div className="mt-4 flex justify-end">
-        <Button
-          onClick={handleClear}
-          variant="secondary"
-          size="sm"
-          icon={X}
-        >
-          Limpiar Filtros
-        </Button>
       </div>
     </div>
   );

@@ -533,8 +533,8 @@ export const reportesAPI = {
 
       const response = await axiosInstance.get('/ventas', {
         params: {
-          desde: fechaInicio,
-          hasta: fechaFin,
+          fecha_inicio: fechaInicio,
+          fecha_fin: fechaFin,
           limit: limit
         }
       });

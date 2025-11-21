@@ -8,7 +8,13 @@ export const RecentSales = ({ ventas, onFilterChange }) => {
   const [fechaInicio, setFechaInicio] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [fechaFin, setFechaFin] = useState(format(new Date(), 'yyyy-MM-dd'));
 
-  const handleFiltroRapido = (tipo) => {
+  const handleFiltroRapido = (e, tipo) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    console.log(`🔵 CLICK EN ${tipo.toUpperCase()}`);
     setFiltroActivo(tipo);
     const hoy = new Date();
 
@@ -24,10 +30,6 @@ export const RecentSales = ({ ventas, onFilterChange }) => {
         inicio = format(ayer, 'yyyy-MM-dd');
         fin = format(ayer, 'yyyy-MM-dd');
         break;
-      case '7dias':
-        inicio = format(subDays(hoy, 7), 'yyyy-MM-dd');
-        fin = format(hoy, 'yyyy-MM-dd');
-        break;
       default:
         inicio = format(hoy, 'yyyy-MM-dd');
         fin = format(hoy, 'yyyy-MM-dd');
@@ -36,38 +38,52 @@ export const RecentSales = ({ ventas, onFilterChange }) => {
     setFechaInicio(inicio);
     setFechaFin(fin);
 
+    console.log(`🔵 filtroActivo cambiado a: ${tipo}`);
+
     if (onFilterChange) {
       onFilterChange(inicio, fin);
     }
   };
 
-  const handleFiltroPersonalizado = () => {
+  const handleFiltroPersonalizado = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    console.log('🔵 CLICK EN FILTRAR');
     setFiltroActivo('personalizado');
+
+    // Validar fechas: si inicio > fin, intercambiar
+    let inicio = fechaInicio;
+    let fin = fechaFin;
+
+    if (new Date(inicio) > new Date(fin)) {
+      [inicio, fin] = [fin, inicio];
+      setFechaInicio(inicio);
+      setFechaFin(fin);
+    }
+
+    console.log('🔵 filtroActivo cambiado a: personalizado');
+
     if (onFilterChange) {
-      onFilterChange(fechaInicio, fechaFin);
+      onFilterChange(inicio, fin);
     }
   };
-  if (!ventas || ventas.length === 0) {
-    return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Receipt className="h-5 w-5 text-gray-600" />
-          <h3 className="font-semibold text-gray-900">Últimas Ventas</h3>
-        </div>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="text-gray-400 mb-2">
-              <Receipt className="h-12 w-12 mx-auto" />
-            </div>
-            <p className="text-gray-500">No hay ventas registradas</p>
-            <p className="text-sm text-gray-400 mt-1">
-              Las ventas aparecerán aquí
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
+  const getMensajeNoVentas = () => {
+    if (filtroActivo === 'hoy') return 'No se encontraron ventas para hoy';
+    if (filtroActivo === 'ayer') return 'No se encontraron ventas para ayer';
+    if (filtroActivo === 'personalizado') return `No se encontraron ventas del ${fechaInicio} al ${fechaFin}`;
+    return 'No hay ventas registradas';
+  };
+
+  const getMensajePeriodo = () => {
+    if (filtroActivo === 'hoy') return ' de hoy';
+    if (filtroActivo === 'ayer') return ' de ayer';
+    if (filtroActivo === 'personalizado') return ` del ${fechaInicio} al ${fechaFin}`;
+    return '';
+  };
 
   const getMetodoPagoBadge = (metodo) => {
     const metodos = {
@@ -102,7 +118,8 @@ export const RecentSales = ({ ventas, onFilterChange }) => {
       <div className="mb-4 flex flex-wrap items-center gap-3">
         {/* Botones rápidos */}
         <button
-          onClick={() => handleFiltroRapido('hoy')}
+          type="button"
+          onClick={(e) => handleFiltroRapido(e, 'hoy')}
           className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
             filtroActivo === 'hoy'
               ? 'bg-blue-600 text-white'
@@ -112,7 +129,8 @@ export const RecentSales = ({ ventas, onFilterChange }) => {
           Hoy
         </button>
         <button
-          onClick={() => handleFiltroRapido('ayer')}
+          type="button"
+          onClick={(e) => handleFiltroRapido(e, 'ayer')}
           className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
             filtroActivo === 'ayer'
               ? 'bg-blue-600 text-white'
@@ -120,16 +138,6 @@ export const RecentSales = ({ ventas, onFilterChange }) => {
           }`}
         >
           Ayer
-        </button>
-        <button
-          onClick={() => handleFiltroRapido('7dias')}
-          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-            filtroActivo === '7dias'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Últimos 7 días
         </button>
 
         {/* Separador visual */}
@@ -152,14 +160,38 @@ export const RecentSales = ({ ventas, onFilterChange }) => {
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
         <button
+          type="button"
           onClick={handleFiltroPersonalizado}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filtroActivo === 'personalizado'
+              ? 'bg-blue-600 text-white ring-2 ring-blue-300'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
         >
           Filtrar
         </button>
       </div>
 
-      <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+      {/* Mensaje de cantidad de ventas */}
+      {ventas.length > 0 && (
+        <p className="text-sm text-gray-600 mb-3">
+          Mostrando {ventas.length} ventas{getMensajePeriodo()}
+        </p>
+      )}
+
+      {/* Mensaje cuando no hay ventas */}
+      {ventas.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-3">
+            <Receipt className="h-16 w-16 mx-auto" />
+          </div>
+          <p className="text-gray-500 font-medium">{getMensajeNoVentas()}</p>
+          <p className="text-sm text-gray-400 mt-2">
+            Prueba seleccionando otra fecha
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>
@@ -275,10 +307,8 @@ export const RecentSales = ({ ventas, onFilterChange }) => {
             })}
           </tbody>
         </table>
-      </div>
 
-      {/* Footer con total */}
-      {ventas.length > 0 && (
+        {/* Footer con total */}
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Total en tabla:</span>
@@ -287,6 +317,7 @@ export const RecentSales = ({ ventas, onFilterChange }) => {
             </span>
           </div>
         </div>
+      </div>
       )}
     </div>
   );

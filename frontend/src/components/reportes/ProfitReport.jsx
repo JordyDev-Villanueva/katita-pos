@@ -3,7 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { useState, useEffect } from 'react';
 import axiosInstance from '../../api/axios';
 import { toast } from 'react-hot-toast';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { extractDateOnly } from '../../utils/timezone';
 
@@ -20,23 +20,51 @@ export const ProfitReport = ({ fechaInicio, fechaFin }) => {
     try {
       setLoading(true);
 
-      // Obtener todas las ventas
-      const response = await axiosInstance.get('/ventas');
+      console.log('=== 📊 DEBUG GANANCIAS - ProfitReport ===');
+      console.log(`📊 Cargando ganancias con fechas: ${fechaInicio} al ${fechaFin}`);
+
+      // CORRECCIÓN: Usar el endpoint de resumen que filtra correctamente en backend
+      const resumenResponse = await axiosInstance.get('/ventas/reportes/resumen', {
+        params: {
+          fecha_inicio: fechaInicio,
+          fecha_fin: fechaFin
+        }
+      });
+
+      console.log('📊 Respuesta del backend (raw):', resumenResponse.data);
+
+      // CORRECCIÓN: success_response() envuelve en {success: true, data: {...}}
+      const backendData = resumenResponse.data.data || resumenResponse.data;
+      console.log('📊 Datos extraídos:', backendData);
+
+      // Obtener todas las ventas para el gráfico de evolución
+      const ventasResponse = await axiosInstance.get('/ventas', {
+        params: {
+          fecha_inicio: fechaInicio,
+          fecha_fin: fechaFin,
+          limit: 1000
+        }
+      });
 
       let ventas = [];
-      if (response.data?.success) {
-        if (Array.isArray(response.data.data)) {
-          ventas = response.data.data;
-        } else if (Array.isArray(response.data.data?.ventas)) {
-          ventas = response.data.data.ventas;
+      if (ventasResponse.data?.success) {
+        if (Array.isArray(ventasResponse.data.data)) {
+          ventas = ventasResponse.data.data;
+        } else if (Array.isArray(ventasResponse.data.data?.ventas)) {
+          ventas = ventasResponse.data.data.ventas;
         }
-      } else if (Array.isArray(response.data)) {
-        ventas = response.data;
+      } else if (Array.isArray(ventasResponse.data)) {
+        ventas = ventasResponse.data;
       }
 
-      // Filtrar por rango de fechas usando extractDateOnly
-      const fechaInicioStr = extractDateOnly(new Date(fechaInicio));
-      const fechaFinStr = extractDateOnly(new Date(fechaFin));
+      // Filtrar por rango de fechas usando extractDateOnly para el gráfico
+      // CORRECCIÓN: Parsear fechas con timezone local
+      const [yInicio, mInicio, dInicio] = fechaInicio.split('-').map(Number);
+      const [yFin, mFin, dFin] = fechaFin.split('-').map(Number);
+      const fechaInicioLocal = new Date(yInicio, mInicio - 1, dInicio);
+      const fechaFinLocal = new Date(yFin, mFin - 1, dFin);
+      const fechaInicioStr = extractDateOnly(fechaInicioLocal);
+      const fechaFinStr = extractDateOnly(fechaFinLocal);
 
       const ventasFiltradas = ventas.filter(venta => {
         const fechaVenta = venta.fecha_venta || venta.fecha || venta.created_at;
@@ -44,55 +72,42 @@ export const ProfitReport = ({ fechaInicio, fechaFin }) => {
         return fechaVentaStr >= fechaInicioStr && fechaVentaStr <= fechaFinStr;
       });
 
-      console.log('=== 📊 DEBUG GANANCIAS - ProfitReport ===');
-      console.log(`📊 Filtrando ventas del ${fechaInicioStr} al ${fechaFinStr}`);
-      console.log(`📊 Total ventas encontradas: ${ventas.length}, filtradas: ${ventasFiltradas.length}`);
+      console.log(`📊 Ventas filtradas para gráfico: ${ventasFiltradas.length}`);
 
       if (ventasFiltradas.length > 0) {
         console.log('📊 Primera venta filtrada:', ventasFiltradas[0]);
-        if (ventasFiltradas[0].detalles && ventasFiltradas[0].detalles.length > 0) {
-          const primerDetalle = ventasFiltradas[0].detalles[0];
-          console.log('📊 Primer detalle:', {
-            producto: primerDetalle.producto?.nombre || 'N/A',
-            cantidad: primerDetalle.cantidad,
-            precio_unitario: primerDetalle.precio_unitario,
-            precio_compra_unitario: primerDetalle.precio_compra_unitario,
-            precio_compra_producto: primerDetalle.producto?.precio_compra
-          });
-        }
+        console.log('📊 Detalles de primera venta:', ventasFiltradas[0].detalles);
       }
 
-      // Calcular ganancias
-      let gananciaBruta = 0;
-      let totalVentas = 0;
+      // CORRECCIÓN: Usar datos del backend en lugar de calcular en frontend
+      const gananciaBruta = parseFloat(backendData.ganancia_bruta || 0);
+      const totalVentas = parseFloat(backendData.total_vendido || 0);
+      const cantidadVentas = parseInt(backendData.cantidad_ventas || 0);
+
+      console.log('=== 💰 DATOS DEL BACKEND ===');
+      console.log(`💎 Ganancia Bruta: S/ ${gananciaBruta.toFixed(2)}`);
+      console.log(`💎 Total Ventas: S/ ${totalVentas.toFixed(2)}`);
+      console.log(`💎 Cantidad Ventas: ${cantidadVentas}`);
+
+      // Calcular productos por margen usando las ventas filtradas (para el top 10)
       const productosPorMargen = {};
 
-      console.log('=== 💰 CALCULANDO GANANCIAS EN CARDS ===');
+      console.log(`\n🔍 Calculando Top Productos con ${ventasFiltradas.length} ventas filtradas...`);
 
-      ventasFiltradas.forEach(venta => {
-        totalVentas += parseFloat(venta.total || 0);
-
+      ventasFiltradas.forEach((venta, idx) => {
         if (venta.detalles && Array.isArray(venta.detalles)) {
+          console.log(`  Venta #${idx + 1}: ${venta.detalles.length} detalles`);
           venta.detalles.forEach(detalle => {
             const precioVenta = parseFloat(detalle.precio_unitario || detalle.precio_venta || 0);
-
-            // CORRECCIÓN CRÍTICA: Usar precio_compra_unitario, si es 0, estimar
             let precioCompra = parseFloat(detalle.precio_compra_unitario || detalle.producto?.precio_compra || 0);
 
-            // Si precio_compra es 0, estimar usando margen estándar (60% del precio de venta = 40% margen)
             if (precioCompra === 0 && precioVenta > 0) {
               precioCompra = precioVenta * 0.60;
-              console.warn(`⚠️ Producto "${detalle.producto?.nombre || 'Desconocido'}" sin precio_compra → estimando S/ ${precioCompra.toFixed(2)}`);
             }
 
             const cantidad = parseInt(detalle.cantidad || 0);
             const margen = (precioVenta - precioCompra) * cantidad;
 
-            console.log(`  ${detalle.producto?.nombre || 'N/A'}: (S/ ${precioVenta.toFixed(2)} - S/ ${precioCompra.toFixed(2)}) × ${cantidad} = S/ ${margen.toFixed(2)}`);
-
-            gananciaBruta += margen;
-
-            // Agrupar por producto
             const productoId = detalle.producto_id;
             const productoNombre = detalle.producto?.nombre || 'Desconocido';
 
@@ -108,7 +123,11 @@ export const ProfitReport = ({ fechaInicio, fechaFin }) => {
             productosPorMargen[productoId].margen += margen;
             productosPorMargen[productoId].cantidadVendida += cantidad;
             productosPorMargen[productoId].totalVendido += precioVenta * cantidad;
+
+            console.log(`    - ${productoNombre}: cantidad=${cantidad}, margen=S/ ${margen.toFixed(2)}`);
           });
+        } else {
+          console.log(`  ⚠️ Venta #${idx + 1}: NO tiene detalles (${venta.detalles})`);
         }
       });
 
@@ -124,11 +143,10 @@ export const ProfitReport = ({ fechaInicio, fechaFin }) => {
         .sort((a, b) => b.margen - a.margen)
         .slice(0, 10);
 
-      console.log('💎 Ganancia Bruta Total:', gananciaBruta.toFixed(2));
-      console.log('💎 Total Ventas:', totalVentas.toFixed(2));
       console.log('💎 Margen Promedio:', margenPromedio.toFixed(2) + '%');
       console.log('💎 ROI:', roi.toFixed(2) + '%');
       console.log('💎 Top Productos:', topProductos.length);
+      console.log('💎 Top Productos (detalle):', JSON.stringify(topProductos, null, 2));
 
       setProfitData({
         gananciaBruta,
@@ -138,12 +156,20 @@ export const ProfitReport = ({ fechaInicio, fechaFin }) => {
         topProductos
       });
 
-      // Calcular evolución de últimos 7 días usando timezone de Perú
+      // Calcular evolución de ganancias para el rango seleccionado
       const evolucionData = [];
-      console.log('📈 Calculando evolución de ganancias (últimos 7 días)...');
+      console.log(`📈 Calculando evolución de ganancias (${fechaInicioStr} al ${fechaFinStr})...`);
 
-      for (let i = 6; i >= 0; i--) {
-        const fecha = subDays(new Date(), i);
+      // CORRECCIÓN: Parsear fechas con timezone local para evitar offset de 1 día
+      const [yearInicio, mesInicio, diaInicio] = fechaInicio.split('-').map(Number);
+      const [yearFin, mesFin, diaFin] = fechaFin.split('-').map(Number);
+      const inicio = new Date(yearInicio, mesInicio - 1, diaInicio); // mes es 0-indexed
+      const fin = new Date(yearFin, mesFin - 1, diaFin);
+      const diasDiferencia = Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
+
+      for (let i = 0; i < diasDiferencia; i++) {
+        const fecha = new Date(inicio);
+        fecha.setDate(fecha.getDate() + i);
         const fechaStr = extractDateOnly(fecha); // Usar extractDateOnly para formato consistente
 
         const ventasDia = ventas.filter(v => {
@@ -211,65 +237,65 @@ export const ProfitReport = ({ fechaInicio, fechaFin }) => {
 
   return (
     <div className="space-y-6">
-      {/* Cards de Métricas */}
+      {/* Cards de Ganancias con estilos mejorados */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Ganancia Bruta */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
+        {/* Card 1: Ganancia Bruta */}
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-sm p-6 border border-green-200 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer">
+          <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-600">Ganancia Bruta</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-sm font-medium text-green-700 mb-1">Ganancia Bruta</p>
+              <p className="text-3xl font-bold text-green-900">
                 S/ {profitData.gananciaBruta.toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <DollarSign className="h-6 w-6 text-green-600" />
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+              <DollarSign className="w-6 h-6 text-green-600" />
             </div>
           </div>
         </div>
 
-        {/* Ganancia Neta (Estimada) */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
+        {/* Card 2: Ganancia Neta */}
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-sm p-6 border border-blue-200 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer">
+          <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-600">Ganancia Neta (Est.)</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-sm font-medium text-blue-700 mb-1">Ganancia Neta (Est.)</p>
+              <p className="text-3xl font-bold text-blue-900">
                 S/ {profitData.gananciaNeta.toFixed(2)}
               </p>
-              <p className="text-xs text-gray-500">-15% gastos operativos</p>
+              <p className="text-xs text-blue-600 mt-1">-15% gastos operativos</p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <TrendingUp className="h-6 w-6 text-blue-600" />
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+              <TrendingUp className="w-6 h-6 text-blue-600" />
             </div>
           </div>
         </div>
 
-        {/* Margen Promedio */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
+        {/* Card 3: Margen Promedio */}
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-sm p-6 border border-purple-200 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer">
+          <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-600">Margen Promedio</p>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-sm font-medium text-purple-700 mb-1">Margen Promedio</p>
+              <p className="text-3xl font-bold text-purple-900">
                 {profitData.margenPromedio.toFixed(1)}%
               </p>
             </div>
-            <div className="p-3 bg-purple-100 rounded-full">
-              <Percent className="h-6 w-6 text-purple-600" />
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+              <Percent className="w-6 h-6 text-purple-600" />
             </div>
           </div>
         </div>
 
-        {/* ROI */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
+        {/* Card 4: ROI */}
+        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl shadow-sm p-6 border border-orange-200 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer">
+          <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-600">ROI</p>
-              <p className="text-2xl font-bold text-orange-600">
+              <p className="text-sm font-medium text-orange-700 mb-1">ROI</p>
+              <p className="text-3xl font-bold text-orange-900">
                 {profitData.roi.toFixed(1)}%
               </p>
             </div>
-            <div className="p-3 bg-orange-100 rounded-full">
-              <Target className="h-6 w-6 text-orange-600" />
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+              <Target className="w-6 h-6 text-orange-600" />
             </div>
           </div>
         </div>

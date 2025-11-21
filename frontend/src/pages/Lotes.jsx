@@ -132,13 +132,16 @@ export const Lotes = () => {
       const fechaVenc = new Date(l.fecha_vencimiento);
       fechaVenc.setHours(0, 0, 0, 0);
       const diff = Math.ceil((fechaVenc - hoy) / (1000 * 60 * 60 * 24));
-      return diff >= 0 && diff <= 7;
+      // Solo contar los que vencen entre 1 y 7 días (futuro)
+      return diff >= 1 && diff <= 7;
     });
 
-    const vencidos = lotesArray.filter(l => {
+    const vencidos = activos.filter(l => {
       const fechaVenc = new Date(l.fecha_vencimiento);
       fechaVenc.setHours(0, 0, 0, 0);
-      return fechaVenc < hoy && l.cantidad_actual > 0;
+      const diff = Math.ceil((fechaVenc - hoy) / (1000 * 60 * 60 * 24));
+      // Vencidos: hoy o antes (0 o negativo)
+      return diff <= 0;
     });
 
     setStats({
@@ -176,19 +179,11 @@ export const Lotes = () => {
       const response = await lotesAPI.createLote(formData);
 
       if (response.success) {
-        toast.success('¡Ingreso registrado exitosamente!', {
-          duration: 4000,
+        // Mostrar solo mensaje corto
+        toast.success('Ingreso registrado', {
+          duration: 3000,
           icon: '✅',
         });
-
-        // Mostrar info adicional
-        const lote = response.data?.lote || response.data;
-        if (lote) {
-          toast.success(
-            `Stock actualizado: ${lote.producto?.nombre} ahora tiene ${lote.producto?.stock_total || 'N/A'} unidades`,
-            { duration: 5000 }
-          );
-        }
 
         handleCloseForm();
         loadLotes(filters);

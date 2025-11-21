@@ -1,9 +1,13 @@
 import { TrendingUp, Package, AlertTriangle, DollarSign } from 'lucide-react';
 
 export const StatsCards = ({ stats }) => {
+  // Labels dinámicos según el filtro activo
+  const ventasLabel = stats?._labels?.ventas || 'Ventas Hoy';
+  const gananciaLabel = stats?._labels?.ganancia || 'Ganancia Hoy';
+
   const cards = [
     {
-      label: 'Ventas Hoy',
+      label: ventasLabel,
       value: `S/ ${Number(stats?.ventasHoy || 0).toFixed(2)}`,
       icon: TrendingUp,
       color: 'blue',
@@ -33,7 +37,7 @@ export const StatsCards = ({ stats }) => {
       description: 'Próximos 7 días',
     },
     {
-      label: 'Ganancia Hoy',
+      label: gananciaLabel,
       value: `S/ ${Number(stats?.gananciaHoy || 0).toFixed(2)}`,
       icon: DollarSign,
       color: 'purple',
@@ -51,16 +55,16 @@ export const StatsCards = ({ stats }) => {
         return (
           <div
             key={index}
-            className={`${card.bgColor} rounded-xl p-5 border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer`}
+            className={`bg-gradient-to-br from-${card.color}-50 to-${card.color}-100 rounded-xl shadow-sm p-6 border border-${card.color}-200 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer`}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm text-gray-600 mb-1">{card.label}</p>
-                <p className={`text-3xl font-bold ${card.textColor} mb-1`}>{card.value}</p>
-                <p className="text-xs text-gray-500">{card.description}</p>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className={`text-sm font-medium text-${card.color}-700 mb-1`}>{card.label}</p>
+                <p className={`text-3xl font-bold text-${card.color}-900`}>{card.value}</p>
+                <p className={`text-xs text-${card.color}-600 mt-1`}>{card.description}</p>
               </div>
-              <div className={`${card.iconBg} p-4 rounded-xl`}>
-                <Icon className={`h-7 w-7 ${card.textColor}`} />
+              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                <Icon className={`w-6 h-6 ${card.textColor}`} />
               </div>
             </div>
           </div>

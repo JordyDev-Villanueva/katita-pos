@@ -486,22 +486,24 @@ def listar_ventas():
     """
     try:
         # ========== LOGS DE DEBUGGING ==========
+        print(f'\n{"="*60}')
         print('[DEBUG] === GET /api/ventas ===')
         print(f'[DEBUG] Query params: {dict(request.args)}')
-        print(f'[DEBUG] Headers: {dict(request.headers)}')
 
         # ========== CONSTRUIR QUERY BASE ==========
-        query = Venta.query
+        query = Venta.query.filter(Venta.estado == 'completada')
 
         # ========== FILTRO POR FECHA ESPECIFICA ==========
         fecha_str = request.args.get('fecha')
         if fecha_str:
-            print(f'[DEBUG] Filtrando por fecha: {fecha_str}')
+            print(f'[DEBUG] Filtrando por fecha específica: {fecha_str}')
             try:
-                fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
-                # Filtrar por fecha (dia completo)
+                fecha_dt = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+                fecha_inicio = datetime.combine(fecha_dt, datetime.min.time())
+                fecha_fin = datetime.combine(fecha_dt, datetime.max.time())
                 query = query.filter(
-                    func.date(Venta.created_at) == fecha
+                    Venta.fecha >= fecha_inicio,
+                    Venta.fecha <= fecha_fin
                 )
             except ValueError:
                 return error_response(
@@ -510,26 +512,29 @@ def listar_ventas():
                 )
 
         # ========== FILTRO POR RANGO DE FECHAS ==========
-        desde_str = request.args.get('desde')
-        hasta_str = request.args.get('hasta')
+        # Soportar tanto 'desde/hasta' como 'fecha_inicio/fecha_fin'
+        desde_str = request.args.get('desde') or request.args.get('fecha_inicio')
+        hasta_str = request.args.get('hasta') or request.args.get('fecha_fin')
 
-        if desde_str:
+        if desde_str and hasta_str:
+            print(f'[DEBUG] Filtrando por rango: {desde_str} a {hasta_str}')
             try:
-                desde = datetime.strptime(desde_str, '%Y-%m-%d').date()
-                query = query.filter(func.date(Venta.created_at) >= desde)
-            except ValueError:
-                return error_response(
-                    'Formato de fecha "desde" invalido. Use YYYY-MM-DD',
-                    status_code=400
+                desde_dt = datetime.strptime(desde_str, '%Y-%m-%d').date()
+                hasta_dt = datetime.strptime(hasta_str, '%Y-%m-%d').date()
+
+                # Convertir a datetime con hora completa del día
+                desde_full = datetime.combine(desde_dt, datetime.min.time())
+                hasta_full = datetime.combine(hasta_dt, datetime.max.time())
+
+                print(f'[DEBUG] Rango convertido: {desde_full} a {hasta_full}')
+
+                query = query.filter(
+                    Venta.fecha >= desde_full,
+                    Venta.fecha <= hasta_full
                 )
-
-        if hasta_str:
-            try:
-                hasta = datetime.strptime(hasta_str, '%Y-%m-%d').date()
-                query = query.filter(func.date(Venta.created_at) <= hasta)
             except ValueError:
                 return error_response(
-                    'Formato de fecha "hasta" invalido. Use YYYY-MM-DD',
+                    'Formato de fecha invalido. Use YYYY-MM-DD',
                     status_code=400
                 )
 
@@ -549,32 +554,37 @@ def listar_ventas():
             query = query.filter(Venta.estado == estado.lower())
 
         # ========== ORDENAMIENTO ==========
-        query = query.order_by(Venta.created_at.desc())
+        query = query.order_by(Venta.fecha.desc())
 
         # ========== PAGINACION ==========
         limit = request.args.get('limit', default=50, type=int)
         offset = request.args.get('offset', default=0, type=int)
 
-        # Validar limit
-        if limit > 200:
-            limit = 200
+        # Validar limit - permitir hasta 1000 ventas para filtros de fecha
+        if limit > 1000:
+            limit = 1000
         if limit < 1:
             limit = 50
 
         # Contar total antes de paginar
-        print(f'[DEBUG] Contando ventas...')
         total = query.count()
-        print(f'[DEBUG] Total ventas encontradas: {total}')
+        print(f'\n[DEBUG] Total ventas encontradas: {total}')
 
         # Aplicar paginacion
-        print(f'[DEBUG] Aplicando paginación: limit={limit}, offset={offset}')
         ventas = query.limit(limit).offset(offset).all()
-        print(f'[DEBUG] Ventas a serializar: {len(ventas)}')
+        print(f'[DEBUG] Ventas retornadas (con limit={limit}): {len(ventas)}')
+
+        # Mostrar las primeras ventas para debugging
+        if ventas:
+            print(f'\n[DEBUG] Primeras ventas encontradas:')
+            for i, v in enumerate(ventas[:5], 1):
+                print(f'  {i}. #{v.numero_venta} - Fecha: {v.fecha} - Total: S/ {v.total:.2f}')
+
+        print(f'{"="*60}\n')
 
         # ========== ENRIQUECER DATOS ==========
         ventas_dict = []
         for idx, venta in enumerate(ventas):
-            print(f'[DEBUG] Serializando venta {idx+1}/{len(ventas)}: ID={venta.id}')
             try:
                 # CORRECCIÓN: Incluir detalles con precio_compra_unitario
                 venta_data = venta.to_dict(include_detalles=True)
@@ -1076,18 +1086,29 @@ def resumen_ventas():
                 status_code=400
             )
 
-        print(f'\n📊 RESUMEN DE VENTAS: {desde} a {hasta}')
+        print(f'\n{"="*80}')
+        print(f'📊 ENDPOINT /ventas/reportes/resumen')
+        print(f'   📅 fecha_inicio recibida: "{desde_str}"')
+        print(f'   📅 fecha_fin recibida: "{hasta_str}"')
+        print(f'   📅 Fechas parseadas: {desde} a {hasta} (tipo: {type(desde).__name__})')
 
         # ========== CONSULTAR VENTAS DEL PERIODO ==========
-        ventas = Venta.query.filter(
-            and_(
-                func.date(Venta.created_at) >= desde,
-                func.date(Venta.created_at) <= hasta,
-                Venta.estado == 'completada'  # Solo ventas completadas
-            )
-        ).all()
+        # SOLUCIÓN: Obtener TODAS las ventas y filtrar en Python por .date()
+        # Esto evita problemas de zona horaria en SQL
+        todas_ventas = Venta.query.filter(Venta.estado == 'completada').all()
 
-        print(f'📊 Se encontraron {len(ventas)} ventas')
+        print(f'\n   📦 Total ventas en BD (completadas): {len(todas_ventas)}')
+
+        # Filtrar con logs detallados
+        ventas = []
+        for v in todas_ventas:
+            fecha_venta_date = v.fecha.date()
+            incluir = desde <= fecha_venta_date <= hasta
+            if incluir:
+                ventas.append(v)
+                print(f'      ✅ Venta #{v.numero_venta}: {v.fecha} -> date={fecha_venta_date} (INCLUIDA)')
+
+        print(f'\n   ✅ Ventas en el rango [{desde}, {hasta}]: {len(ventas)}')
 
         # ========== CALCULAR METRICAS ==========
         total_vendido = Decimal('0')
@@ -1096,9 +1117,38 @@ def resumen_ventas():
         por_vendedor = {}
         productos_vendidos = {}  # producto_id: cantidad
 
-        for venta in ventas:
+        print(f'\n💰 CALCULANDO GANANCIAS DEL RANGO {desde} a {hasta}:')
+        print(f'💰 Cantidad de ventas a procesar: {len(ventas)}')
+        print(f'{"─"*60}')
+
+        for idx, venta in enumerate(ventas, 1):
+            print(f'\n📝 VENTA #{idx}: {venta.numero_venta}')
+            print(f'   ID: {venta.id}')
+            print(f'   Fecha/Hora: {venta.fecha}')
+            print(f'   Estado: {venta.estado}')
+
             total_vendido += venta.total
-            ganancia_total += venta.ganancia_total
+            ganancia_venta = venta.ganancia_total
+            ganancia_total += ganancia_venta
+
+            print(f'   Total: S/ {venta.total:.2f}')
+            print(f'   Ganancia: S/ {ganancia_venta:.2f}')
+
+            # Mostrar detalles de cada producto en la venta
+            if venta.detalles:
+                print(f'   Detalles ({len(venta.detalles)} productos):')
+                for detalle in venta.detalles:
+                    # Obtener nombre del producto a través de la relación
+                    try:
+                        nombre_producto = detalle.producto.nombre if detalle.producto else 'Producto desconocido'
+                    except:
+                        nombre_producto = 'Producto desconocido'
+
+                    print(f'      • {nombre_producto}')
+                    print(f'        - Precio venta: S/ {detalle.precio_unitario:.2f}')
+                    print(f'        - Precio compra: S/ {detalle.precio_compra_unitario:.2f}')
+                    print(f'        - Cantidad: {detalle.cantidad}')
+                    print(f'        - Ganancia: (S/ {detalle.precio_unitario:.2f} - S/ {detalle.precio_compra_unitario:.2f}) × {detalle.cantidad} = S/ {detalle.ganancia_total:.2f}')
 
             # Contar por metodo de pago
             metodo = venta.metodo_pago or 'sin_especificar'
@@ -1138,6 +1188,11 @@ def resumen_ventas():
                         'cantidad': detalle.cantidad
                     }
 
+        print(f'\n✅ RESULTADOS:')
+        print(f'   Total vendido: S/ {total_vendido:.2f}')
+        print(f'   Ganancia bruta: S/ {ganancia_total:.2f}')
+        print(f'{"="*70}\n')
+
         # Calcular ticket promedio
         cantidad_ventas = len(ventas)
         ticket_promedio = (total_vendido / cantidad_ventas) if cantidad_ventas > 0 else Decimal('0')
@@ -1172,10 +1227,13 @@ def resumen_ventas():
             for v in por_vendedor.values()
         ]
 
-        print(f'📊 Total vendido: S/ {total_vendido}')
-        print(f'📊 Ganancia total: S/ {ganancia_total}')
-        print(f'📊 Ventas por método: {ventas_por_metodo}')
-        print(f'📊 Ventas por vendedor: {ventas_por_vendedor}')
+        print(f'\n{"="*80}')
+        print(f'✅ RESULTADOS FINALES:')
+        print(f'   💰 Total vendido: S/ {total_vendido:.2f}')
+        print(f'   💵 Ganancia bruta: S/ {ganancia_total:.2f}')
+        print(f'   🛒 Cantidad de ventas: {len(ventas)}')
+        print(f'   🎯 Ticket promedio: S/ {ticket_promedio:.2f}')
+        print(f'{"="*80}\n')
 
         # ========== RESPUESTA EXITOSA ==========
         return success_response(
@@ -1187,7 +1245,8 @@ def resumen_ventas():
                 'total_vendido': float(total_vendido),
                 'cantidad_ventas': cantidad_ventas,
                 'ticket_promedio': float(ticket_promedio),
-                'ganancia_total': float(ganancia_total),
+                'ganancia_bruta': float(ganancia_total),  # CORRECCIÓN: Frontend espera ganancia_bruta
+                'ganancia_total': float(ganancia_total),  # Mantener compatibilidad con SalesReport
                 'producto_mas_vendido': producto_mas_vendido,
                 'ventas_por_metodo': ventas_por_metodo,
                 'ventas_por_vendedor': ventas_por_vendedor,
@@ -1197,10 +1256,14 @@ def resumen_ventas():
         )
 
     except Exception as e:
+        import traceback
+        print(f'❌ ERROR EN RESUMEN DE VENTAS: {str(e)}')
+        print(f'❌ Traceback:')
+        traceback.print_exc()
         return error_response(
             message='Error al generar resumen de ventas',
             status_code=500,
-            errors={'exception': str(e)}
+            errors={'exception': str(e), 'traceback': traceback.format_exc()}
         )
 
 
@@ -1212,7 +1275,7 @@ def resumen_ventas():
 @jwt_required()
 def exportar_reporte_pdf():
     """
-    Genera un reporte de ventas en formato PDF.
+    Genera un reporte de ventas profesional en formato PDF con Top 10 productos.
 
     Query Parameters:
         - fecha_inicio: Fecha inicio (YYYY-MM-DD)
@@ -1248,10 +1311,72 @@ def exportar_reporte_pdf():
         # Calcular totales
         total_vendido = sum(venta.total for venta in ventas)
         ganancia_total = sum(venta.ganancia_total for venta in ventas)
+        total_unidades = sum(sum(detalle.cantidad for detalle in venta.detalles) for venta in ventas)
+
+        # Calcular margen de ganancia
+        margen_porcentaje = (ganancia_total / total_vendido * 100) if total_vendido > 0 else 0
+
+        # Calcular Top 10 productos
+        productos_ventas = {}
+        for venta in ventas:
+            for detalle in venta.detalles:
+                producto_id = detalle.producto_id
+                if producto_id not in productos_ventas:
+                    productos_ventas[producto_id] = {
+                        'nombre': detalle.producto.nombre if detalle.producto else 'Sin nombre',
+                        'cantidad': 0,
+                        'total': Decimal('0'),
+                        'ganancia': Decimal('0')
+                    }
+                productos_ventas[producto_id]['cantidad'] += detalle.cantidad
+                productos_ventas[producto_id]['total'] += detalle.subtotal
+                productos_ventas[producto_id]['ganancia'] += detalle.ganancia_unitaria * detalle.cantidad
+
+        top_productos = sorted(productos_ventas.values(), key=lambda x: x['total'], reverse=True)[:10]
+
+        # Calcular estadísticas de métodos de pago
+        metodos_count = {}
+        for venta in ventas:
+            metodo = venta.metodo_pago.upper()
+            metodos_count[metodo] = metodos_count.get(metodo, 0) + 1
+        metodo_mas_usado = max(metodos_count.items(), key=lambda x: x[1])[0] if metodos_count else 'N/A'
+
+        # Calcular análisis por hora (hora pico)
+        ventas_por_hora = {}
+        for venta in ventas:
+            hora = venta.created_at.hour
+            ventas_por_hora[hora] = ventas_por_hora.get(hora, 0) + float(venta.total)
+
+        hora_pico = 'N/A'
+        if ventas_por_hora:
+            hora_max = max(ventas_por_hora.items(), key=lambda x: x[1])[0]
+            hora_pico = f'{hora_max}:00 - {hora_max+1}:00'
+
+        # Comparación con período anterior
+        dias_diferencia = (fecha_fin - fecha_inicio).days + 1
+        fecha_inicio_anterior = fecha_inicio - timedelta(days=dias_diferencia)
+        fecha_fin_anterior = fecha_inicio - timedelta(days=1)
+
+        ventas_anterior = Venta.query.filter(
+            and_(
+                func.date(Venta.created_at) >= fecha_inicio_anterior,
+                func.date(Venta.created_at) <= fecha_fin_anterior,
+                Venta.estado == 'completada'
+            )
+        ).all()
+
+        total_vendido_anterior = sum(venta.total for venta in ventas_anterior)
+        comparacion = 'N/A'
+        if total_vendido_anterior > 0:
+            cambio_porcentaje = ((total_vendido - total_vendido_anterior) / total_vendido_anterior) * 100
+            simbolo = '↑' if cambio_porcentaje > 0 else '↓'
+            comparacion = f'{simbolo} {abs(cambio_porcentaje):.1f}% vs período anterior'
+        elif len(ventas_anterior) == 0 and len(ventas) > 0:
+            comparacion = '↑ Nuevo período (sin ventas previas)'
 
         # Crear PDF en memoria
         buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=0.5*inch, bottomMargin=0.5*inch)
         elements = []
 
         # Estilos
@@ -1259,20 +1384,21 @@ def exportar_reporte_pdf():
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
-            fontSize=24,
+            fontSize=22,
             textColor=colors.HexColor('#1e40af'),
-            spaceAfter=30,
-            alignment=TA_CENTER
+            spaceAfter=20,
+            alignment=TA_CENTER,
+            fontName='Helvetica-Bold'
         )
 
         # Título
         elements.append(Paragraph('KATITA POS - Reporte de Ventas', title_style))
-        elements.append(Spacer(1, 0.2*inch))
+        elements.append(Spacer(1, 0.15*inch))
 
         # Período
         periodo_text = f'Período: {fecha_inicio.strftime("%d/%m/%Y")} - {fecha_fin.strftime("%d/%m/%Y")}'
         elements.append(Paragraph(periodo_text, styles['Normal']))
-        elements.append(Spacer(1, 0.3*inch))
+        elements.append(Spacer(1, 0.25*inch))
 
         # Resumen de métricas
         resumen_data = [
@@ -1280,29 +1406,73 @@ def exportar_reporte_pdf():
             ['Total de Ventas:', f'{len(ventas)} ventas'],
             ['Total Vendido:', f'S/ {total_vendido:.2f}'],
             ['Ganancia Total:', f'S/ {ganancia_total:.2f}'],
-            ['Ticket Promedio:', f'S/ {(total_vendido / len(ventas)):.2f}' if len(ventas) > 0 else 'S/ 0.00']
+            ['Margen de Ganancia:', f'{margen_porcentaje:.1f}%'],
+            ['Ticket Promedio:', f'S/ {(total_vendido / len(ventas)):.2f}' if len(ventas) > 0 else 'S/ 0.00'],
+            ['Unidades Vendidas:', f'{total_unidades} unidades'],
+            ['Método Más Usado:', metodo_mas_usado],
+            ['Hora Pico:', hora_pico],
+            ['Comparación:', comparacion]
         ]
 
-        resumen_table = Table(resumen_data, colWidths=[3*inch, 2*inch])
+        resumen_table = Table(resumen_data, colWidths=[3.2*inch, 2.5*inch])
         resumen_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e40af')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 14),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('FONTSIZE', (0, 0), (-1, 0), 13),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+            ('TOPPADDING', (0, 0), (-1, 0), 10),
             ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
             ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('TOPPADDING', (0, 1), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
         ]))
 
         elements.append(resumen_table)
-        elements.append(Spacer(1, 0.4*inch))
+        elements.append(Spacer(1, 0.3*inch))
+
+        # Top 10 Productos
+        if top_productos:
+            elements.append(Paragraph('TOP 10 PRODUCTOS MÁS VENDIDOS', styles['Heading2']))
+            elements.append(Spacer(1, 0.15*inch))
+
+            top_data = [['#', 'Producto', 'Cant.', 'Total Vendido', 'Ganancia']]
+            for idx, prod in enumerate(top_productos, 1):
+                top_data.append([
+                    str(idx),
+                    prod['nombre'][:30],
+                    str(prod['cantidad']),
+                    f"S/ {float(prod['total']):.2f}",
+                    f"S/ {float(prod['ganancia']):.2f}"
+                ])
+
+            top_table = Table(top_data, colWidths=[0.4*inch, 2.5*inch, 0.8*inch, 1.2*inch, 1.2*inch])
+            top_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#16a34a')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('ALIGN', (1, 1), (1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+                ('TOPPADDING', (0, 0), (-1, 0), 10),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.lightgreen),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('TOPPADDING', (0, 1), (-1, -1), 5),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
+            ]))
+
+            elements.append(top_table)
+            elements.append(Spacer(1, 0.3*inch))
 
         # Detalle de ventas
         if ventas:
             elements.append(Paragraph('DETALLE DE VENTAS', styles['Heading2']))
-            elements.append(Spacer(1, 0.2*inch))
+            elements.append(Spacer(1, 0.15*inch))
 
             ventas_data = [['Fecha', 'ID', 'Método', 'Vendedor', 'Total', 'Ganancia']]
 
@@ -1317,17 +1487,20 @@ def exportar_reporte_pdf():
                     f'S/ {venta.ganancia_total:.2f}'
                 ])
 
-            ventas_table = Table(ventas_data, colWidths=[1.3*inch, 0.6*inch, 0.9*inch, 1.5*inch, 0.9*inch, 0.9*inch])
+            ventas_table = Table(ventas_data, colWidths=[1.2*inch, 0.5*inch, 1.1*inch, 1.5*inch, 0.9*inch, 0.9*inch])
             ventas_table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e40af')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('FONTSIZE', (0, 0), (-1, 0), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('TOPPADDING', (0, 0), (-1, 0), 8),
                 ('BACKGROUND', (0, 1), (-1, -1), colors.white),
                 ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('TOPPADDING', (0, 1), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
             ]))
 
             elements.append(ventas_table)
@@ -1362,7 +1535,7 @@ def exportar_reporte_pdf():
 @jwt_required()
 def exportar_reporte_excel():
     """
-    Genera un reporte de ventas en formato Excel.
+    Genera un reporte de ventas profesional en formato Excel con Top 10 productos.
 
     Query Parameters:
         - fecha_inicio: Fecha inicio (YYYY-MM-DD)
@@ -1398,6 +1571,68 @@ def exportar_reporte_excel():
         # Calcular totales
         total_vendido = sum(venta.total for venta in ventas)
         ganancia_total = sum(venta.ganancia_total for venta in ventas)
+        total_unidades = sum(sum(detalle.cantidad for detalle in venta.detalles) for venta in ventas)
+
+        # Calcular margen de ganancia
+        margen_porcentaje = (ganancia_total / total_vendido * 100) if total_vendido > 0 else 0
+
+        # Calcular Top 10 productos
+        productos_ventas = {}
+        for venta in ventas:
+            for detalle in venta.detalles:
+                producto_id = detalle.producto_id
+                if producto_id not in productos_ventas:
+                    productos_ventas[producto_id] = {
+                        'nombre': detalle.producto.nombre if detalle.producto else 'Sin nombre',
+                        'cantidad': 0,
+                        'total': Decimal('0'),
+                        'ganancia': Decimal('0')
+                    }
+                productos_ventas[producto_id]['cantidad'] += detalle.cantidad
+                productos_ventas[producto_id]['total'] += detalle.subtotal
+                productos_ventas[producto_id]['ganancia'] += detalle.ganancia_unitaria * detalle.cantidad
+
+        top_productos = sorted(productos_ventas.values(), key=lambda x: x['total'], reverse=True)[:10]
+
+        # Calcular estadísticas de métodos de pago
+        metodos_count = {}
+        for venta in ventas:
+            metodo = venta.metodo_pago.upper()
+            metodos_count[metodo] = metodos_count.get(metodo, 0) + 1
+        metodo_mas_usado = max(metodos_count.items(), key=lambda x: x[1])[0] if metodos_count else 'N/A'
+
+        # Calcular análisis por hora (hora pico)
+        ventas_por_hora = {}
+        for venta in ventas:
+            hora = venta.created_at.hour
+            ventas_por_hora[hora] = ventas_por_hora.get(hora, 0) + float(venta.total)
+
+        hora_pico = 'N/A'
+        if ventas_por_hora:
+            hora_max = max(ventas_por_hora.items(), key=lambda x: x[1])[0]
+            hora_pico = f'{hora_max}:00 - {hora_max+1}:00'
+
+        # Comparación con período anterior
+        dias_diferencia = (fecha_fin - fecha_inicio).days + 1
+        fecha_inicio_anterior = fecha_inicio - timedelta(days=dias_diferencia)
+        fecha_fin_anterior = fecha_inicio - timedelta(days=1)
+
+        ventas_anterior = Venta.query.filter(
+            and_(
+                func.date(Venta.created_at) >= fecha_inicio_anterior,
+                func.date(Venta.created_at) <= fecha_fin_anterior,
+                Venta.estado == 'completada'
+            )
+        ).all()
+
+        total_vendido_anterior = sum(venta.total for venta in ventas_anterior)
+        comparacion = 'N/A'
+        if total_vendido_anterior > 0:
+            cambio_porcentaje = ((total_vendido - total_vendido_anterior) / total_vendido_anterior) * 100
+            simbolo = '↑' if cambio_porcentaje > 0 else '↓'
+            comparacion = f'{simbolo} {abs(cambio_porcentaje):.1f}% vs período anterior'
+        elif len(ventas_anterior) == 0 and len(ventas) > 0:
+            comparacion = '↑ Nuevo período (sin ventas previas)'
 
         # Crear Excel
         wb = Workbook()
@@ -1406,8 +1641,10 @@ def exportar_reporte_excel():
 
         # Estilos
         header_fill = PatternFill(start_color='1e40af', end_color='1e40af', fill_type='solid')
-        header_font = Font(color='FFFFFF', bold=True, size=12)
+        header_font = Font(color='FFFFFF', bold=True, size=11)
         title_font = Font(bold=True, size=16, color='1e40af')
+        green_fill = PatternFill(start_color='16a34a', end_color='16a34a', fill_type='solid')
+        green_header_font = Font(color='FFFFFF', bold=True, size=11)
         border = Border(
             left=Side(style='thin'),
             right=Side(style='thin'),
@@ -1420,15 +1657,17 @@ def exportar_reporte_excel():
         ws['A1'] = 'KATITA POS - Reporte de Ventas'
         ws['A1'].font = title_font
         ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
+        ws.row_dimensions[1].height = 25
 
         # Período
         ws.merge_cells('A2:F2')
         ws['A2'] = f'Período: {fecha_inicio.strftime("%d/%m/%Y")} - {fecha_fin.strftime("%d/%m/%Y")}'
         ws['A2'].alignment = Alignment(horizontal='center')
+        ws['A2'].font = Font(size=11)
 
         # Resumen de métricas
         ws['A4'] = 'RESUMEN DE VENTAS'
-        ws['A4'].font = Font(bold=True, size=12)
+        ws['A4'].font = Font(bold=True, size=13, color='1e40af')
 
         ws['A5'] = 'Total de Ventas:'
         ws['B5'] = f'{len(ventas)} ventas'
@@ -1436,23 +1675,69 @@ def exportar_reporte_excel():
         ws['B6'] = f'S/ {total_vendido:.2f}'
         ws['A7'] = 'Ganancia Total:'
         ws['B7'] = f'S/ {ganancia_total:.2f}'
-        ws['A8'] = 'Ticket Promedio:'
-        ws['B8'] = f'S/ {(total_vendido / len(ventas)):.2f}' if len(ventas) > 0 else 'S/ 0.00'
+        ws['A8'] = 'Margen de Ganancia:'
+        ws['B8'] = f'{margen_porcentaje:.1f}%'
+        ws['A9'] = 'Ticket Promedio:'
+        ws['B9'] = f'S/ {(total_vendido / len(ventas)):.2f}' if len(ventas) > 0 else 'S/ 0.00'
+        ws['A10'] = 'Unidades Vendidas:'
+        ws['B10'] = f'{total_unidades} unidades'
+        ws['A11'] = 'Método Más Usado:'
+        ws['B11'] = metodo_mas_usado
+        ws['A12'] = 'Hora Pico:'
+        ws['B12'] = hora_pico
+        ws['A13'] = 'Comparación:'
+        ws['B13'] = comparacion
 
         # Formatear resumen
-        for row in range(5, 9):
-            ws[f'A{row}'].font = Font(bold=True)
+        for row in range(5, 14):
+            ws[f'A{row}'].font = Font(bold=True, size=10)
             ws[f'A{row}'].border = border
             ws[f'B{row}'].border = border
+            ws[f'B{row}'].alignment = Alignment(horizontal='left')
+
+        # Top 10 Productos
+        current_row = 15
+        if top_productos:
+            ws[f'A{current_row}'] = 'TOP 10 PRODUCTOS MÁS VENDIDOS'
+            ws[f'A{current_row}'].font = Font(bold=True, size=13, color='16a34a')
+            current_row += 2
+
+            # Headers Top 10
+            top_headers = ['#', 'Producto', 'Cantidad', 'Total Vendido', 'Ganancia']
+            for col, header in enumerate(top_headers, start=1):
+                cell = ws.cell(row=current_row, column=col)
+                cell.value = header
+                cell.fill = green_fill
+                cell.font = green_header_font
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                cell.border = border
+
+            # Datos Top 10
+            current_row += 1
+            for idx, prod in enumerate(top_productos, 1):
+                ws.cell(row=current_row, column=1, value=idx)
+                ws.cell(row=current_row, column=2, value=prod['nombre'])
+                ws.cell(row=current_row, column=3, value=prod['cantidad'])
+                ws.cell(row=current_row, column=4, value=f"S/ {float(prod['total']):.2f}")
+                ws.cell(row=current_row, column=5, value=f"S/ {float(prod['ganancia']):.2f}")
+
+                for col in range(1, 6):
+                    ws.cell(row=current_row, column=col).border = border
+                    ws.cell(row=current_row, column=col).alignment = Alignment(horizontal='center' if col in [1, 3] else 'left')
+
+                current_row += 1
+
+            current_row += 1
 
         # Detalle de ventas
-        ws['A10'] = 'DETALLE DE VENTAS'
-        ws['A10'].font = Font(bold=True, size=12)
+        ws[f'A{current_row}'] = 'DETALLE DE VENTAS'
+        ws[f'A{current_row}'].font = Font(bold=True, size=13, color='1e40af')
+        current_row += 2
 
         # Headers
         headers = ['Fecha', 'ID Venta', 'Método de Pago', 'Vendedor', 'Total', 'Ganancia']
         for col, header in enumerate(headers, start=1):
-            cell = ws.cell(row=12, column=col)
+            cell = ws.cell(row=current_row, column=col)
             cell.value = header
             cell.fill = header_fill
             cell.font = header_font
@@ -1460,28 +1745,28 @@ def exportar_reporte_excel():
             cell.border = border
 
         # Datos de ventas
-        row = 13
+        current_row += 1
         for venta in ventas:
             vendedor_nombre = venta.vendedor.nombre_completo if venta.vendedor else 'Sin asignar'
-            ws.cell(row=row, column=1, value=venta.created_at.strftime('%d/%m/%Y %H:%M'))
-            ws.cell(row=row, column=2, value=f'#{venta.id}')
-            ws.cell(row=row, column=3, value=venta.metodo_pago.upper())
-            ws.cell(row=row, column=4, value=vendedor_nombre)
-            ws.cell(row=row, column=5, value=f'S/ {venta.total:.2f}')
-            ws.cell(row=row, column=6, value=f'S/ {venta.ganancia_total:.2f}')
+            ws.cell(row=current_row, column=1, value=venta.created_at.strftime('%d/%m/%Y %H:%M'))
+            ws.cell(row=current_row, column=2, value=f'#{venta.id}')
+            ws.cell(row=current_row, column=3, value=venta.metodo_pago.upper())
+            ws.cell(row=current_row, column=4, value=vendedor_nombre)
+            ws.cell(row=current_row, column=5, value=f'S/ {venta.total:.2f}')
+            ws.cell(row=current_row, column=6, value=f'S/ {venta.ganancia_total:.2f}')
 
             # Aplicar bordes
             for col in range(1, 7):
-                ws.cell(row=row, column=col).border = border
-                ws.cell(row=row, column=col).alignment = Alignment(horizontal='center')
+                ws.cell(row=current_row, column=col).border = border
+                ws.cell(row=current_row, column=col).alignment = Alignment(horizontal='center')
 
-            row += 1
+            current_row += 1
 
         # Ajustar anchos de columna
         ws.column_dimensions['A'].width = 20
         ws.column_dimensions['B'].width = 12
-        ws.column_dimensions['C'].width = 18
-        ws.column_dimensions['D'].width = 20
+        ws.column_dimensions['C'].width = 20
+        ws.column_dimensions['D'].width = 25
         ws.column_dimensions['E'].width = 15
         ws.column_dimensions['F'].width = 15
 

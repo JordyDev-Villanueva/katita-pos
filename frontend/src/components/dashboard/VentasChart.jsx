@@ -6,7 +6,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
@@ -57,7 +56,7 @@ export const VentasChart = ({ data }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full flex flex-col">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-gray-600" />
@@ -75,8 +74,8 @@ export const VentasChart = ({ data }) => {
         </div>
       </div>
 
-      <div className="flex-1">
-        <ResponsiveContainer width="100%" height="100%">
+      <div style={{ width: '100%', height: '350px' }}>
+        <ResponsiveContainer width="100%" height={350}>
           <AreaChart
             data={data}
             margin={{ top: 10, right: 30, left: 0, bottom: 0 }}

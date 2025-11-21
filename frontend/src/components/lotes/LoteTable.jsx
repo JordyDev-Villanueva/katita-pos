@@ -18,9 +18,9 @@ export const LoteTable = ({ lotes, loading }) => {
     return (
       <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
         <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-        <p className="text-gray-600 text-lg font-medium mb-2">No hay lotes registrados</p>
+        <p className="text-gray-600 text-lg font-medium mb-2">No se encontraron lotes</p>
         <p className="text-gray-500 text-sm">
-          Registra tu primer ingreso de mercadería haciendo click en "Registrar Ingreso"
+          No hay lotes que coincidan con los filtros seleccionados
         </p>
       </div>
     );

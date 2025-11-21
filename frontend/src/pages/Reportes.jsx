@@ -21,7 +21,7 @@ const Reportes = () => {
 
   // Cargar reporte automáticamente cuando cambian los filtros
   useEffect(() => {
-    if (tipoReporte === 'ventas') {
+    if (tipoReporte === 'ventas' || tipoReporte === 'ganancias') {
       loadSalesReport();
     }
   }, [tipoReporte, fechaInicio, fechaFin]);
@@ -143,7 +143,7 @@ const Reportes = () => {
 
         {/* Filtros */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className={`grid gap-4 ${tipoReporte === 'inventario' ? 'grid-cols-1 md:grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>
             {/* Tipo de Reporte */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -160,31 +160,35 @@ const Reportes = () => {
               </select>
             </div>
 
-            {/* Fecha Inicio */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fecha Inicio
-              </label>
-              <input
-                type="date"
-                value={fechaInicio}
-                onChange={(e) => setFechaInicio(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+            {/* Fecha Inicio - ocultar si es inventario */}
+            {tipoReporte !== 'inventario' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fecha Inicio
+                </label>
+                <input
+                  type="date"
+                  value={fechaInicio}
+                  onChange={(e) => setFechaInicio(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            )}
 
-            {/* Fecha Fin */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fecha Fin
-              </label>
-              <input
-                type="date"
-                value={fechaFin}
-                onChange={(e) => setFechaFin(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+            {/* Fecha Fin - ocultar si es inventario */}
+            {tipoReporte !== 'inventario' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fecha Fin
+                </label>
+                <input
+                  type="date"
+                  value={fechaFin}
+                  onChange={(e) => setFechaFin(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            )}
           </div>
         </div>
 

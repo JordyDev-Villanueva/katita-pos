@@ -16,9 +16,9 @@ export const ProductTable = ({ productos, loading, onEdit, onToggleActive }) => 
     return (
       <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
         <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-        <p className="text-gray-600 text-lg font-medium mb-2">No hay productos</p>
+        <p className="text-gray-600 text-lg font-medium mb-2">No se encontraron productos</p>
         <p className="text-gray-500 text-sm">
-          Agrega tu primer producto haciendo click en "Nuevo Producto"
+          No hay productos que coincidan con los filtros seleccionados
         </p>
       </div>
     );

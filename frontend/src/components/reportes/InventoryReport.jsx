@@ -1,4 +1,4 @@
-import { Package, TrendingDown, DollarSign, AlertTriangle } from 'lucide-react';
+import { Package, DollarSign, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import axiosInstance from '../../api/axios';
 import { toast } from 'react-hot-toast';
@@ -94,59 +94,58 @@ export const InventoryReport = () => {
 
   return (
     <div className="space-y-6">
-      {/* Cards de Métricas */}
+      {/* Cards de Inventario con estilos mejorados */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Productos */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
+        <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl shadow-sm p-6 border border-indigo-200 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer">
+          <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-600">Productos Totales</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalProductos}</p>
+              <p className="text-sm font-medium text-indigo-700 mb-1">Total Productos</p>
+              <p className="text-3xl font-bold text-indigo-900">{stats.totalProductos}</p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <Package className="h-6 w-6 text-blue-600" />
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+              <Package className="w-6 h-6 text-indigo-600" />
             </div>
           </div>
         </div>
 
-        {/* Stock Total */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
+        {/* Stock Disponible */}
+        <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl shadow-sm p-6 border border-teal-200 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer">
+          <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-600">Stock Total</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.stockTotal}</p>
-              <p className="text-xs text-gray-500">unidades</p>
+              <p className="text-sm font-medium text-teal-700 mb-1">Stock Disponible</p>
+              <p className="text-3xl font-bold text-teal-900">{stats.stockTotal}</p>
             </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <Package className="h-6 w-6 text-green-600" />
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+              <CheckCircle className="w-6 h-6 text-teal-600" />
             </div>
           </div>
         </div>
 
-        {/* Valor del Inventario */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
+        {/* Valor Total */}
+        <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl shadow-sm p-6 border border-pink-200 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer">
+          <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-600">Valor Inventario</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-pink-700 mb-1">Valor Total</p>
+              <p className="text-3xl font-bold text-pink-900">
                 S/ {stats.valorInventario.toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-purple-100 rounded-full">
-              <DollarSign className="h-6 w-6 text-purple-600" />
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+              <DollarSign className="w-6 h-6 text-pink-600" />
             </div>
           </div>
         </div>
 
-        {/* Bajo Stock */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
+        {/* Productos Críticos */}
+        <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl shadow-sm p-6 border border-red-200 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer">
+          <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-600">Productos Bajo Stock</p>
-              <p className="text-2xl font-bold text-red-600">{stats.bajoStock}</p>
+              <p className="text-sm font-medium text-red-700 mb-1">Productos Críticos</p>
+              <p className="text-3xl font-bold text-red-900">{stats.bajoStock}</p>
             </div>
-            <div className="p-3 bg-red-100 rounded-full">
-              <TrendingDown className="h-6 w-6 text-red-600" />
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
             </div>
           </div>
         </div>
