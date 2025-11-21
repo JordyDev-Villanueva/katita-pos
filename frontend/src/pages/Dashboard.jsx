@@ -193,30 +193,8 @@ export const Dashboard = () => {
         console.log('📋 Keys:', Object.keys(productos[0]));
       }
 
-      // Filtrar productos CON STOCK (usar OR para aceptar cualquier campo > 0)
-      console.log('\n🔍 FILTRANDO PRODUCTOS CON STOCK:');
-      const productosConStock = productos.filter(p => {
-        // Intentar todos los campos posibles de stock
-        const stock1 = p.stock ? parseInt(p.stock) : 0;
-        const stock2 = p.stock_total ? parseInt(p.stock_total) : 0;
-        const stockFinal = Math.max(stock1, stock2); // Usar el mayor
-
-        console.log(`  • ${p.nombre || 'Sin nombre'} (ID: ${p.id})`);
-        console.log(`    - p.stock = ${p.stock} → ${stock1}`);
-        console.log(`    - p.stock_total = ${p.stock_total} → ${stock2}`);
-        console.log(`    - Stock final = ${stockFinal}`);
-        console.log(`    - Tiene stock: ${stockFinal > 0 ? '✅ SÍ' : '❌ NO'}`);
-
-        return stockFinal > 0;
-      });
-
-      const conStock = productosConStock.length;
-      setProductosStock(conStock);
-      console.log(`\n✅ PRODUCTOS CON STOCK: ${conStock} / ${productos.length}`);
-      console.log('='.repeat(70));
-
       // 2. Lotes por Vencer (próximos 7 días)
-      console.log('\n⚠️  2/4 - Cargando lotes por vencer...');
+      console.log('\n⚠️  2/4 - Cargando lotes...');
       const resLotes = await axiosInstance.get('/lotes');
 
       console.log('📦 RESPUESTA RAW LOTES:', JSON.stringify(resLotes.data, null, 2));
@@ -242,6 +220,40 @@ export const Dashboard = () => {
       const hoy = new Date();
       hoy.setHours(0, 0, 0, 0);
       console.log('📅 Fecha actual (sin hora):', hoy.toISOString());
+
+      // Función para verificar si un producto tiene lotes válidos (no vencidos con stock)
+      const tieneStockValido = (productoId) => {
+        const lotesProducto = lotes.filter(l => l.producto_id === productoId);
+        return lotesProducto.some(lote => {
+          if ((lote.cantidad_actual || 0) <= 0) return false;
+          const fechaVenc = new Date(lote.fecha_vencimiento);
+          fechaVenc.setHours(0, 0, 0, 0);
+          const diff = Math.ceil((fechaVenc - hoy) / (1000 * 60 * 60 * 24));
+          return diff > 0; // Tiene stock Y no está vencido
+        });
+      };
+
+      // Filtrar productos CON STOCK VÁLIDO (excluir los que solo tienen lotes vencidos)
+      console.log('\n🔍 FILTRANDO PRODUCTOS CON STOCK VÁLIDO:');
+      const productosConStock = productos.filter(p => {
+        const stock1 = p.stock ? parseInt(p.stock) : 0;
+        const stock2 = p.stock_total ? parseInt(p.stock_total) : 0;
+        const stockFinal = Math.max(stock1, stock2);
+
+        const tieneStock = stockFinal > 0;
+        const stockEsValido = tieneStockValido(p.id);
+
+        console.log(`  • ${p.nombre || 'Sin nombre'} (ID: ${p.id})`);
+        console.log(`    - Stock: ${stockFinal}`);
+        console.log(`    - Stock válido (no vencido): ${stockEsValido ? '✅ SÍ' : '❌ NO'}`);
+
+        return tieneStock && stockEsValido;
+      });
+
+      const conStock = productosConStock.length;
+      setProductosStock(conStock);
+      console.log(`\n✅ PRODUCTOS CON STOCK VÁLIDO: ${conStock} / ${productos.length}`);
+      console.log('='.repeat(70));
 
       const lotesProximosVencer = [];
       const lotesYaVencidos = [];

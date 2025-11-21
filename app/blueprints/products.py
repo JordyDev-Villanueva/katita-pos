@@ -255,6 +255,43 @@ def listar_productos():
         }
     """
     try:
+        # ========== AUTO-INACTIVAR LOTES VENCIDOS ==========
+        from datetime import date
+        hoy = date.today()
+
+        lotes_vencidos = Lote.query.filter(
+            Lote.fecha_vencimiento <= hoy,
+            Lote.activo == True,
+            Lote.cantidad_actual > 0
+        ).all()
+
+        if lotes_vencidos:
+            for lote in lotes_vencidos:
+                lote.activo = False
+            db.session.commit()
+
+        # ========== AUTO-INACTIVAR PRODUCTOS SIN LOTES VÁLIDOS ==========
+        # Obtener todos los productos activos con stock
+        productos_con_stock = Product.query.filter(
+            Product.activo == True,
+            Product.stock_total > 0
+        ).all()
+
+        for producto in productos_con_stock:
+            # Verificar si tiene al menos un lote válido (no vencido con stock)
+            lotes_validos = Lote.query.filter(
+                Lote.producto_id == producto.id,
+                Lote.cantidad_actual > 0,
+                Lote.fecha_vencimiento > hoy,
+                Lote.activo == True
+            ).count()
+
+            # Si no tiene lotes válidos, inactivar el producto
+            if lotes_validos == 0:
+                producto.activo = False
+
+        db.session.commit()
+
         # Obtener usuario autenticado
         current_user_id_str = get_jwt_identity()
         current_user_id = int(current_user_id_str) if current_user_id_str else None

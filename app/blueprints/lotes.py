@@ -282,6 +282,40 @@ def listar_lotes():
         }
     """
     try:
+        # ========== AUTO-INACTIVAR LOTES VENCIDOS ==========
+        from datetime import date
+        hoy = date.today()
+        lotes_vencidos = Lote.query.filter(
+            Lote.fecha_vencimiento <= hoy,
+            Lote.activo == True,
+            Lote.cantidad_actual > 0
+        ).all()
+
+        productos_afectados = set()
+        if lotes_vencidos:
+            for lote in lotes_vencidos:
+                lote.activo = False
+                productos_afectados.add(lote.producto_id)
+            db.session.commit()
+
+        # ========== AUTO-INACTIVAR PRODUCTOS SIN LOTES VÁLIDOS ==========
+        if productos_afectados:
+            for producto_id in productos_afectados:
+                producto = Product.query.get(producto_id)
+                if producto and producto.activo:
+                    # Verificar si el producto tiene al menos un lote válido (no vencido con stock)
+                    lotes_validos = Lote.query.filter(
+                        Lote.producto_id == producto_id,
+                        Lote.cantidad_actual > 0,
+                        Lote.fecha_vencimiento > hoy,
+                        Lote.activo == True
+                    ).count()
+
+                    # Si no tiene lotes válidos, inactivar el producto
+                    if lotes_validos == 0:
+                        producto.activo = False
+
+            db.session.commit()
         # ========== CONSTRUIR QUERY BASE ==========
         query = Lote.query
 

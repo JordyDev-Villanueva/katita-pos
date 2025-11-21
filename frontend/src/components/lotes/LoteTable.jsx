@@ -169,9 +169,11 @@ export const LoteTable = ({ lotes, loading }) => {
                           ? 'bg-gray-100 text-gray-800'
                           : diasParaVencer < 0
                           ? 'bg-red-100 text-red-800'
-                          : 'bg-green-100 text-green-800'
+                          : lote.activo
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {agotado ? 'Agotado' : diasParaVencer < 0 ? 'Vencido' : 'Activo'}
+                        {agotado ? 'Agotado' : diasParaVencer < 0 ? 'Inactivo' : lote.activo ? 'Activo' : 'Inactivo'}
                       </span>
 
                       {lote.ubicacion && (

@@ -7,6 +7,7 @@ import { ProductTable } from '../components/productos/ProductTable';
 import { ProductForm } from '../components/productos/ProductForm';
 import { Button } from '../components/common/Button';
 import { productsAPI } from '../api/products';
+import { lotesAPI } from '../api/lotes';
 import toast from 'react-hot-toast';
 
 export const Productos = () => {
@@ -17,6 +18,7 @@ export const Productos = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [filters, setFilters] = useState({});
   const [showUpdatedBadge, setShowUpdatedBadge] = useState(false);
+  const [lotes, setLotes] = useState([]);
   const [stats, setStats] = useState({
     total: 0,
     activos: 0,
@@ -25,15 +27,20 @@ export const Productos = () => {
   });
 
   useEffect(() => {
-    loadProducts();
+    const init = async () => {
+      const lotesArray = await loadLotes(); // Cargar lotes primero y obtener array
+      loadProducts({}, lotesArray); // Pasar lotes a loadProducts
+    };
+    init();
   }, []);
 
-  const loadProducts = async (filterParams = {}) => {
+  const loadProducts = async (filterParams = {}, lotesArray = lotes) => {
     try {
       console.log('\n='.repeat(60));
       console.log('[DEBUG FRONTEND] Cargando productos...');
       console.log('='.repeat(60));
       console.log('Parametros de filtro:', filterParams);
+      console.log('Lotes disponibles para cálculo:', lotesArray.length);
 
       setLoading(true);
       const response = await productsAPI.listProducts(filterParams);
@@ -72,7 +79,7 @@ export const Productos = () => {
       console.log('='.repeat(60) + '\n');
 
       setProductos(productosArray);
-      calculateStats(productosArray);
+      calculateStats(productosArray, lotesArray);
 
     } catch (error) {
       console.error('Error cargando productos:', error);
@@ -83,8 +90,38 @@ export const Productos = () => {
     }
   };
 
-  const calculateStats = (productos) => {
-    const activos = productos.filter(p => p.activo).length;
+  const loadLotes = async () => {
+    try {
+      const response = await lotesAPI.listLotes({ limit: 500 });
+      const lotesArray = response.success && Array.isArray(response.data?.lotes)
+        ? response.data.lotes
+        : [];
+      setLotes(lotesArray);
+      return lotesArray;
+    } catch (error) {
+      console.error('Error cargando lotes:', error);
+      return [];
+    }
+  };
+
+  const calculateStats = (productos, lotesArray = lotes) => {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    // Función para verificar si un producto tiene al menos un lote válido (no vencido con stock)
+    const tieneStockValido = (productoId) => {
+      const lotesProducto = lotesArray.filter(l => l.producto_id === productoId);
+      return lotesProducto.some(lote => {
+        if (lote.cantidad_actual <= 0) return false;
+        const fechaVenc = new Date(lote.fecha_vencimiento);
+        fechaVenc.setHours(0, 0, 0, 0);
+        const diff = Math.ceil((fechaVenc - hoy) / (1000 * 60 * 60 * 24));
+        return diff > 0; // Tiene stock Y no está vencido
+      });
+    };
+
+    // Activos: productos activos Y con al menos un lote válido
+    const activos = productos.filter(p => p.activo && tieneStockValido(p.id)).length;
     const bajoStock = productos.filter(p => p.stock_total < p.stock_minimo).length;
     const valorInventario = productos.reduce((sum, p) => {
       return sum + (p.stock_total * p.precio_compra);
@@ -119,12 +156,12 @@ export const Productos = () => {
       params.bajo_stock = true;
     }
 
-    loadProducts(params);
+    loadProducts(params, lotes);
   };
 
   const handleClearFilters = () => {
     setFilters({});
-    loadProducts();
+    loadProducts({}, lotes);
   };
 
   const handleNewProduct = () => {
@@ -159,7 +196,8 @@ export const Productos = () => {
 
       if (response.success) {
         handleCloseForm();
-        loadProducts(filters);
+        const lotesArray = await loadLotes(); // Recargar lotes y obtener array
+        loadProducts(filters, lotesArray);
       }
 
     } catch (error) {
@@ -185,7 +223,7 @@ export const Productos = () => {
 
       if (response.success) {
         toast.success(`Producto ${accion === 'activar' ? 'activado' : 'desactivado'} correctamente`);
-        loadProducts(filters);
+        loadProducts(filters, lotes);
       }
 
     } catch (error) {
@@ -194,8 +232,9 @@ export const Productos = () => {
     }
   };
 
-  const handleRefreshProducts = () => {
-    loadProducts(filters);
+  const handleRefreshProducts = async () => {
+    const lotesArray = await loadLotes(); // Recargar lotes primero y obtener array
+    loadProducts(filters, lotesArray);
     setShowUpdatedBadge(true);
     setTimeout(() => setShowUpdatedBadge(false), 2000);
   };

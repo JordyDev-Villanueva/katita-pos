@@ -125,27 +125,36 @@ export const Lotes = () => {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    const activos = lotesArray.filter(l => l.cantidad_actual > 0);
+    // Primero identificar vencidos y no vencidos
+    const vencidos = lotesArray.filter(l => {
+      if (l.cantidad_actual <= 0) return false;
+      const fechaVenc = new Date(l.fecha_vencimiento);
+      fechaVenc.setHours(0, 0, 0, 0);
+      const diff = Math.ceil((fechaVenc - hoy) / (1000 * 60 * 60 * 24));
+      return diff <= 0; // Vencidos: hoy o antes
+    });
+
+    // Activos: tienen stock Y NO están vencidos
+    const activos = lotesArray.filter(l => {
+      if (l.cantidad_actual <= 0) return false;
+      const fechaVenc = new Date(l.fecha_vencimiento);
+      fechaVenc.setHours(0, 0, 0, 0);
+      const diff = Math.ceil((fechaVenc - hoy) / (1000 * 60 * 60 * 24));
+      return diff > 0; // NO vencidos
+    });
+
     const agotados = lotesArray.filter(l => l.cantidad_actual === 0);
 
+    // Por vencer: solo los activos (no vencidos) que vencen entre 1 y 7 días
     const porVencer = activos.filter(l => {
       const fechaVenc = new Date(l.fecha_vencimiento);
       fechaVenc.setHours(0, 0, 0, 0);
       const diff = Math.ceil((fechaVenc - hoy) / (1000 * 60 * 60 * 24));
-      // Solo contar los que vencen entre 1 y 7 días (futuro)
       return diff >= 1 && diff <= 7;
     });
 
-    const vencidos = activos.filter(l => {
-      const fechaVenc = new Date(l.fecha_vencimiento);
-      fechaVenc.setHours(0, 0, 0, 0);
-      const diff = Math.ceil((fechaVenc - hoy) / (1000 * 60 * 60 * 24));
-      // Vencidos: hoy o antes (0 o negativo)
-      return diff <= 0;
-    });
-
     setStats({
-      totalActivos: activos.length,
+      totalActivos: activos.length, // Ahora excluye vencidos
       agotados: agotados.length,
       porVencer: porVencer.length,
       vencidos: vencidos.length,
