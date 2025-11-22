@@ -134,8 +134,8 @@ export const ProductForm = ({ isOpen, onClose, onSubmit, producto = null, loadin
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl my-8">
         {/* Header */}
         <div className="bg-primary-600 text-white p-6 rounded-t-2xl sticky top-0 z-10">
           <div className="flex items-center justify-between">
@@ -183,20 +183,6 @@ export const ProductForm = ({ isOpen, onClose, onSubmit, producto = null, loadin
                 required
                 placeholder="Coca Cola 500ml"
               />
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Descripción (Opcional)
-                </label>
-                <textarea
-                  name="descripcion"
-                  value={formData.descripcion}
-                  onChange={handleChange}
-                  rows="3"
-                  className="block w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="Descripción adicional del producto..."
-                />
-              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">

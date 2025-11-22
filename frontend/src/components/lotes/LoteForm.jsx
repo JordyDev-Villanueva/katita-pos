@@ -96,14 +96,17 @@ export const LoteForm = ({ isOpen, onClose, onSubmit, productos, loading = false
     onSubmit(dataToSubmit);
   };
 
-  // Calcular fecha mínima (mañana)
+  // Calcular fecha mínima (mañana) usando fecha local
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split('T')[0];
+  const year = tomorrow.getFullYear();
+  const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+  const day = String(tomorrow.getDate()).padStart(2, '0');
+  const minDate = `${year}-${month}-${day}`;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8">
         {/* Header */}
         <div className="bg-green-600 text-white p-6 rounded-t-2xl sticky top-0 z-10">
           <div className="flex items-center justify-between">
@@ -257,9 +260,9 @@ export const LoteForm = ({ isOpen, onClose, onSubmit, productos, loading = false
                 name="notas"
                 value={formData.notas}
                 onChange={handleChange}
-                rows="3"
-                className="block w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="Observaciones adicionales sobre este lote..."
+                rows="2"
+                className="block w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                placeholder="Ej: Lote con empaque dañado, promoción especial, etc..."
               />
             </div>
 
