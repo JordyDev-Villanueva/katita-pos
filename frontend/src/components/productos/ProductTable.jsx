@@ -26,7 +26,8 @@ export const ProductTable = ({ productos, loading, onEdit, onToggleActive }) => 
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <div className="overflow-x-auto">
+      {/* Vista de tabla para desktop */}
+      <div className="hidden lg:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -177,6 +178,102 @@ export const ProductTable = ({ productos, loading, onEdit, onToggleActive }) => 
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Vista de cards para móvil */}
+      <div className="lg:hidden divide-y divide-gray-200">
+        {productos.map((producto) => {
+          const bajoStock = producto.stock_total < producto.stock_minimo;
+
+          return (
+            <div key={producto.id} className="p-4 hover:bg-gray-50 transition-colors">
+              <div className="flex items-start gap-3 mb-3">
+                {/* Imagen */}
+                <div className="flex-shrink-0">
+                  {producto.imagen_url ? (
+                    <img
+                      src={producto.imagen_url}
+                      alt={producto.nombre}
+                      className="h-16 w-16 rounded-lg object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div
+                    className="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center"
+                    style={{ display: producto.imagen_url ? 'none' : 'flex' }}
+                  >
+                    <Package className="h-7 w-7 text-gray-400" />
+                  </div>
+                </div>
+
+                {/* Info principal */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 truncate">{producto.nombre}</h3>
+                  <p className="text-sm text-gray-500 font-mono">{producto.codigo_barras}</p>
+                  <span className="inline-block mt-1 px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                    {producto.categoria}
+                  </span>
+                </div>
+
+                {/* Estado */}
+                <span
+                  className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    producto.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}
+                >
+                  {producto.activo ? 'Activo' : 'Inactivo'}
+                </span>
+              </div>
+
+              {/* Detalles */}
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <p className="text-xs text-gray-500">Precio Venta</p>
+                  <p className="text-sm font-semibold text-green-600">S/ {Number(producto.precio_venta).toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Precio Compra</p>
+                  <p className="text-sm font-medium text-gray-700">S/ {Number(producto.precio_compra).toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Stock</p>
+                  <p className={`text-sm font-semibold ${bajoStock ? 'text-red-600' : 'text-gray-900'}`}>
+                    {producto.stock_total || 0} {bajoStock && <span className="text-xs">(Bajo)</span>}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Stock Mínimo</p>
+                  <p className="text-sm font-medium text-gray-700">{producto.stock_minimo}</p>
+                </div>
+              </div>
+
+              {/* Acciones */}
+              <div className="flex gap-2 pt-3 border-t border-gray-100">
+                <button
+                  onClick={() => onEdit(producto)}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary-50 text-primary-600 hover:bg-primary-100 rounded-lg transition-colors text-sm font-medium"
+                >
+                  <Edit2 className="h-4 w-4" />
+                  Editar
+                </button>
+                <button
+                  onClick={() => onToggleActive(producto)}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
+                    producto.activo
+                      ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                      : 'bg-green-50 text-green-600 hover:bg-green-100'
+                  }`}
+                >
+                  <Power className="h-4 w-4" />
+                  {producto.activo ? 'Desactivar' : 'Activar'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Footer con contador */}

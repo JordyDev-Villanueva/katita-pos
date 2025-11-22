@@ -241,17 +241,17 @@ export const Productos = () => {
 
   return (
     <Layout>
-      <div className="p-6">
+      <div className="p-4 lg:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Gestión de Productos</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Gestión de Productos</h1>
+            <p className="text-gray-600 mt-1 text-sm lg:text-base">
               Administra el catálogo completo de productos del minimarket
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {/* Badge "Datos actualizados" */}
             {showUpdatedBadge && (
               <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg animate-fade-in">
