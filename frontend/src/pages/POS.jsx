@@ -344,112 +344,148 @@ export const POS = () => {
 
   return (
     <Layout>
-      <div className="flex h-screen bg-gray-50">
+      <div className="flex h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50">
         {/* Área principal de productos */}
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
-            {/* Header Principal con Badge de Notificación */}
-            <div className="mb-6 flex items-start justify-between">
-              {/* Lado izquierdo: Título */}
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Punto de Venta
-                </h1>
-                <p className="text-gray-600">
-                  Vendedor: <span className="font-semibold">{user?.nombre_completo}</span>
-                </p>
-              </div>
+            {/* Header Principal Mejorado */}
+            <div className="mb-6 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                {/* Lado izquierdo: Título con gradiente */}
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <ShoppingCart className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        Punto de Venta
+                      </h1>
+                      <p className="text-sm text-gray-600">
+                        Vendedor: <span className="font-semibold text-blue-600">{user?.nombre_completo}</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-              {/* Lado derecho: Badge de notificación + Toast personalizado */}
-              <div className="flex items-center gap-3">
-                {/* Badge de notificación de búsqueda - AL LADO IZQUIERDO */}
-                {searchNotification && (
-                  <div
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg animate-fade-in ${searchNotification.type === 'success'
-                      ? 'bg-green-100 text-green-700'
-                      : searchNotification.type === 'error'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-yellow-100 text-yellow-700'
-                      }`}
-                  >
-                    {searchNotification.type === 'success' && (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {/* Lado derecho: Badge de notificación + Toast personalizado */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* Badge de notificación de búsqueda */}
+                  {searchNotification && (
+                    <div
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl shadow-md animate-fade-in ${searchNotification.type === 'success'
+                        ? 'bg-green-100 text-green-700 border border-green-200'
+                        : searchNotification.type === 'error'
+                          ? 'bg-red-100 text-red-700 border border-red-200'
+                          : 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                        }`}
+                    >
+                      {searchNotification.type === 'success' && (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                      {searchNotification.type === 'error' && (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      )}
+                      <span className="text-sm font-semibold">{searchNotification.message}</span>
+                    </div>
+                  )}
+
+                  {/* Toast personalizado para acciones del carrito */}
+                  {customToast.show && (
+                    <div className="px-5 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-lg flex items-center gap-2 animate-fade-in">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                    )}
-                    {searchNotification.type === 'error' && (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    )}
-                    <span className="text-sm font-medium">{searchNotification.message}</span>
-                  </div>
-                )}
-
-                {/* Toast personalizado para acciones del carrito */}
-                {customToast.show && (
-                  <div className="px-4 py-2 bg-green-500 text-white rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="font-medium">{customToast.message}</span>
-                  </div>
-                )}
+                      <span className="font-semibold">{customToast.message}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Barra de búsqueda profesional */}
-            <div className="mb-4">
-              <div className="relative">
-                <Barcode className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && resultadosBusqueda.length === 1) {
-                      agregarDesdeResultados(resultadosBusqueda[0]);
-                    }
-                  }}
-                  placeholder="Escanea código de barras o busca por nombre del producto..."
-                  className="w-full pl-10 pr-12 py-4 text-lg border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  autoFocus
-                />
-                {buscando && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600"></div>
-                  </div>
-                )}
+            {/* Barra de búsqueda profesional mejorada */}
+            <div className="mb-6">
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl opacity-20 group-hover:opacity-30 blur transition duration-200"></div>
+                <div className="relative bg-white rounded-2xl shadow-lg">
+                  <Barcode className="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-500 w-6 h-6" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && resultadosBusqueda.length === 1) {
+                        agregarDesdeResultados(resultadosBusqueda[0]);
+                      }
+                    }}
+                    placeholder="Escanea código de barras o busca por nombre del producto..."
+                    className="w-full pl-14 pr-14 py-5 text-lg border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    autoFocus
+                  />
+                  {buscando && (
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    </div>
+                  )}
+                  {!buscando && searchQuery && (
+                    <button
+                      onClick={() => {
+                        setSearchQuery('');
+                        setResultadosBusqueda([]);
+                      }}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
               </div>
 
-              <p className="text-sm text-gray-600 mt-2">
-                💡 Usa la pistola escáner o escribe manualmente el código/nombre del producto
-              </p>
+              <div className="flex items-center gap-2 mt-3 text-sm text-gray-600">
+                <div className="flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="font-medium text-blue-700">Usa la pistola escáner o escribe manualmente</span>
+                </div>
+              </div>
             </div>
 
-            {/* Resultados de búsqueda */}
+            {/* Resultados de búsqueda mejorados */}
             {resultadosBusqueda.length > 0 && (
-              <div className="mb-6 bg-white rounded-lg border-2 border-blue-200 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    Resultados de búsqueda ({resultadosBusqueda.length})
-                  </h3>
+              <div className="mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200 p-6 shadow-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                      <Search className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-800">
+                      Resultados de búsqueda
+                      <span className="ml-2 px-2 py-0.5 bg-blue-600 text-white text-sm rounded-full">
+                        {resultadosBusqueda.length}
+                      </span>
+                    </h3>
+                  </div>
                   <button
                     onClick={() => {
                       setResultadosBusqueda([]);
                       setSearchQuery('');
                     }}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-white rounded-lg transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {resultadosBusqueda.map((producto) => (
                     <div
                       key={producto.id}
-                      className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all"
+                      className="bg-white rounded-xl p-4 border-2 border-gray-200 hover:border-blue-400 hover:shadow-xl transition-all transform hover:-translate-y-1 duration-200"
                     >
                       {/* Nombre del producto */}
                       <div className="flex items-start gap-2 mb-2">
@@ -482,16 +518,16 @@ export const POS = () => {
                         </div>
                       </div>
 
-                      {/* Botón agregar */}
+                      {/* Botón agregar mejorado */}
                       <button
                         onClick={() => agregarDesdeResultados(producto)}
                         disabled={producto.stock_total <= 0}
-                        className={`w-full py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${producto.stock_total > 0
-                          ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        className={`w-full py-3 px-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-md ${producto.stock_total > 0
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transform hover:scale-105'
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           }`}
                       >
-                        <ShoppingCart className="w-4 h-4" />
+                        <ShoppingCart className="w-5 h-5" />
                         {producto.stock_total > 0 ? 'Agregar al Carrito' : 'Sin Stock'}
                       </button>
                     </div>
@@ -520,8 +556,8 @@ export const POS = () => {
           </div>
         </div>
 
-        {/* Carrito lateral */}
-        <div className="w-96 bg-white border-l border-gray-200 flex-shrink-0">
+        {/* Carrito lateral mejorado */}
+        <div className="w-full lg:w-96 bg-gradient-to-b from-white to-gray-50 border-l border-gray-200 flex-shrink-0 shadow-2xl">
           <Cart
             items={cart}
             onUpdateQuantity={updateQuantity}
