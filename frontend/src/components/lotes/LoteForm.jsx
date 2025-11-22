@@ -106,9 +106,9 @@ export const LoteForm = ({ isOpen, onClose, onSubmit, productos, loading = false
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[98vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-green-600 text-white p-6 rounded-t-2xl sticky top-0 z-10">
+        <div className="bg-green-600 text-white p-4 rounded-t-2xl flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="bg-white bg-opacity-20 p-3 rounded-lg">
@@ -131,8 +131,8 @@ export const LoteForm = ({ isOpen, onClose, onSubmit, productos, loading = false
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="space-y-6">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4">
+          <div className="space-y-4">
             {/* Producto */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -162,8 +162,8 @@ export const LoteForm = ({ isOpen, onClose, onSubmit, productos, loading = false
 
             {/* Info del producto seleccionado */}
             {productoSeleccionado && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm font-semibold text-blue-900 mb-2">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm font-semibold text-blue-900 mb-1.5">
                   Información del Producto:
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-sm">
@@ -187,7 +187,7 @@ export const LoteForm = ({ isOpen, onClose, onSubmit, productos, loading = false
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Cantidad */}
               <Input
                 label="Cantidad de Unidades"
@@ -268,8 +268,8 @@ export const LoteForm = ({ isOpen, onClose, onSubmit, productos, loading = false
 
             {/* Resumen del ingreso */}
             {formData.cantidad_inicial && formData.precio_compra_lote && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-sm font-semibold text-green-900 mb-2">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <p className="text-sm font-semibold text-green-900 mb-1.5">
                   Resumen del Ingreso:
                 </p>
                 <div className="flex justify-between items-center">
@@ -283,7 +283,7 @@ export const LoteForm = ({ isOpen, onClose, onSubmit, productos, loading = false
           </div>
 
           {/* Footer */}
-          <div className="mt-6 pt-6 border-t flex gap-3">
+          <div className="mt-4 pt-4 border-t flex gap-3">
             <Button
               type="button"
               onClick={onClose}

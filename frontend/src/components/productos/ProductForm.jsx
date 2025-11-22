@@ -135,9 +135,9 @@ export const ProductForm = ({ isOpen, onClose, onSubmit, producto = null, loadin
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[98vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-primary-600 text-white p-6 rounded-t-2xl sticky top-0 z-10">
+        <div className="bg-primary-600 text-white p-4 rounded-t-2xl flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">
@@ -157,10 +157,10 @@ export const ProductForm = ({ isOpen, onClose, onSubmit, producto = null, loadin
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Columna Izquierda */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Input
                 label="Código de Barras"
                 name="codigo_barras"
@@ -270,7 +270,7 @@ export const ProductForm = ({ isOpen, onClose, onSubmit, producto = null, loadin
           </div>
 
           {/* Footer */}
-          <div className="mt-6 pt-6 border-t flex gap-3">
+          <div className="mt-4 pt-4 border-t flex gap-3">
             <Button
               type="button"
               onClick={onClose}
