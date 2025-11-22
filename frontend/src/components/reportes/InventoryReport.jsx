@@ -23,10 +23,8 @@ export const InventoryReport = () => {
     try {
       setLoading(true);
 
-      // Obtener todos los productos
-      const response = await axiosInstance.get('/products', {
-        params: { activo: true }
-      });
+      // Obtener TODOS los productos (activos e inactivos) para contar vencidos correctamente
+      const response = await axiosInstance.get('/products');
 
       let productosArray = [];
       if (response.data?.success) {
