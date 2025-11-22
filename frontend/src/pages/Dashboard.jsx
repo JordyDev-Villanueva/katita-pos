@@ -32,6 +32,15 @@ export const Dashboard = () => {
   const [ventasGrafico, setVentasGrafico] = useState([]);
   const [topProductos, setTopProductos] = useState([]);
 
+  // ==================== FUNCIÓN HELPER PARA FECHAS ====================
+  // Obtener fecha local en formato YYYY-MM-DD sin conversión UTC
+  const obtenerFechaLocal = (fecha = new Date()) => {
+    const year = fecha.getFullYear();
+    const month = String(fecha.getMonth() + 1).padStart(2, '0');
+    const day = String(fecha.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Detectar login
   useEffect(() => {
     const justLoggedIn = sessionStorage.getItem('justLoggedIn');
@@ -334,8 +343,8 @@ export const Dashboard = () => {
       const hace7Dias = new Date();
       hace7Dias.setDate(hoy.getDate() - 6);
 
-      const inicio = hace7Dias.toISOString().split('T')[0];
-      const fin = hoy.toISOString().split('T')[0];
+      const inicio = obtenerFechaLocal(hace7Dias);
+      const fin = obtenerFechaLocal(hoy);
 
       console.log('\n' + '='.repeat(70));
       console.log('📈 CARGANDO GRÁFICO ÚLTIMOS 7 DÍAS');
@@ -448,8 +457,8 @@ export const Dashboard = () => {
       const hoy = new Date();
       const hace30Dias = new Date();
       hace30Dias.setDate(hoy.getDate() - 30);
-      const inicio = hace30Dias.toISOString().split('T')[0];
-      const fin = hoy.toISOString().split('T')[0];
+      const inicio = obtenerFechaLocal(hace30Dias);
+      const fin = obtenerFechaLocal(hoy);
 
       console.log('\n' + '='.repeat(70));
       console.log('🏆 CARGANDO TOP 10 PRODUCTOS (ÚLTIMOS 30 DÍAS)');
@@ -552,7 +561,7 @@ export const Dashboard = () => {
   // ==================== HANDLERS DE FILTROS ====================
   const handleHoy = () => {
     setFiltroActivo('hoy');
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = obtenerFechaLocal();
     setFechaDesde(hoy);
     setFechaHasta(hoy);
     loadFilteredData(hoy, hoy);
@@ -560,10 +569,12 @@ export const Dashboard = () => {
 
   const handleAyer = () => {
     setFiltroActivo('ayer');
-    const ayer = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    setFechaDesde(ayer);
-    setFechaHasta(ayer);
-    loadFilteredData(ayer, ayer);
+    const ayer = new Date();
+    ayer.setDate(ayer.getDate() - 1);
+    const ayerStr = obtenerFechaLocal(ayer);
+    setFechaDesde(ayerStr);
+    setFechaHasta(ayerStr);
+    loadFilteredData(ayerStr, ayerStr);
   };
 
   const handleFiltrar = () => {
@@ -610,7 +621,8 @@ export const Dashboard = () => {
 
     const init = async () => {
       try {
-        const hoy = new Date().toISOString().split('T')[0];
+        // Obtener fecha local sin conversión UTC
+        const hoy = obtenerFechaLocal();
         console.log('📅 Fecha hoy:', hoy);
 
         setFechaDesde(hoy);
