@@ -221,29 +221,27 @@ export const Lotes = () => {
   return (
     <Layout>
       <div className="p-4 lg:p-6">
-        {/* Header */}
-        <div className="mb-6 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Package2 className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                    Gestión de Lotes
-                  </h1>
-                  <p className="text-sm text-gray-600">
-                    Control de inventario con sistema FIFO y alertas de vencimiento
-                  </p>
-                </div>
+        {/* Header Simplificado */}
+        <div className="mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <Package2 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Gestión de Lotes
+                </h1>
+                <p className="text-sm text-gray-600">
+                  Control de inventario con sistema FIFO y alertas de vencimiento
+                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
               {/* Badge "Datos actualizados" */}
               {showUpdatedBadge && (
-                <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg animate-fade-in">
+                <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg border border-green-200 animate-fade-in">
                   <CheckCircle className="w-4 h-4" />
                   <span className="text-sm font-medium">Datos actualizados</span>
                 </div>
@@ -252,7 +250,7 @@ export const Lotes = () => {
               {/* Botón Recargar */}
               <button
                 onClick={handleRefresh}
-                className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2"
+                className="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-lg transition-colors flex items-center gap-2 border border-gray-300 shadow-sm"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span className="text-sm font-medium">Recargar</span>
@@ -281,6 +279,8 @@ export const Lotes = () => {
               </button>
             </div>
           </div>
+          {/* Línea decorativa con gradiente */}
+          <div className="h-0.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 rounded-full"></div>
         </div>
 
         {/* Estadísticas */}

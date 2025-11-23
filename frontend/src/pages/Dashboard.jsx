@@ -667,28 +667,26 @@ export const Dashboard = () => {
   return (
     <Layout>
       <div className="p-4 lg:p-6">
-        {/* Header */}
-        <div className="mb-6 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Calendar className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                    Dashboard
-                  </h1>
-                  <p className="text-sm text-gray-600">
-                    Bienvenido, <span className="font-semibold text-blue-600">{user?.nombre_completo}</span>
-                  </p>
-                </div>
+        {/* Header Simplificado */}
+        <div className="mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Dashboard
+                </h1>
+                <p className="text-sm text-gray-600">
+                  Bienvenido, <span className="font-semibold text-blue-600">{user?.nombre_completo}</span>
+                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
               {showWelcome && (
-                <div className="flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2.5 rounded-lg shadow-md animate-fade-in">
+                <div className="flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2.5 rounded-lg shadow-sm border border-green-200 animate-fade-in">
                   <CheckCircle className="w-5 h-5" />
                   <span className="font-medium">¡Bienvenido, {user?.nombre_completo}!</span>
                   <button onClick={() => setShowWelcome(false)} className="ml-2 text-green-600 hover:text-green-800">
@@ -698,7 +696,7 @@ export const Dashboard = () => {
               )}
 
               {showUpdatedBadge && (
-                <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg animate-fade-in">
+                <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg border border-green-200 animate-fade-in">
                   <CheckCircle className="w-4 h-4" />
                   <span className="text-sm font-medium">Datos actualizados</span>
                 </div>
@@ -706,17 +704,19 @@ export const Dashboard = () => {
 
               <button
                 onClick={handleRefresh}
-                className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2"
+                className="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-lg transition-colors flex items-center gap-2 border border-gray-300 shadow-sm"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span className="text-sm font-medium">Recargar</span>
               </button>
             </div>
           </div>
+          {/* Línea decorativa con gradiente */}
+          <div className="h-0.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 rounded-full"></div>
         </div>
 
         {/* Filtros */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white rounded-xl shadow-md border-2 border-gray-200 p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Acceso Rápido */}
             <div>
@@ -784,7 +784,7 @@ export const Dashboard = () => {
         {/* 4 Cards Principales */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* Ventas */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-sm p-6 border border-blue-200 hover:shadow-lg hover:scale-105 transition-all duration-200">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md p-6 border-2 border-blue-200 hover:shadow-lg hover:scale-105 transition-all duration-200">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-blue-700 mb-1">{getCardLabel('Ventas')}</p>
@@ -798,7 +798,7 @@ export const Dashboard = () => {
           </div>
 
           {/* Productos en Stock */}
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-sm p-6 border border-green-200 hover:shadow-lg hover:scale-105 transition-all duration-200">
+          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-md p-6 border-2 border-green-200 hover:shadow-lg hover:scale-105 transition-all duration-200">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-green-700 mb-1">Productos en Stock</p>
@@ -812,7 +812,7 @@ export const Dashboard = () => {
           </div>
 
           {/* Por Vencer */}
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl shadow-sm p-6 border border-yellow-200 hover:shadow-lg hover:scale-105 transition-all duration-200">
+          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl shadow-md p-6 border-2 border-yellow-200 hover:shadow-lg hover:scale-105 transition-all duration-200">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-yellow-700 mb-1">Lotes - Próximos 7 días</p>
@@ -826,7 +826,7 @@ export const Dashboard = () => {
           </div>
 
           {/* Ganancia */}
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-sm p-6 border border-purple-200 hover:shadow-lg hover:scale-105 transition-all duration-200">
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-md p-6 border-2 border-purple-200 hover:shadow-lg hover:scale-105 transition-all duration-200">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-purple-700 mb-1">{getCardLabel('Ganancia')}</p>

@@ -110,22 +110,20 @@ const Reportes = () => {
   return (
     <Layout>
       <div className="p-4 lg:p-6">
-        {/* Header con botones de exportación */}
-        <div className="mb-6 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <BarChart3 className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                    Reportes y Analytics
-                  </h1>
-                  <p className="text-sm text-gray-600">
-                    Visualiza y analiza los datos de tu negocio
-                  </p>
-                </div>
+        {/* Header Simplificado con botones de exportación */}
+        <div className="mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Reportes y Analytics
+                </h1>
+                <p className="text-sm text-gray-600">
+                  Visualiza y analiza los datos de tu negocio
+                </p>
               </div>
             </div>
 
@@ -149,10 +147,12 @@ const Reportes = () => {
               </div>
             )}
           </div>
+          {/* Línea decorativa con gradiente */}
+          <div className="h-0.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 rounded-full"></div>
         </div>
 
         {/* Filtros */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-2 border-gray-200">
           <div className={`grid gap-4 ${tipoReporte === 'inventario' ? 'grid-cols-1 md:grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>
             {/* Tipo de Reporte */}
             <div>

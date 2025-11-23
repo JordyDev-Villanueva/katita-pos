@@ -353,23 +353,21 @@ export const POS = () => {
         {/* Área principal de productos */}
         <div className="flex-1 p-4 lg:p-6 overflow-y-auto pb-24 lg:pb-6">
           <div className="max-w-7xl mx-auto">
-            {/* Header Principal Mejorado */}
-            <div className="mb-6 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            {/* Header Simplificado */}
+            <div className="mb-6">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4">
                 {/* Lado izquierdo: Título con gradiente */}
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <ShoppingCart className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                        Punto de Venta
-                      </h1>
-                      <p className="text-sm text-gray-600">
-                        Vendedor: <span className="font-semibold text-blue-600">{user?.nombre_completo}</span>
-                      </p>
-                    </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                    <ShoppingCart className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                      Punto de Venta
+                    </h1>
+                    <p className="text-sm text-gray-600">
+                      Vendedor: <span className="font-semibold text-blue-600">{user?.nombre_completo}</span>
+                    </p>
                   </div>
                 </div>
 
@@ -410,6 +408,8 @@ export const POS = () => {
                   )}
                 </div>
               </div>
+              {/* Línea decorativa con gradiente */}
+              <div className="h-0.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 rounded-full"></div>
             </div>
 
             {/* Barra de búsqueda profesional mejorada */}
