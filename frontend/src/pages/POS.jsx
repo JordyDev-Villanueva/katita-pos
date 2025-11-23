@@ -25,6 +25,9 @@ export const POS = () => {
   const [resultadosBusqueda, setResultadosBusqueda] = useState([]);
   const [buscando, setBuscando] = useState(false);
 
+  // Estado para carrito móvil
+  const [showMobileCart, setShowMobileCart] = useState(false);
+
   // Función para mostrar toast personalizado
   const showCustomToast = (message) => {
     setCustomToast({ show: true, message });
@@ -342,11 +345,13 @@ export const POS = () => {
 
   const total = cart.reduce((sum, item) => sum + (item.cantidad * item.precio_unitario), 0);
 
+  const totalItems = cart.reduce((sum, item) => sum + item.cantidad, 0);
+
   return (
     <Layout>
       <div className="flex h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50">
         {/* Área principal de productos */}
-        <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
+        <div className="flex-1 p-4 lg:p-6 overflow-y-auto pb-24 lg:pb-6">
           <div className="max-w-7xl mx-auto">
             {/* Header Principal Mejorado */}
             <div className="mb-6 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
@@ -556,8 +561,8 @@ export const POS = () => {
           </div>
         </div>
 
-        {/* Carrito lateral mejorado */}
-        <div className="w-full lg:w-96 bg-gradient-to-b from-white to-gray-50 border-l border-gray-200 flex-shrink-0 shadow-2xl">
+        {/* Carrito lateral (solo desktop) */}
+        <div className="hidden lg:block lg:w-96 bg-gradient-to-b from-white to-gray-50 border-l border-gray-200 flex-shrink-0 shadow-2xl">
           <Cart
             items={cart}
             onUpdateQuantity={updateQuantity}
@@ -567,6 +572,64 @@ export const POS = () => {
           />
         </div>
       </div>
+
+      {/* Botón flotante del carrito (solo móvil) */}
+      <button
+        onClick={() => setShowMobileCart(true)}
+        className="lg:hidden fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center z-40 transform hover:scale-110 transition-all"
+      >
+        <div className="relative">
+          <ShoppingCart className="w-7 h-7" />
+          {totalItems > 0 && (
+            <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+              {totalItems}
+            </span>
+          )}
+        </div>
+      </button>
+
+      {/* Modal del carrito (solo móvil) */}
+      {showMobileCart && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          {/* Overlay oscuro */}
+          <div
+            className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+            onClick={() => setShowMobileCart(false)}
+          ></div>
+
+          {/* Carrito deslizable desde abajo */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl max-h-[85vh] flex flex-col animate-slide-up">
+            {/* Header del modal */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-3xl">
+              <div className="flex items-center gap-2 text-white">
+                <ShoppingCart className="w-6 h-6" />
+                <h3 className="text-lg font-bold">Carrito ({totalItems} items)</h3>
+              </div>
+              <button
+                onClick={() => setShowMobileCart(false)}
+                className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
+            </div>
+
+            {/* Contenido del carrito */}
+            <div className="flex-1 overflow-y-auto">
+              <Cart
+                items={cart}
+                onUpdateQuantity={updateQuantity}
+                onRemove={removeFromCart}
+                onClearCart={clearCart}
+                onCheckout={() => {
+                  setShowMobileCart(false);
+                  handleCheckout();
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Modal de pago */}
       <PaymentModal
