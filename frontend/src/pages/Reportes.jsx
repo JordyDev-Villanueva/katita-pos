@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText, TrendingUp, Package, DollarSign, FileDown, FileSpreadsheet } from 'lucide-react';
+import { FileText, TrendingUp, Package, DollarSign, FileDown, FileSpreadsheet, BarChart3 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { SalesReport } from '../components/reportes/SalesReport';
 import { InventoryReport } from '../components/reportes/InventoryReport';
@@ -109,36 +109,46 @@ const Reportes = () => {
 
   return (
     <Layout>
-      <div className="p-6">
+      <div className="p-4 lg:p-6">
         {/* Header con botones de exportación */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-              <FileText className="w-7 h-7 text-blue-600" />
-              Reportes y Analytics
-            </h1>
-            <p className="text-gray-600 mt-1">Visualiza y analiza los datos de tu negocio</p>
-          </div>
-
-          {/* Botones de exportación (solo aparecen si hay datos) */}
-          {tieneDatos && (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={exportarPDF}
-                className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center gap-2 shadow-md"
-              >
-                <FileDown className="w-4 h-4" />
-                Exportar PDF
-              </button>
-              <button
-                onClick={exportarExcel}
-                className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2 shadow-md"
-              >
-                <FileSpreadsheet className="w-4 h-4" />
-                Exportar Excel
-              </button>
+        <div className="mb-6 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <BarChart3 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    Reportes y Analytics
+                  </h1>
+                  <p className="text-sm text-gray-600">
+                    Visualiza y analiza los datos de tu negocio
+                  </p>
+                </div>
+              </div>
             </div>
-          )}
+
+            {/* Botones de exportación (solo aparecen si hay datos) */}
+            {tieneDatos && (
+              <div className="flex items-center gap-3 flex-wrap">
+                <button
+                  onClick={exportarPDF}
+                  className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all flex items-center gap-2 shadow-md transform hover:scale-105"
+                >
+                  <FileDown className="w-4 h-4" />
+                  <span className="text-sm font-medium">Exportar PDF</span>
+                </button>
+                <button
+                  onClick={exportarExcel}
+                  className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all flex items-center gap-2 shadow-md transform hover:scale-105"
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  <span className="text-sm font-medium">Exportar Excel</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Filtros */}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, RefreshCw, FileText, CheckCircle } from 'lucide-react';
+import { Plus, RefreshCw, FileText, CheckCircle, Package2 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { LoteStats } from '../components/lotes/LoteStats';
 import { LoteFilters } from '../components/lotes/LoteFilters';
@@ -220,55 +220,66 @@ export const Lotes = () => {
 
   return (
     <Layout>
-      <div className="p-6">
+      <div className="p-4 lg:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Gestión de Lotes</h1>
-            <p className="text-gray-600 mt-1">
-              Control de inventario con sistema FIFO y alertas de vencimiento
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Badge "Datos actualizados" */}
-            {showUpdatedBadge && (
-              <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg animate-fade-in">
-                <CheckCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">Datos actualizados</span>
+        <div className="mb-6 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Package2 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    Gestión de Lotes
+                  </h1>
+                  <p className="text-sm text-gray-600">
+                    Control de inventario con sistema FIFO y alertas de vencimiento
+                  </p>
+                </div>
               </div>
-            )}
+            </div>
 
-            {/* Botón Recargar */}
-            <button
-              onClick={handleRefresh}
-              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span className="text-sm font-medium">Recargar</span>
-            </button>
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Badge "Datos actualizados" */}
+              {showUpdatedBadge && (
+                <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg animate-fade-in">
+                  <CheckCircle className="w-4 h-4" />
+                  <span className="text-sm font-medium">Datos actualizados</span>
+                </div>
+              )}
 
-            {/* Botón Mermas */}
-            {mermas.lotes.length > 0 && (
+              {/* Botón Recargar */}
               <button
-                onClick={() => setShowMermasReport(!showMermasReport)}
-                className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                onClick={handleRefresh}
+                className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2"
               >
-                <FileText className="w-4 h-4" />
-                <span className="text-sm font-medium">
-                  {showMermasReport ? 'Ocultar' : 'Ver'} Mermas ({mermas.lotes.length})
-                </span>
+                <RefreshCw className="w-4 h-4" />
+                <span className="text-sm font-medium">Recargar</span>
               </button>
-            )}
 
-            {/* Botón Registrar Ingreso */}
-            <button
-              onClick={handleNewLote}
-              className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span className="text-sm font-medium">Registrar Ingreso</span>
-            </button>
+              {/* Botón Mermas */}
+              {mermas.lotes.length > 0 && (
+                <button
+                  onClick={() => setShowMermasReport(!showMermasReport)}
+                  className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all flex items-center gap-2 shadow-md transform hover:scale-105"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    {showMermasReport ? 'Ocultar' : 'Ver'} Mermas ({mermas.lotes.length})
+                  </span>
+                </button>
+              )}
+
+              {/* Botón Registrar Ingreso */}
+              <button
+                onClick={handleNewLote}
+                className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg transition-all flex items-center gap-2 shadow-md transform hover:scale-105"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="text-sm font-medium">Registrar Ingreso</span>
+              </button>
+            </div>
           </div>
         </div>
 

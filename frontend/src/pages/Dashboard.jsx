@@ -668,39 +668,50 @@ export const Dashboard = () => {
     <Layout>
       <div className="p-4 lg:p-6">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">Dashboard</h1>
-            <p className="text-gray-600 text-sm lg:text-base">
-              Bienvenido, <span className="font-semibold text-primary-600">{user?.nombre_completo}</span>
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 flex-wrap">
-            {showWelcome && (
-              <div className="flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2.5 rounded-lg shadow-md animate-fade-in">
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-medium">¡Bienvenido, {user?.nombre_completo}!</span>
-                <button onClick={() => setShowWelcome(false)} className="ml-2 text-green-600 hover:text-green-800">
-                  <X className="w-4 h-4" />
-                </button>
+        <div className="mb-6 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Calendar className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    Dashboard
+                  </h1>
+                  <p className="text-sm text-gray-600">
+                    Bienvenido, <span className="font-semibold text-blue-600">{user?.nombre_completo}</span>
+                  </p>
+                </div>
               </div>
-            )}
+            </div>
 
-            {showUpdatedBadge && (
-              <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg animate-fade-in">
-                <CheckCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">Datos actualizados</span>
-              </div>
-            )}
+            <div className="flex items-center gap-3 flex-wrap">
+              {showWelcome && (
+                <div className="flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2.5 rounded-lg shadow-md animate-fade-in">
+                  <CheckCircle className="w-5 h-5" />
+                  <span className="font-medium">¡Bienvenido, {user?.nombre_completo}!</span>
+                  <button onClick={() => setShowWelcome(false)} className="ml-2 text-green-600 hover:text-green-800">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
 
-            <button
-              onClick={handleRefresh}
-              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span className="text-sm font-medium">Recargar</span>
-            </button>
+              {showUpdatedBadge && (
+                <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg animate-fade-in">
+                  <CheckCircle className="w-4 h-4" />
+                  <span className="text-sm font-medium">Datos actualizados</span>
+                </div>
+              )}
+
+              <button
+                onClick={handleRefresh}
+                className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span className="text-sm font-medium">Recargar</span>
+              </button>
+            </div>
           </div>
         </div>
 
