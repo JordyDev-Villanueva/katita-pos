@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { User, Lock, Mail, Phone, Save, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import { authAPI } from '../api/auth';
 import toast from 'react-hot-toast';
 
 export default function Profile() {
@@ -78,9 +78,9 @@ export default function Profile() {
     setErrors({});
 
     try {
-      const response = await api.put('/auth/profile', formData);
+      const response = await authAPI.updateProfile(formData);
 
-      if (response.data.success) {
+      if (response.success) {
         toast.success('Perfil actualizado correctamente');
         // Actualizar el usuario en el contexto podría requerir refrescar
         window.location.reload();
@@ -117,12 +117,12 @@ export default function Profile() {
     }
 
     try {
-      const response = await api.put('/auth/profile', {
+      const response = await authAPI.updateProfile({
         current_password: passwordData.current_password,
         new_password: passwordData.new_password
       });
 
-      if (response.data.success) {
+      if (response.success) {
         toast.success('Contraseña cambiada correctamente');
         // Limpiar formulario de contraseña
         setPasswordData({

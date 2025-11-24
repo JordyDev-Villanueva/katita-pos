@@ -33,4 +33,9 @@ export const authAPI = {
     });
     return response.data;
   },
+
+  updateProfile: async (profileData) => {
+    const response = await axiosInstance.put('/auth/profile', profileData);
+    return response.data;
+  },
 };
