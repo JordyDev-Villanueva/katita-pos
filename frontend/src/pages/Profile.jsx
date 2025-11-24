@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User, Lock, Mail, Phone, Save, Eye, EyeOff, CheckCircle } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { authAPI } from '../api/auth';
 import toast from 'react-hot-toast';
 
