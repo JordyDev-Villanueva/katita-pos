@@ -460,3 +460,173 @@ def get_current_user():
             status_code=500,
             errors={'exception': str(e)}
         )
+
+
+# ==================================================================================
+# ENDPOINT 5: PUT /api/auth/profile - Actualizar perfil del usuario
+# ==================================================================================
+
+@auth_bp.route('/profile', methods=['PUT'])
+@jwt_required()
+def update_profile():
+    """
+    Actualizar información del perfil del usuario autenticado
+
+    Permite al usuario actualizar sus datos personales y cambiar contraseña.
+
+    Headers requeridos:
+        Authorization: Bearer <access_token>
+
+    Request body (todos opcionales):
+        {
+            "nombre_completo": "Nuevo Nombre",
+            "email": "nuevo@email.com",
+            "telefono": "987654321",
+            "current_password": "contraseña_actual",
+            "new_password": "nueva_contraseña"
+        }
+
+    Returns:
+        200: Perfil actualizado exitosamente
+        400: Error de validación
+        401: Contraseña actual incorrecta o token inválido
+        404: Usuario no encontrado
+
+    Ejemplo de respuesta exitosa:
+        {
+            "success": true,
+            "message": "Perfil actualizado exitosamente",
+            "data": {
+                "id": 1,
+                "username": "admin",
+                "nombre_completo": "Nuevo Nombre",
+                "email": "nuevo@email.com",
+                "telefono": "987654321"
+            }
+        }
+    """
+    try:
+        # Obtener ID del usuario del token JWT
+        current_user_id_str = get_jwt_identity()
+        user_id = int(current_user_id_str)
+
+        print(f'\n✏️ PUT /api/auth/profile')
+        print(f'   Usuario autenticado: {user_id}')
+
+        # Buscar usuario en la base de datos
+        user = User.query.get(user_id)
+
+        if not user:
+            return not_found_response('Usuario no encontrado')
+
+        if not user.activo:
+            return unauthorized_response('Usuario inactivo')
+
+        # Obtener datos del request
+        data = request.json
+
+        # ========== VALIDAR Y ACTUALIZAR DATOS BÁSICOS ==========
+        errores = {}
+        campos_actualizados = []
+
+        # Actualizar nombre completo
+        if 'nombre_completo' in data and data['nombre_completo']:
+            nuevo_nombre = data['nombre_completo'].strip()
+            if len(nuevo_nombre) < 3:
+                errores['nombre_completo'] = 'El nombre debe tener al menos 3 caracteres'
+            else:
+                user.nombre_completo = nuevo_nombre
+                campos_actualizados.append('nombre_completo')
+
+        # Actualizar email
+        if 'email' in data and data['email']:
+            nuevo_email = data['email'].strip().lower()
+            # Verificar que el email no esté en uso por otro usuario
+            email_existente = User.query.filter(
+                User.email == nuevo_email,
+                User.id != user_id
+            ).first()
+
+            if email_existente:
+                errores['email'] = 'Este email ya está en uso'
+            else:
+                import re
+                email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+                if not re.match(email_regex, nuevo_email):
+                    errores['email'] = 'Formato de email inválido'
+                else:
+                    user.email = nuevo_email
+                    campos_actualizados.append('email')
+
+        # Actualizar teléfono
+        if 'telefono' in data:
+            nuevo_telefono = data['telefono'].strip() if data['telefono'] else None
+            user.telefono = nuevo_telefono
+            campos_actualizados.append('telefono')
+
+        # ========== CAMBIAR CONTRASEÑA (SI SE PROPORCIONA) ==========
+        if 'new_password' in data and data['new_password']:
+            # Verificar que se proporcionó la contraseña actual
+            if not data.get('current_password'):
+                errores['current_password'] = 'Debe proporcionar la contraseña actual para cambiarla'
+            else:
+                # Verificar que la contraseña actual sea correcta
+                if not user.check_password(data['current_password']):
+                    errores['current_password'] = 'La contraseña actual es incorrecta'
+                else:
+                    # Validar nueva contraseña
+                    nueva_password = data['new_password']
+                    if len(nueva_password) < 6:
+                        errores['new_password'] = 'La nueva contraseña debe tener al menos 6 caracteres'
+                    else:
+                        user.set_password(nueva_password)
+                        campos_actualizados.append('password')
+                        print(f'   🔐 Contraseña actualizada para: {user.username}')
+
+        # Si hay errores de validación, retornarlos
+        if errores:
+            return validation_error_response(errores)
+
+        # Si no hay cambios, retornar mensaje
+        if not campos_actualizados:
+            return success_response(
+                data={
+                    'id': user.id,
+                    'username': user.username,
+                    'nombre_completo': user.nombre_completo,
+                    'email': user.email,
+                    'telefono': user.telefono,
+                    'rol': user.rol
+                },
+                message='No se realizaron cambios'
+            )
+
+        # Guardar cambios en la base de datos
+        db.session.commit()
+
+        print(f'   ✅ Perfil actualizado: {", ".join(campos_actualizados)}')
+
+        # ========== RESPUESTA EXITOSA ==========
+        return success_response(
+            data={
+                'id': user.id,
+                'username': user.username,
+                'nombre_completo': user.nombre_completo,
+                'email': user.email,
+                'telefono': user.telefono,
+                'rol': user.rol,
+                'campos_actualizados': campos_actualizados
+            },
+            message='Perfil actualizado exitosamente'
+        )
+
+    except Exception as e:
+        print(f'❌ ERROR al actualizar perfil: {str(e)}')
+        import traceback
+        traceback.print_exc()
+        db.session.rollback()
+        return error_response(
+            message='Error al actualizar perfil',
+            status_code=500,
+            errors={'exception': str(e)}
+        )

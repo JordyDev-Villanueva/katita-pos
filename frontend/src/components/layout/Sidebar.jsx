@@ -9,7 +9,8 @@ import {
   LogOut,
   ShoppingBag,
   Menu,
-  X
+  X,
+  User
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -117,12 +118,27 @@ export const Sidebar = () => {
         </nav>
 
         {/* User Info y Logout - Sticky at Bottom */}
-        <div className="p-4 border-t border-primary-800 bg-sidebar">
-          <div className="bg-primary-800 rounded-lg p-3 mb-3">
+        <div className="p-4 border-t border-primary-800 bg-sidebar space-y-2">
+          <div className="bg-primary-800 rounded-lg p-3">
             <p className="text-xs text-primary-200 mb-1">Usuario</p>
             <p className="text-sm font-medium text-white">{user?.nombre_completo}</p>
             <p className="text-xs text-primary-300 capitalize">Rol: {user?.rol}</p>
           </div>
+
+          <NavLink
+            to="/perfil"
+            onClick={() => setIsOpen(false)}
+            className={({ isActive }) =>
+              `w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-colors duration-200 font-medium ${
+                isActive
+                  ? 'bg-primary-700 text-white'
+                  : 'bg-primary-800 hover:bg-primary-700 text-primary-100 hover:text-white'
+              }`
+            }
+          >
+            <User className="h-4 w-4" />
+            Mi Perfil
+          </NavLink>
 
           <button
             onClick={logout}
