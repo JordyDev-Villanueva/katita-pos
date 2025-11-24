@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { User, Lock, Mail, Phone, Save, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { authAPI } from '../api/auth';
+import { Layout } from '../components/layout/Layout';
 import toast from 'react-hot-toast';
 
 export default function Profile() {
@@ -143,19 +144,20 @@ export default function Profile() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <User className="w-8 h-8 text-blue-600" />
-            Mi Perfil
-          </h1>
-          <p className="text-gray-600 mt-1">Administra tu información personal y seguridad</p>
+    <Layout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <User className="w-8 h-8 text-blue-600" />
+              Mi Perfil
+            </h1>
+            <p className="text-gray-600 mt-1">Administra tu información personal y seguridad</p>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Información Personal */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -403,6 +405,7 @@ export default function Profile() {
           </form>
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 }
