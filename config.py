@@ -72,7 +72,8 @@ class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
     DATABASE_MODE = 'cloud'  # En producción siempre usar PostgreSQL
-    SQLALCHEMY_DATABASE_URI = Config.POSTGRES_DATABASE_URI
+    # Leer directamente del environment para asegurar que Railway use las variables correctas
+    SQLALCHEMY_DATABASE_URI = os.environ.get('POSTGRES_DATABASE_URI') or Config.POSTGRES_DATABASE_URI
 
 
 class TestingConfig(Config):
