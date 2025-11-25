@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 
 export default function Profile() {
   const { user } = useAuth();
+  // Cache bust: v2.0.1
 
   // Estados para el formulario
   const [formData, setFormData] = useState({
@@ -160,9 +161,9 @@ export default function Profile() {
         </div>
 
         {/* User Info Card Mejorada */}
-        <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-6">
+        <div className="bg-white rounded-xl shadow-xl border-4 border-gray-300 p-6">
           <div className="flex items-center gap-4">
-            <div className="bg-gradient-to-br from-primary-500 to-primary-700 p-4 rounded-full shadow-md border-2 border-primary-300">
+            <div className="bg-gradient-to-br from-primary-500 to-primary-700 p-4 rounded-full shadow-lg border-4 border-white ring-4 ring-primary-300">
               <User className="w-8 h-8 text-white" />
             </div>
             <div className="flex-1">
@@ -170,10 +171,10 @@ export default function Profile() {
               <p className="text-sm text-gray-500 font-medium">@{user?.username}</p>
             </div>
             <div>
-              <span className={`px-4 py-2 rounded-full text-sm font-bold shadow-md border-2 ${
-                user?.rol === 'admin' ? 'bg-purple-100 text-purple-800 border-purple-300' :
-                user?.rol === 'vendedor' ? 'bg-blue-100 text-blue-800 border-blue-300' :
-                'bg-green-100 text-green-800 border-green-300'
+              <span className={`px-4 py-2 rounded-full text-sm font-bold shadow-lg border-3 ${
+                user?.rol === 'admin' ? 'bg-purple-100 text-purple-800 border-purple-400 ring-2 ring-purple-200' :
+                user?.rol === 'vendedor' ? 'bg-blue-100 text-blue-800 border-blue-400 ring-2 ring-blue-200' :
+                'bg-green-100 text-green-800 border-green-400 ring-2 ring-green-200'
               }`}>
                 <Shield className="w-4 h-4 inline mr-1" />
                 {user?.rol === 'admin' ? 'Administrador' :
@@ -185,8 +186,8 @@ export default function Profile() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Información Personal */}
-          <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-b-2 border-blue-300 px-6 py-4">
+          <div className="bg-white rounded-xl shadow-xl border-4 border-gray-300 overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-b-4 border-blue-400 px-6 py-4">
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 <User className="w-5 h-5 text-blue-600" />
                 Información Personal
@@ -203,7 +204,7 @@ export default function Profile() {
                   type="text"
                   value={user?.username || ''}
                   disabled
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed font-medium"
+                  className="w-full px-4 py-3 border-3 border-gray-400 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed font-medium shadow-inner"
                 />
                 <p className="text-xs text-gray-500 mt-1.5">El nombre de usuario no se puede cambiar</p>
               </div>
@@ -218,8 +219,8 @@ export default function Profile() {
                   name="nombre_completo"
                   value={formData.nombre_completo}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
-                    errors.nombre_completo ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
+                  className={`w-full px-4 py-3 border-3 rounded-lg focus:ring-4 focus:ring-blue-300 focus:border-blue-500 transition-all shadow-sm ${
+                    errors.nombre_completo ? 'border-red-500 bg-red-50' : 'border-gray-400 hover:border-blue-400'
                   }`}
                   required
                 />
@@ -239,8 +240,8 @@ export default function Profile() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
-                    errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
+                  className={`w-full px-4 py-3 border-3 rounded-lg focus:ring-4 focus:ring-blue-300 focus:border-blue-500 transition-all shadow-sm ${
+                    errors.email ? 'border-red-500 bg-red-50' : 'border-gray-400 hover:border-blue-400'
                   }`}
                   required
                 />
@@ -260,7 +261,7 @@ export default function Profile() {
                   name="telefono"
                   value={formData.telefono}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border-2 border-gray-300 hover:border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full px-4 py-3 border-3 border-gray-400 hover:border-blue-400 rounded-lg focus:ring-4 focus:ring-blue-300 focus:border-blue-500 transition-all shadow-sm"
                   placeholder="Opcional"
                 />
               </div>
@@ -287,8 +288,8 @@ export default function Profile() {
           </div>
 
           {/* Cambiar Contraseña */}
-          <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-50 to-purple-100 border-b-2 border-purple-300 px-6 py-4">
+          <div className="bg-white rounded-xl shadow-xl border-4 border-gray-300 overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100 border-b-4 border-purple-400 px-6 py-4">
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 <Lock className="w-5 h-5 text-purple-600" />
                 Cambiar Contraseña
@@ -307,8 +308,8 @@ export default function Profile() {
                     name="current_password"
                     value={passwordData.current_password}
                     onChange={handlePasswordChange}
-                    className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${
-                      errors.current_password ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
+                    className={`w-full px-4 py-3 pr-12 border-3 rounded-lg focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all shadow-sm ${
+                      errors.current_password ? 'border-red-500 bg-red-50' : 'border-gray-400 hover:border-purple-400'
                     }`}
                     required
                   />
@@ -336,8 +337,8 @@ export default function Profile() {
                     name="new_password"
                     value={passwordData.new_password}
                     onChange={handlePasswordChange}
-                    className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${
-                      errors.new_password ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
+                    className={`w-full px-4 py-3 pr-12 border-3 rounded-lg focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all shadow-sm ${
+                      errors.new_password ? 'border-red-500 bg-red-50' : 'border-gray-400 hover:border-purple-400'
                     }`}
                     required
                     minLength={6}
@@ -367,8 +368,8 @@ export default function Profile() {
                     name="confirm_password"
                     value={passwordData.confirm_password}
                     onChange={handlePasswordChange}
-                    className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${
-                      errors.confirm_password ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
+                    className={`w-full px-4 py-3 pr-12 border-3 rounded-lg focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all shadow-sm ${
+                      errors.confirm_password ? 'border-red-500 bg-red-50' : 'border-gray-400 hover:border-purple-400'
                     }`}
                     required
                   />
@@ -387,7 +388,7 @@ export default function Profile() {
 
               {/* Indicador de fortaleza */}
               {passwordData.new_password && (
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 space-y-2 border-2 border-gray-300 shadow-sm">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 space-y-2 border-3 border-gray-400 shadow-md">
                   <p className="text-sm font-semibold text-gray-700 mb-2">Requisitos de contraseña:</p>
                   <div className="flex items-center gap-2 text-sm">
                     <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
