@@ -86,8 +86,8 @@ def create_app(config_name=None):
             'status': 'healthy',
             'service': 'KATITA-POS API',
             'database_mode': app.config['DATABASE_MODE'],
-            'version': '1.0.5',
-            'timezone_fixed': 'Peru UTC-5'
+            'version': '1.0.6',
+            'optimized_dashboard': True
         }), 200
 
     app.logger.info(f"KATITA-POS started in {app.config['DATABASE_MODE']} mode")
@@ -189,6 +189,10 @@ def register_blueprints(app):
     # Registrar blueprint de ventas
     from app.blueprints.ventas import ventas_bp
     app.register_blueprint(ventas_bp)
+
+    # Registrar blueprint de dashboard (optimizado)
+    from app.blueprints.dashboard import dashboard_bp
+    app.register_blueprint(dashboard_bp)
 
 
 def register_error_handlers(app):

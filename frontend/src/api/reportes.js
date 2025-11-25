@@ -7,8 +7,53 @@ import { getPeruToday, extractDateOnly, formatPeruDate, daysDifference } from '.
 
 export const reportesAPI = {
   /**
+   * Obtiene estadísticas del dashboard de forma OPTIMIZADA (1 sola petición)
+   * MUCHO MÁS RÁPIDO que getDashboardResumen
+   */
+  getDashboardStatsOptimizado: async () => {
+    try {
+      console.log('🚀 Obteniendo dashboard stats (OPTIMIZADO)...');
+
+      const response = await axiosInstance.get('/dashboard/stats');
+
+      if (!response.data?.success) {
+        console.warn('⚠️ Respuesta sin success flag');
+        return { success: false, data: null };
+      }
+
+      console.log('✅ Dashboard stats obtenidas:', response.data.data);
+
+      return {
+        success: true,
+        data: {
+          stats: {
+            ventasHoy: response.data.data.ventas_hoy.total,
+            gananciaHoy: response.data.data.ventas_hoy.ganancia,
+            productosEnStock: response.data.data.productos.en_stock,
+            porVencer: response.data.data.lotes.por_vencer,
+          },
+          alertas: {
+            bajoStock: response.data.data.productos.bajo_stock_lista || [],
+            porVencer: response.data.data.lotes.por_vencer_lista || [],
+            vencidos: [], // Se puede agregar si el endpoint lo retorna
+          },
+          ventasHoyCount: response.data.data.ventas_hoy.cantidad,
+          totalProductos: response.data.data.productos.total,
+          productosBajoStock: response.data.data.productos.bajo_stock,
+          todasVentas: response.data.data.ventas_ultimos_7_dias || [],
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ Error obteniendo dashboard stats optimizado:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Obtiene resumen completo para el Dashboard
    * Combina: ventas del día, productos bajo stock, alertas de vencimiento
+   * NOTA: Esta es la versión antigua (múltiples peticiones). Usa getDashboardStatsOptimizado para mejor rendimiento.
    */
   getDashboardResumen: async () => {
     try {
