@@ -192,18 +192,18 @@ export default function Profile() {
           </div>
 
           {/* FILA INFERIOR: Formularios lado a lado - 50/50 */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-auto">
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-hidden">
 
             {/* Formulario de Información Personal */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden h-fit">
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-5 py-3">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <User className="w-5 h-5" />
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <User className="w-4 h-4" />
                   Información Personal
                 </h3>
               </div>
 
-              <form onSubmit={handleSaveProfile} className="p-5 space-y-4">
+              <form onSubmit={handleSaveProfile} className="p-4 space-y-2.5 flex-1 flex flex-col">
                 {/* Usuario (solo lectura) */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5">
@@ -295,15 +295,15 @@ export default function Profile() {
             </div>
 
             {/* Formulario de Cambio de Contraseña */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden h-fit">
-              <div className="bg-gradient-to-r from-purple-500 to-purple-600 px-5 py-3">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Lock className="w-5 h-5" />
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
+              <div className="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-2">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <Lock className="w-4 h-4" />
                   Cambiar Contraseña
                 </h3>
               </div>
 
-              <form onSubmit={handleChangePassword} className="p-5 space-y-4">
+              <form onSubmit={handleChangePassword} className="p-4 space-y-2.5 flex-1 flex flex-col">
                 {/* Contraseña Actual */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5">
