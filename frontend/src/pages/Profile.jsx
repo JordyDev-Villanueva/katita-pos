@@ -136,55 +136,55 @@ export default function Profile() {
     <Layout>
       {/* DISEÑO COMPACTO: TODO EN UNA PANTALLA SIN SCROLL */}
       <div className="h-[calc(100vh-80px)] overflow-hidden">
-        <div className="h-full flex flex-col gap-6 p-6">
+        <div className="h-full flex flex-col gap-3 p-4">
 
           {/* FILA SUPERIOR: Tarjeta de Usuario - Ancho Completo */}
-          <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl">
-            <div className="flex items-center gap-6 p-6">
+          <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl shrink-0">
+            <div className="flex flex-col md:flex-row items-center gap-4 p-4">
               {/* Avatar y nombre */}
-              <div className="relative shrink-0">
-                <div className="bg-white/20 backdrop-blur-sm p-5 rounded-full border-4 border-white/30">
-                  <UserCircle2 className="w-20 h-20 text-white" />
+              <div className="flex items-center gap-4 flex-1">
+                <div className="relative shrink-0">
+                  <div className="bg-white/20 backdrop-blur-sm p-3 rounded-full border-4 border-white/30">
+                    <UserCircle2 className="w-12 h-12 md:w-16 md:h-16 text-white" />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 bg-green-400 w-4 h-4 rounded-full border-2 border-white"></div>
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-green-400 w-6 h-6 rounded-full border-4 border-white"></div>
+
+                {/* Info del usuario */}
+                <div className="flex-1">
+                  <h2 className="text-xl md:text-2xl font-bold text-white">{user?.nombre_completo}</h2>
+                  <p className="text-indigo-200 text-sm md:text-base font-medium">@{user?.username}</p>
+                </div>
               </div>
 
-              {/* Info del usuario */}
-              <div className="flex-1">
-                <h2 className="text-3xl font-bold text-white">{user?.nombre_completo}</h2>
-                <p className="text-indigo-200 text-lg font-medium mt-1">@{user?.username}</p>
-              </div>
-
-              {/* Badge de rol */}
-              <div className="shrink-0">
-                <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-full text-base font-bold shadow-lg ${
+              {/* Badge de rol + Info rápida */}
+              <div className="flex flex-wrap gap-3 items-center justify-center md:justify-end shrink-0">
+                {/* Badge de rol */}
+                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold shadow-lg ${
                   user?.rol === 'admin'
                     ? 'bg-yellow-400 text-yellow-900'
                     : user?.rol === 'vendedor'
                     ? 'bg-blue-400 text-blue-900'
                     : 'bg-green-400 text-green-900'
                 }`}>
-                  <Shield className="w-5 h-5" />
+                  <Shield className="w-4 h-4" />
                   {user?.rol === 'admin' ? 'Administrador' :
                    user?.rol === 'vendedor' ? 'Vendedor' : 'Bodeguero'}
                 </div>
-              </div>
 
-              {/* Info rápida - inline */}
-              <div className="flex gap-6 shrink-0">
-                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                  <Mail className="w-5 h-5 text-white" />
+                {/* Email */}
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                  <Mail className="w-4 h-4 text-white" />
                   <div>
-                    <p className="text-xs text-indigo-200">Email</p>
-                    <p className="text-sm font-semibold text-white">{user?.email || 'No configurado'}</p>
+                    <p className="text-xs font-semibold text-white">{user?.email || 'No configurado'}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                  <Phone className="w-5 h-5 text-white" />
+                {/* Teléfono */}
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                  <Phone className="w-4 h-4 text-white" />
                   <div>
-                    <p className="text-xs text-indigo-200">Teléfono</p>
-                    <p className="text-sm font-semibold text-white">{user?.telefono || 'No configurado'}</p>
+                    <p className="text-xs font-semibold text-white">{user?.telefono || 'No configurado'}</p>
                   </div>
                 </div>
               </div>
@@ -192,35 +192,35 @@ export default function Profile() {
           </div>
 
           {/* FILA INFERIOR: Formularios lado a lado - 50/50 */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-hidden">
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 min-h-0">
 
             {/* Formulario de Información Personal */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col min-h-0">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2 shrink-0">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <User className="w-4 h-4" />
                   Información Personal
                 </h3>
               </div>
 
-              <form onSubmit={handleSaveProfile} className="p-4 space-y-2.5 flex-1 flex flex-col">
+              <form onSubmit={handleSaveProfile} className="p-3 space-y-2 flex-1 flex flex-col overflow-y-auto">
                 {/* Usuario (solo lectura) */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">
                     Usuario
                   </label>
                   <input
                     type="text"
                     value={user?.username || ''}
                     disabled
-                    className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                    className="w-full px-3 py-1.5 text-sm border-2 border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
                   />
-                  <p className="text-xs text-gray-400 mt-1">No se puede cambiar</p>
+                  <p className="text-xs text-gray-400 mt-0.5">No se puede cambiar</p>
                 </div>
 
                 {/* Nombre completo */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">
                     Nombre Completo *
                   </label>
                   <input
@@ -228,19 +228,19 @@ export default function Profile() {
                     name="nombre_completo"
                     value={formData.nombre_completo}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
+                    className={`w-full px-3 py-1.5 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
                       errors.nombre_completo ? 'border-red-400 bg-red-50' : 'border-gray-300'
                     }`}
                     required
                   />
                   {errors.nombre_completo && (
-                    <p className="text-red-500 text-xs mt-1">{errors.nombre_completo}</p>
+                    <p className="text-red-500 text-xs mt-0.5">{errors.nombre_completo}</p>
                   )}
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">
                     Correo Electrónico *
                   </label>
                   <input
@@ -248,19 +248,19 @@ export default function Profile() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
+                    className={`w-full px-3 py-1.5 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
                       errors.email ? 'border-red-400 bg-red-50' : 'border-gray-300'
                     }`}
                     required
                   />
                   {errors.email && (
-                    <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                    <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>
                   )}
                 </div>
 
                 {/* Teléfono */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">
                     Teléfono (Opcional)
                   </label>
                   <input
@@ -268,7 +268,7 @@ export default function Profile() {
                     name="telefono"
                     value={formData.telefono}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition"
+                    className="w-full px-3 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition"
                     placeholder="+51 999 999 999"
                   />
                 </div>
@@ -277,7 +277,7 @@ export default function Profile() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm mt-auto"
                 >
                   {loading ? (
                     <>
@@ -295,18 +295,18 @@ export default function Profile() {
             </div>
 
             {/* Formulario de Cambio de Contraseña */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
-              <div className="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-2">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col min-h-0">
+              <div className="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-2 shrink-0">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <Lock className="w-4 h-4" />
                   Cambiar Contraseña
                 </h3>
               </div>
 
-              <form onSubmit={handleChangePassword} className="p-4 space-y-2.5 flex-1 flex flex-col">
+              <form onSubmit={handleChangePassword} className="p-3 space-y-2 flex-1 flex flex-col overflow-y-auto">
                 {/* Contraseña Actual */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">
                     Contraseña Actual *
                   </label>
                   <div className="relative">
@@ -315,7 +315,7 @@ export default function Profile() {
                       name="current_password"
                       value={passwordData.current_password}
                       onChange={handlePasswordChange}
-                      className={`w-full px-3 py-2 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
+                      className={`w-full px-3 py-1.5 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
                         errors.current_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
                       }`}
                       required
@@ -329,13 +329,13 @@ export default function Profile() {
                     </button>
                   </div>
                   {errors.current_password && (
-                    <p className="text-red-500 text-xs mt-1">{errors.current_password}</p>
+                    <p className="text-red-500 text-xs mt-0.5">{errors.current_password}</p>
                   )}
                 </div>
 
                 {/* Nueva Contraseña */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">
                     Nueva Contraseña *
                   </label>
                   <div className="relative">
@@ -344,7 +344,7 @@ export default function Profile() {
                       name="new_password"
                       value={passwordData.new_password}
                       onChange={handlePasswordChange}
-                      className={`w-full px-3 py-2 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
+                      className={`w-full px-3 py-1.5 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
                         errors.new_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
                       }`}
                       required
@@ -358,15 +358,15 @@ export default function Profile() {
                       {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">Mínimo 6 caracteres</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Mínimo 6 caracteres</p>
                   {errors.new_password && (
-                    <p className="text-red-500 text-xs mt-1">{errors.new_password}</p>
+                    <p className="text-red-500 text-xs mt-0.5">{errors.new_password}</p>
                   )}
                 </div>
 
                 {/* Confirmar Nueva Contraseña */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">
                     Confirmar Nueva Contraseña *
                   </label>
                   <div className="relative">
@@ -375,7 +375,7 @@ export default function Profile() {
                       name="confirm_password"
                       value={passwordData.confirm_password}
                       onChange={handlePasswordChange}
-                      className={`w-full px-3 py-2 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
+                      className={`w-full px-3 py-1.5 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
                         errors.confirm_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
                       }`}
                       required
@@ -389,7 +389,7 @@ export default function Profile() {
                     </button>
                   </div>
                   {errors.confirm_password && (
-                    <p className="text-red-500 text-xs mt-1">{errors.confirm_password}</p>
+                    <p className="text-red-500 text-xs mt-0.5">{errors.confirm_password}</p>
                   )}
                 </div>
 
@@ -397,7 +397,7 @@ export default function Profile() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm"
+                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm mt-auto"
                 >
                   {loading ? (
                     <>
