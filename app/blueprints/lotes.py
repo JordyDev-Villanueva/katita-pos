@@ -97,11 +97,16 @@ def crear_lote():
         }
     """
     try:
+        from flask import current_app
+        current_app.logger.info("[LOTES] Iniciando creacion de lote...")
+
         # Obtener usuario autenticado desde JWT
         current_user_id_str = get_jwt_identity()
         current_user_id = int(current_user_id_str) if current_user_id_str else None
+        current_app.logger.info(f"[LOTES] Usuario autenticado: {current_user_id}")
 
         data = request.json
+        current_app.logger.info(f"[LOTES] Datos recibidos: {data}")
 
         # ========== VALIDACIONES DE CAMPOS REQUERIDOS ==========
         campos_requeridos = ['producto_id', 'cantidad_inicial', 'fecha_vencimiento', 'precio_compra_lote']
@@ -223,17 +228,23 @@ def crear_lote():
         )
 
     except IntegrityError as e:
+        from flask import current_app
+        current_app.logger.error(f"[LOTES] IntegrityError: {str(e)}")
         db.session.rollback()
         return conflict_response(
             message='Error de integridad en la base de datos',
             errors={'database': str(e.orig)}
         )
     except Exception as e:
+        from flask import current_app
+        import traceback
+        current_app.logger.error(f"[LOTES] Exception: {str(e)}")
+        current_app.logger.error(f"[LOTES] Traceback: {traceback.format_exc()}")
         db.session.rollback()
         return error_response(
             message='Error al crear el lote',
             status_code=500,
-            errors={'exception': str(e)}
+            errors={'exception': str(e), 'traceback': traceback.format_exc()}
         )
 
 
