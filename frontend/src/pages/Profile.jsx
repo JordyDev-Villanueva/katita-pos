@@ -203,25 +203,25 @@ export default function Profile() {
                 </h3>
               </div>
 
-              <form onSubmit={handleSaveProfile} className="p-3 flex-1 flex flex-col justify-between overflow-hidden">
-                <div className="space-y-2">
+              <form onSubmit={handleSaveProfile} className="p-4 flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 space-y-3">
                   {/* Usuario (solo lectura) */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
                       Usuario
                     </label>
                     <input
                       type="text"
                       value={user?.username || ''}
                       disabled
-                      className="w-full px-3 py-1.5 text-sm border-2 border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
                     />
-                    <p className="text-xs text-gray-400 mt-0.5">No se puede cambiar</p>
+                    <p className="text-xs text-gray-400 mt-1">No se puede cambiar</p>
                   </div>
 
                   {/* Nombre completo */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
                       Nombre Completo *
                     </label>
                     <input
@@ -229,19 +229,19 @@ export default function Profile() {
                       name="nombre_completo"
                       value={formData.nombre_completo}
                       onChange={handleChange}
-                      className={`w-full px-3 py-1.5 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
+                      className={`w-full px-3 py-2 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
                         errors.nombre_completo ? 'border-red-400 bg-red-50' : 'border-gray-300'
                       }`}
                       required
                     />
                     {errors.nombre_completo && (
-                      <p className="text-red-500 text-xs mt-0.5">{errors.nombre_completo}</p>
+                      <p className="text-red-500 text-xs mt-1">{errors.nombre_completo}</p>
                     )}
                   </div>
 
                   {/* Email */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
                       Correo Electrónico *
                     </label>
                     <input
@@ -249,19 +249,19 @@ export default function Profile() {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className={`w-full px-3 py-1.5 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
+                      className={`w-full px-3 py-2 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
                         errors.email ? 'border-red-400 bg-red-50' : 'border-gray-300'
                       }`}
                       required
                     />
                     {errors.email && (
-                      <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>
+                      <p className="text-red-500 text-xs mt-1">{errors.email}</p>
                     )}
                   </div>
 
                   {/* Teléfono */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
                       Teléfono (Opcional)
                     </label>
                     <input
@@ -269,7 +269,7 @@ export default function Profile() {
                       name="telefono"
                       value={formData.telefono}
                       onChange={handleChange}
-                      className="w-full px-3 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition"
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition"
                       placeholder="+51 999 999 999"
                     />
                   </div>
@@ -279,7 +279,7 @@ export default function Profile() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm mt-4"
                 >
                   {loading ? (
                     <>
@@ -305,11 +305,11 @@ export default function Profile() {
                 </h3>
               </div>
 
-              <form onSubmit={handleChangePassword} className="p-3 flex-1 flex flex-col justify-between overflow-hidden">
-                <div className="space-y-2">
+              <form onSubmit={handleChangePassword} className="p-4 flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 space-y-3">
                   {/* Contraseña Actual */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
                       Contraseña Actual *
                     </label>
                     <div className="relative">
@@ -318,7 +318,7 @@ export default function Profile() {
                         name="current_password"
                         value={passwordData.current_password}
                         onChange={handlePasswordChange}
-                        className={`w-full px-3 py-1.5 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
+                        className={`w-full px-3 py-2 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
                           errors.current_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
                         }`}
                         required
@@ -332,13 +332,13 @@ export default function Profile() {
                       </button>
                     </div>
                     {errors.current_password && (
-                      <p className="text-red-500 text-xs mt-0.5">{errors.current_password}</p>
+                      <p className="text-red-500 text-xs mt-1">{errors.current_password}</p>
                     )}
                   </div>
 
                   {/* Nueva Contraseña */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
                       Nueva Contraseña *
                     </label>
                     <div className="relative">
@@ -347,7 +347,7 @@ export default function Profile() {
                         name="new_password"
                         value={passwordData.new_password}
                         onChange={handlePasswordChange}
-                        className={`w-full px-3 py-1.5 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
+                        className={`w-full px-3 py-2 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
                           errors.new_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
                         }`}
                         required
@@ -361,15 +361,15 @@ export default function Profile() {
                         {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">Mínimo 6 caracteres</p>
+                    <p className="text-xs text-gray-400 mt-1">Mínimo 6 caracteres</p>
                     {errors.new_password && (
-                      <p className="text-red-500 text-xs mt-0.5">{errors.new_password}</p>
+                      <p className="text-red-500 text-xs mt-1">{errors.new_password}</p>
                     )}
                   </div>
 
                   {/* Confirmar Nueva Contraseña */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
                       Confirmar Nueva Contraseña *
                     </label>
                     <div className="relative">
@@ -378,7 +378,7 @@ export default function Profile() {
                         name="confirm_password"
                         value={passwordData.confirm_password}
                         onChange={handlePasswordChange}
-                        className={`w-full px-3 py-1.5 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
+                        className={`w-full px-3 py-2 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
                           errors.confirm_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
                         }`}
                         required
@@ -392,7 +392,7 @@ export default function Profile() {
                       </button>
                     </div>
                     {errors.confirm_password && (
-                      <p className="text-red-500 text-xs mt-0.5">{errors.confirm_password}</p>
+                      <p className="text-red-500 text-xs mt-1">{errors.confirm_password}</p>
                     )}
                   </div>
                 </div>
@@ -401,7 +401,7 @@ export default function Profile() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm"
+                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm mt-4"
                 >
                   {loading ? (
                     <>
