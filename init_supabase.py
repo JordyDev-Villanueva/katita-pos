@@ -9,7 +9,7 @@ from app import db
 import bcrypt
 
 # URL de Supabase
-SUPABASE_URL = 'postgresql://postgres.sovoxkfvvwicqqfpaove:Scarlett122024GJ@aws-0-sa-east-1.pooler.supabase.com:6543/postgres'
+SUPABASE_URL = 'postgresql://postgres.sovoxkfvvwicqqfpaove:Scarlett122024GJ@aws-1-sa-east-1.pooler.supabase.com:6543/postgres'
 
 print("[*] Conectando a Supabase...")
 engine = create_engine(SUPABASE_URL)
