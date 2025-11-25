@@ -135,8 +135,8 @@ export default function Profile() {
   return (
     <Layout>
       {/* DISEÑO COMPACTO: TODO EN UNA PANTALLA SIN SCROLL */}
-      <div className="h-[calc(100vh-80px)] flex flex-col overflow-y-auto md:overflow-hidden">
-        <div className="flex-1 flex flex-col gap-3 p-4">
+      <div className="h-full flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col gap-3 p-4 overflow-y-auto md:overflow-hidden">
 
           {/* FILA SUPERIOR: Tarjeta de Usuario - Ancho Completo */}
           <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl shrink-0">
