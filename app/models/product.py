@@ -6,10 +6,13 @@ Gestiona el inventario de productos del minimarket
 """
 
 from app import db
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from sqlalchemy import CheckConstraint, Index
 from sqlalchemy.ext.hybrid import hybrid_property
 from decimal import Decimal
+
+# Zona horaria de Perú (UTC-5)
+PERU_TZ = timezone(timedelta(hours=-5))
 
 
 class Product(db.Model):
@@ -126,15 +129,15 @@ class Product(db.Model):
 
     created_at = db.Column(
         db.DateTime,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
         nullable=False,
         comment='Fecha de creación'
     )
 
     updated_at = db.Column(
         db.DateTime,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
+        onupdate=lambda: datetime.now(PERU_TZ),
         nullable=False,
         comment='Fecha de última actualización'
     )
@@ -323,17 +326,17 @@ class Product(db.Model):
         else:
             raise ValueError(f'Operación no válida: {operacion}')
 
-        self.updated_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(PERU_TZ)
 
     def activar(self):
         """Activa el producto"""
         self.activo = True
-        self.updated_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(PERU_TZ)
 
     def desactivar(self):
         """Desactiva el producto"""
         self.activo = False
-        self.updated_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(PERU_TZ)
 
     # ==================== Métodos de Validación ====================
 

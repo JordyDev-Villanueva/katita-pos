@@ -16,6 +16,9 @@ from sqlalchemy.orm import validates
 from sqlalchemy.ext.hybrid import hybrid_property
 from app import db
 
+# Zona horaria de Perú (UTC-5)
+PERU_TZ = timezone(timedelta(hours=-5))
+
 
 class SyncQueue(db.Model):
     """
@@ -56,14 +59,14 @@ class SyncQueue(db.Model):
     # Timestamps
     created_at = db.Column(
         DateTime,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
         nullable=False
     )
     procesado_at = db.Column(DateTime, nullable=True)
     updated_at = db.Column(
         DateTime,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
+        onupdate=lambda: datetime.now(PERU_TZ),
         nullable=False
     )
 
@@ -187,7 +190,7 @@ class SyncQueue(db.Model):
             return 0
 
         # Siempre usar UTC para consistencia
-        hoy = datetime.now(timezone.utc)
+        hoy = datetime.now(PERU_TZ)
 
         # Si created_at es timezone-aware, usar directamente
         # Si es naive (SQLite), asumir que está en UTC
@@ -223,7 +226,7 @@ class SyncQueue(db.Model):
             procesado_at = now (UTC)
         """
         self.procesado = True
-        self.procesado_at = datetime.now(timezone.utc)
+        self.procesado_at = datetime.now(PERU_TZ)
 
     def registrar_error(self, mensaje):
         """
@@ -351,7 +354,7 @@ class SyncQueue(db.Model):
             list[SyncQueue]: Lista de registros prioritarios pendientes
         """
         # Calcular el timestamp de hace 60 minutos en UTC
-        hace_60_min = datetime.now(timezone.utc) - timedelta(minutes=60)
+        hace_60_min = datetime.now(PERU_TZ) - timedelta(minutes=60)
 
         return cls.query.filter(
             cls.procesado == False,
@@ -387,7 +390,7 @@ class SyncQueue(db.Model):
             int: Cantidad de registros eliminados
         """
         # Calcular fecha límite en UTC
-        fecha_limite = datetime.now(timezone.utc) - timedelta(days=dias)
+        fecha_limite = datetime.now(PERU_TZ) - timedelta(days=dias)
 
         # Buscar registros a eliminar
         registros = cls.query.filter(
@@ -427,7 +430,7 @@ class SyncQueue(db.Model):
         deletes = cls.query.filter_by(operacion='delete', procesado=False).count()
 
         # Registros prioritarios
-        hace_60_min = datetime.now(timezone.utc) - timedelta(minutes=60)
+        hace_60_min = datetime.now(PERU_TZ) - timedelta(minutes=60)
         prioritarios = cls.query.filter(
             cls.procesado == False,
             cls.created_at <= hace_60_min

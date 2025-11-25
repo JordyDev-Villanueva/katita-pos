@@ -16,6 +16,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import validates
 from app import db
 
+# Zona horaria de Perú (UTC-5)
+PERU_TZ = timezone(timedelta(hours=-5))
+
 
 class User(db.Model):
     """
@@ -57,13 +60,13 @@ class User(db.Model):
     # Timestamps
     created_at = db.Column(
         DateTime,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
         nullable=False
     )
     updated_at = db.Column(
         DateTime,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
+        onupdate=lambda: datetime.now(PERU_TZ),
         nullable=False
     )
 
@@ -269,7 +272,7 @@ class User(db.Model):
             return False
 
         # Comparar con datetime aware
-        ahora = datetime.now(timezone.utc)
+        ahora = datetime.now(PERU_TZ)
         bloqueado_hasta = self.bloqueado_hasta
 
         # Si bloqueado_hasta es naive, convertirlo a aware
@@ -285,7 +288,7 @@ class User(db.Model):
         Args:
             minutos (int): Duración del bloqueo en minutos (default: 30)
         """
-        self.bloqueado_hasta = datetime.now(timezone.utc) + timedelta(minutes=minutos)
+        self.bloqueado_hasta = datetime.now(PERU_TZ) + timedelta(minutes=minutos)
         self.activo = False
 
     def desbloquear(self):
@@ -296,7 +299,7 @@ class User(db.Model):
 
     def registrar_acceso(self):
         """Actualiza la fecha y hora del último acceso"""
-        self.ultimo_acceso = datetime.now(timezone.utc)
+        self.ultimo_acceso = datetime.now(PERU_TZ)
         self.intentos_login_fallidos = 0  # Resetear intentos al login exitoso
 
     def incrementar_intentos_fallidos(self):
@@ -382,7 +385,7 @@ class User(db.Model):
     @classmethod
     def buscar_bloqueados(cls):
         """Retorna usuarios actualmente bloqueados"""
-        ahora = datetime.now(timezone.utc)
+        ahora = datetime.now(PERU_TZ)
         return cls.query.filter(
             cls.bloqueado_hasta != None,
             cls.bloqueado_hasta > ahora

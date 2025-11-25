@@ -15,6 +15,9 @@ from sqlalchemy.orm import validates, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 from app import db
 
+# Zona horaria de Perú (UTC-5)
+PERU_TZ = timezone(timedelta(hours=-5))
+
 
 class MovimientoStock(db.Model):
     """
@@ -62,13 +65,13 @@ class MovimientoStock(db.Model):
     # Timestamps
     created_at = db.Column(
         DateTime,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
         nullable=False
     )
     updated_at = db.Column(
         DateTime,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
+        onupdate=lambda: datetime.now(PERU_TZ),
         nullable=False
     )
 
@@ -182,7 +185,7 @@ class MovimientoStock(db.Model):
 
         # Siempre usar UTC para consistencia (created_at se guarda en UTC)
         # SQLite no preserva timezone info, pero sabemos que created_at es UTC
-        hoy = datetime.now(timezone.utc).date()
+        hoy = datetime.now(PERU_TZ).date()
 
         # Si created_at es timezone-aware, obtener la fecha directamente
         # Si es naive (SQLite), asumimos que está en UTC
@@ -426,7 +429,7 @@ class MovimientoStock(db.Model):
         """
         if fecha is None:
             # Usar la fecha actual en UTC para coincidir con created_at
-            fecha = datetime.now(timezone.utc).date()
+            fecha = datetime.now(PERU_TZ).date()
 
         inicio = datetime.combine(fecha, datetime.min.time()).replace(tzinfo=timezone.utc)
         fin = datetime.combine(fecha, datetime.max.time()).replace(tzinfo=timezone.utc)

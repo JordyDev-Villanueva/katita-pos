@@ -6,7 +6,7 @@ Conecta Venta con Product y Lote (trazabilidad FIFO).
 Permite calcular ganancias y generar reportes.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 from sqlalchemy import (
     Index, CheckConstraint, Integer,
@@ -15,6 +15,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import validates, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 from app import db
+
+# Zona horaria de Perú (UTC-5)
+PERU_TZ = timezone(timedelta(hours=-5))
 
 
 class DetalleVenta(db.Model):
@@ -53,14 +56,14 @@ class DetalleVenta(db.Model):
     # Timestamps
     created_at = db.Column(
         DateTime,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
         nullable=False,
         index=True
     )
     updated_at = db.Column(
         DateTime,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
+        onupdate=lambda: datetime.now(PERU_TZ),
         nullable=False
     )
 

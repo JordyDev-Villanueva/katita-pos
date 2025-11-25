@@ -12,6 +12,9 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import validates
 from decimal import Decimal
 
+# Zona horaria de Perú (UTC-5)
+PERU_TZ = timezone(timedelta(hours=-5))
+
 
 class Lote(db.Model):
     """
@@ -88,7 +91,7 @@ class Lote(db.Model):
 
     fecha_ingreso = db.Column(
         db.DateTime,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
         nullable=False,
         comment='Fecha de ingreso al inventario'
     )
@@ -134,15 +137,15 @@ class Lote(db.Model):
 
     created_at = db.Column(
         db.DateTime,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
         nullable=False,
         comment='Fecha de creación'
     )
 
     updated_at = db.Column(
         db.DateTime,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(PERU_TZ),
+        onupdate=lambda: datetime.now(PERU_TZ),
         nullable=False,
         comment='Fecha de última actualización'
     )
@@ -215,7 +218,7 @@ class Lote(db.Model):
 
         # Si fecha_ingreso no se proporciona, usar la fecha actual
         if self.fecha_ingreso is None:
-            self.fecha_ingreso = datetime.now(timezone.utc)
+            self.fecha_ingreso = datetime.now(PERU_TZ)
 
         # Validar fechas DESPUÉS de que todos los campos estén inicializados
         if self.fecha_vencimiento and self.fecha_ingreso:
@@ -433,7 +436,7 @@ class Lote(db.Model):
             raise ValueError(f'Stock insuficiente. Disponible: {self.cantidad_actual}, solicitado: {cantidad}')
 
         self.cantidad_actual -= cantidad
-        self.updated_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(PERU_TZ)
 
         # Si se agota el stock, marcar como inactivo
         if self.cantidad_actual == 0:
@@ -461,7 +464,7 @@ class Lote(db.Model):
             )
 
         self.cantidad_actual = nueva_cantidad
-        self.updated_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(PERU_TZ)
 
         # Reactivar si estaba inactivo por falta de stock
         if self.cantidad_actual > 0 and not self.activo:
@@ -487,7 +490,7 @@ class Lote(db.Model):
             # Manejar timezone-aware y timezone-naive datetimes
             if self.fecha_ingreso.tzinfo is not None:
                 # fecha_ingreso tiene timezone (aware)
-                hoy = datetime.now(timezone.utc)
+                hoy = datetime.now(PERU_TZ)
             else:
                 # fecha_ingreso no tiene timezone (naive)
                 hoy = datetime.now()
@@ -499,12 +502,12 @@ class Lote(db.Model):
     def activar(self):
         """Activa el lote"""
         self.activo = True
-        self.updated_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(PERU_TZ)
 
     def desactivar(self):
         """Desactiva el lote"""
         self.activo = False
-        self.updated_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(PERU_TZ)
 
     # ==================== Métodos de Clase (Queries) ====================
 
