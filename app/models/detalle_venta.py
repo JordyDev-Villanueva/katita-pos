@@ -43,7 +43,7 @@ class DetalleVenta(db.Model):
     # Cantidades y precios
     cantidad = db.Column(Integer, nullable=False)
     precio_unitario = db.Column(Numeric(10, 2), nullable=False)  # Precio de venta
-    precio_compra_unitario = db.Column(Numeric(10, 2), nullable=False)  # Para calcular ganancia
+    precio_compra = db.Column('precio_compra', Numeric(10, 2), nullable=False)  # Para calcular ganancia (nombre en DB: precio_compra)
 
     # Subtotales
     subtotal = db.Column(Numeric(10, 2), nullable=False)  # cantidad × precio_unitario
@@ -75,7 +75,7 @@ class DetalleVenta(db.Model):
     __table_args__ = (
         CheckConstraint('cantidad > 0', name='check_cantidad_positiva'),
         CheckConstraint('precio_unitario > 0', name='check_precio_unitario_positivo'),
-        CheckConstraint('precio_compra_unitario >= 0', name='check_precio_compra_no_negativo'),
+        CheckConstraint('precio_compra >= 0', name='check_precio_compra_no_negativo'),
         CheckConstraint('descuento_item >= 0', name='check_descuento_item_no_negativo'),
         CheckConstraint('descuento_item <= subtotal', name='check_descuento_menor_subtotal'),
         Index('idx_venta_producto', 'venta_id', 'producto_id'),
@@ -124,13 +124,13 @@ class DetalleVenta(db.Model):
 
         return precio_unitario
 
-    @validates('precio_compra_unitario')
-    def validate_precio_compra_unitario(self, key, precio_compra_unitario):
+    @validates('precio_compra')
+    def validate_precio_compra(self, key, precio_compra):
         """Valida que el precio de compra no sea negativo"""
-        if precio_compra_unitario is not None and precio_compra_unitario < 0:
+        if precio_compra is not None and precio_compra < 0:
             raise ValueError('El precio de compra no puede ser negativo')
 
-        return precio_compra_unitario
+        return precio_compra
 
     @validates('descuento_item')
     def validate_descuento_item(self, key, descuento_item):
@@ -145,10 +145,10 @@ class DetalleVenta(db.Model):
     @hybrid_property
     def ganancia_unitaria(self):
         """Retorna la ganancia por unidad (precio_venta - precio_compra)"""
-        if not self.precio_unitario or not self.precio_compra_unitario:
+        if not self.precio_unitario or not self.precio_compra:
             return Decimal('0.00')
 
-        return Decimal(str(self.precio_unitario)) - Decimal(str(self.precio_compra_unitario))
+        return Decimal(str(self.precio_unitario)) - Decimal(str(self.precio_compra))
 
     @hybrid_property
     def ganancia_total(self):
@@ -165,13 +165,13 @@ class DetalleVenta(db.Model):
 
         Formula: (ganancia / precio_compra) × 100
         """
-        if not self.precio_compra_unitario or self.precio_compra_unitario == 0:
+        if not self.precio_compra or self.precio_compra == 0:
             return 0.0
 
         ganancia = float(self.ganancia_unitaria)
-        precio_compra = float(self.precio_compra_unitario)
+        precio_compra_val = float(self.precio_compra)
 
-        return (ganancia / precio_compra) * 100.0
+        return (ganancia / precio_compra_val) * 100.0
 
     @hybrid_property
     def margen_bruto(self):
@@ -257,7 +257,8 @@ class DetalleVenta(db.Model):
             'lote_id': self.lote_id,
             'cantidad': self.cantidad,
             'precio_unitario': float(self.precio_unitario) if self.precio_unitario else 0.0,
-            'precio_compra_unitario': float(self.precio_compra_unitario) if self.precio_compra_unitario else 0.0,
+            'precio_compra': float(self.precio_compra) if self.precio_compra else 0.0,
+            'precio_compra_unitario': float(self.precio_compra) if self.precio_compra else 0.0,  # Mantener compatibilidad
             'subtotal': float(self.subtotal) if self.subtotal else 0.0,
             'descuento_item': float(self.descuento_item) if self.descuento_item else 0.0,
             'subtotal_final': float(self.subtotal_final) if self.subtotal_final else 0.0,
@@ -397,7 +398,7 @@ class DetalleVenta(db.Model):
             func.sum(cls.cantidad).label('cantidad_vendida'),
             func.sum(cls.subtotal_final).label('total_ventas'),
             func.sum(
-                (cls.precio_unitario - cls.precio_compra_unitario) * cls.cantidad
+                (cls.precio_unitario - cls.precio_compra) * cls.cantidad
             ).label('ganancia_total')
         ).join(Product, cls.producto_id == Product.id)
 
@@ -460,7 +461,7 @@ class DetalleVenta(db.Model):
             list[DetalleVenta]: Lista de detalles ordenados por ganancia
         """
         return cls.query.order_by(
-            ((cls.precio_unitario - cls.precio_compra_unitario) * cls.cantidad).desc()
+            ((cls.precio_unitario - cls.precio_compra) * cls.cantidad).desc()
         ).limit(limite).all()
 
     # === REPRESENTACIONES ===

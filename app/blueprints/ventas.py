@@ -357,7 +357,7 @@ def procesar_venta():
                     lote_id=lote.id,
                     cantidad=cantidad_a_descontar,
                     precio_unitario=precio_unitario,
-                    precio_compra_unitario=lote.precio_compra_lote
+                    precio_compra=lote.precio_compra_lote
                 )
 
                 # Calcular subtotales (ganancia, etc)
@@ -1154,9 +1154,9 @@ def resumen_ventas():
 
                     print(f'      • {nombre_producto}')
                     print(f'        - Precio venta: S/ {detalle.precio_unitario:.2f}')
-                    print(f'        - Precio compra: S/ {detalle.precio_compra_unitario:.2f}')
+                    print(f'        - Precio compra: S/ {detalle.precio_compra:.2f}')
                     print(f'        - Cantidad: {detalle.cantidad}')
-                    print(f'        - Ganancia: (S/ {detalle.precio_unitario:.2f} - S/ {detalle.precio_compra_unitario:.2f}) × {detalle.cantidad} = S/ {detalle.ganancia_total:.2f}')
+                    print(f'        - Ganancia: (S/ {detalle.precio_unitario:.2f} - S/ {detalle.precio_compra:.2f}) × {detalle.cantidad} = S/ {detalle.ganancia_total:.2f}')
 
             # Contar por metodo de pago
             metodo = venta.metodo_pago or 'sin_especificar'
