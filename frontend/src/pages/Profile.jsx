@@ -146,8 +146,8 @@ export default function Profile() {
                 <div className="relative shrink-0">
                   <div className="bg-white/20 backdrop-blur-sm p-3 rounded-full border-4 border-white/30">
                     <UserCircle2 className="w-12 h-12 md:w-16 md:h-16 text-white" />
+                    <div className="absolute -bottom-1 -right-1 bg-green-400 w-4 h-4 rounded-full border-2 border-white"></div>
                   </div>
-                  <div className="absolute -bottom-1 -right-1 bg-green-400 w-4 h-4 rounded-full border-2 border-white"></div>
                 </div>
 
                 {/* Info del usuario */}
@@ -203,8 +203,8 @@ export default function Profile() {
                 </h3>
               </div>
 
-              <form onSubmit={handleSaveProfile} className="p-4 flex-1 flex flex-col justify-between">
-                <div className="space-y-4">
+              <form onSubmit={handleSaveProfile} className="p-4 flex-1 flex flex-col gap-4">
+                <div className="flex-1 flex flex-col justify-center space-y-4">
                   {/* Usuario (solo lectura) */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1.5">
@@ -290,8 +290,8 @@ export default function Profile() {
                 </h3>
               </div>
 
-              <form onSubmit={handleChangePassword} className="p-4 flex-1 flex flex-col justify-between">
-                <div className="space-y-4">
+              <form onSubmit={handleChangePassword} className="p-4 flex-1 flex flex-col gap-4">
+                <div className="flex-1 flex flex-col justify-center space-y-4">
                   {/* Contraseña Actual */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1.5">
