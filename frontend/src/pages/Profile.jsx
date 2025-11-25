@@ -203,25 +203,25 @@ export default function Profile() {
                 </h3>
               </div>
 
-              <form onSubmit={handleSaveProfile} className="p-4 flex-1 flex flex-col gap-4">
-                <div className="flex-1 flex flex-col justify-center space-y-4">
+              <form onSubmit={handleSaveProfile} className="p-5 flex-1 flex flex-col">
+                <div className="space-y-5 mb-auto">
                   {/* Usuario (solo lectura) */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Usuario
                     </label>
                     <input
                       type="text"
                       value={user?.username || ''}
                       disabled
-                      className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                      className="w-full px-4 py-2.5 text-base border-2 border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
                     />
-                    <p className="text-xs text-gray-400 mt-1">No se puede cambiar</p>
+                    <p className="text-xs text-gray-500 mt-1.5">No se puede cambiar</p>
                   </div>
 
                   {/* Nombre completo */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Nombre Completo *
                     </label>
                     <input
@@ -229,19 +229,19 @@ export default function Profile() {
                       name="nombre_completo"
                       value={formData.nombre_completo}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
+                      className={`w-full px-4 py-2.5 text-base border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
                         errors.nombre_completo ? 'border-red-400 bg-red-50' : 'border-gray-300'
                       }`}
                       required
                     />
                     {errors.nombre_completo && (
-                      <p className="text-red-500 text-xs mt-1">{errors.nombre_completo}</p>
+                      <p className="text-red-500 text-sm mt-1.5">{errors.nombre_completo}</p>
                     )}
                   </div>
 
                   {/* Email */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Correo Electrónico *
                     </label>
                     <input
@@ -249,13 +249,13 @@ export default function Profile() {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
+                      className={`w-full px-4 py-2.5 text-base border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
                         errors.email ? 'border-red-400 bg-red-50' : 'border-gray-300'
                       }`}
                       required
                     />
                     {errors.email && (
-                      <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                      <p className="text-red-500 text-sm mt-1.5">{errors.email}</p>
                     )}
                   </div>
                 </div>
@@ -264,7 +264,7 @@ export default function Profile() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl text-base mt-5"
                 >
                   {loading ? (
                     <>
@@ -290,11 +290,11 @@ export default function Profile() {
                 </h3>
               </div>
 
-              <form onSubmit={handleChangePassword} className="p-4 flex-1 flex flex-col gap-4">
-                <div className="flex-1 flex flex-col justify-center space-y-4">
+              <form onSubmit={handleChangePassword} className="p-5 flex-1 flex flex-col">
+                <div className="space-y-5 mb-auto">
                   {/* Contraseña Actual */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Contraseña Actual *
                     </label>
                     <div className="relative">
@@ -303,7 +303,7 @@ export default function Profile() {
                         name="current_password"
                         value={passwordData.current_password}
                         onChange={handlePasswordChange}
-                        className={`w-full px-3 py-2 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
+                        className={`w-full px-4 py-2.5 pr-10 text-base border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
                           errors.current_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
                         }`}
                         required
@@ -311,19 +311,19 @@ export default function Profile() {
                       <button
                         type="button"
                         onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       >
-                        {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
                     {errors.current_password && (
-                      <p className="text-red-500 text-xs mt-1">{errors.current_password}</p>
+                      <p className="text-red-500 text-sm mt-1.5">{errors.current_password}</p>
                     )}
                   </div>
 
                   {/* Nueva Contraseña */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Nueva Contraseña *
                     </label>
                     <div className="relative">
@@ -332,7 +332,7 @@ export default function Profile() {
                         name="new_password"
                         value={passwordData.new_password}
                         onChange={handlePasswordChange}
-                        className={`w-full px-3 py-2 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
+                        className={`w-full px-4 py-2.5 pr-10 text-base border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
                           errors.new_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
                         }`}
                         required
@@ -341,20 +341,20 @@ export default function Profile() {
                       <button
                         type="button"
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       >
-                        {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
-                    <p className="text-xs text-gray-400 mt-1">Mínimo 6 caracteres</p>
+                    <p className="text-xs text-gray-500 mt-1.5">Mínimo 6 caracteres</p>
                     {errors.new_password && (
-                      <p className="text-red-500 text-xs mt-1">{errors.new_password}</p>
+                      <p className="text-red-500 text-sm mt-1.5">{errors.new_password}</p>
                     )}
                   </div>
 
                   {/* Confirmar Nueva Contraseña */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Confirmar Nueva Contraseña *
                     </label>
                     <div className="relative">
@@ -363,7 +363,7 @@ export default function Profile() {
                         name="confirm_password"
                         value={passwordData.confirm_password}
                         onChange={handlePasswordChange}
-                        className={`w-full px-3 py-2 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
+                        className={`w-full px-4 py-2.5 pr-10 text-base border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
                           errors.confirm_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
                         }`}
                         required
@@ -371,13 +371,13 @@ export default function Profile() {
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       >
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
                     {errors.confirm_password && (
-                      <p className="text-red-500 text-xs mt-1">{errors.confirm_password}</p>
+                      <p className="text-red-500 text-sm mt-1.5">{errors.confirm_password}</p>
                     )}
                   </div>
                 </div>
@@ -386,7 +386,7 @@ export default function Profile() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm"
+                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl text-base mt-5"
                 >
                   {loading ? (
                     <>
