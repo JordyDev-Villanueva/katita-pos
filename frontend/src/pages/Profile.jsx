@@ -136,65 +136,63 @@ export default function Profile() {
     <Layout>
       {/* DISEÑO COMPACTO: TODO EN UNA PANTALLA SIN SCROLL */}
       <div className="h-[calc(100vh-80px)] overflow-hidden">
-        <div className="h-full grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+        <div className="h-full flex flex-col gap-6 p-6">
 
-          {/* COLUMNA IZQUIERDA: Info de Usuario */}
-          <div className="lg:col-span-1 space-y-4">
-            {/* Tarjeta de Usuario Compacta */}
-            <div className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 rounded-xl shadow-xl p-6 text-white">
-              <div className="flex flex-col items-center text-center">
-                <div className="relative">
-                  <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full border-4 border-white/30 mb-3">
-                    <UserCircle2 className="w-16 h-16 text-white" />
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 bg-green-400 w-5 h-5 rounded-full border-3 border-white"></div>
+          {/* FILA SUPERIOR: Tarjeta de Usuario - Ancho Completo */}
+          <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl">
+            <div className="flex items-center gap-6 p-6">
+              {/* Avatar y nombre */}
+              <div className="relative shrink-0">
+                <div className="bg-white/20 backdrop-blur-sm p-5 rounded-full border-4 border-white/30">
+                  <UserCircle2 className="w-20 h-20 text-white" />
                 </div>
-
-                <h2 className="text-2xl font-bold mt-3">{user?.nombre_completo}</h2>
-                <p className="text-indigo-200 text-sm font-medium">@{user?.username}</p>
-
-                <div className="mt-4 w-full">
-                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${
-                    user?.rol === 'admin'
-                      ? 'bg-yellow-400 text-yellow-900'
-                      : user?.rol === 'vendedor'
-                      ? 'bg-blue-400 text-blue-900'
-                      : 'bg-green-400 text-green-900'
-                  }`}>
-                    <Shield className="w-4 h-4" />
-                    {user?.rol === 'admin' ? 'Administrador' :
-                     user?.rol === 'vendedor' ? 'Vendedor' : 'Bodeguero'}
-                  </div>
-                </div>
+                <div className="absolute -bottom-1 -right-1 bg-green-400 w-6 h-6 rounded-full border-4 border-white"></div>
               </div>
-            </div>
 
-            {/* Info Rápida */}
-            <div className="bg-white rounded-xl shadow-lg p-4 space-y-3">
-              <div className="flex items-center gap-3 text-gray-700">
-                <div className="bg-blue-100 p-2 rounded-lg">
-                  <Mail className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500 font-medium">Email</p>
-                  <p className="text-sm font-semibold truncate">{user?.email || 'No configurado'}</p>
+              {/* Info del usuario */}
+              <div className="flex-1">
+                <h2 className="text-3xl font-bold text-white">{user?.nombre_completo}</h2>
+                <p className="text-indigo-200 text-lg font-medium mt-1">@{user?.username}</p>
+              </div>
+
+              {/* Badge de rol */}
+              <div className="shrink-0">
+                <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-full text-base font-bold shadow-lg ${
+                  user?.rol === 'admin'
+                    ? 'bg-yellow-400 text-yellow-900'
+                    : user?.rol === 'vendedor'
+                    ? 'bg-blue-400 text-blue-900'
+                    : 'bg-green-400 text-green-900'
+                }`}>
+                  <Shield className="w-5 h-5" />
+                  {user?.rol === 'admin' ? 'Administrador' :
+                   user?.rol === 'vendedor' ? 'Vendedor' : 'Bodeguero'}
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 text-gray-700">
-                <div className="bg-green-100 p-2 rounded-lg">
-                  <Phone className="w-5 h-5 text-green-600" />
+              {/* Info rápida - inline */}
+              <div className="flex gap-6 shrink-0">
+                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+                  <Mail className="w-5 h-5 text-white" />
+                  <div>
+                    <p className="text-xs text-indigo-200">Email</p>
+                    <p className="text-sm font-semibold text-white">{user?.email || 'No configurado'}</p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500 font-medium">Teléfono</p>
-                  <p className="text-sm font-semibold truncate">{user?.telefono || 'No configurado'}</p>
+
+                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+                  <Phone className="w-5 h-5 text-white" />
+                  <div>
+                    <p className="text-xs text-indigo-200">Teléfono</p>
+                    <p className="text-sm font-semibold text-white">{user?.telefono || 'No configurado'}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* COLUMNA DERECHA: Formularios en 2 columnas */}
-          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* FILA INFERIOR: Formularios lado a lado - 50/50 */}
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-auto">
 
             {/* Formulario de Información Personal */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden h-fit">
