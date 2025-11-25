@@ -6,7 +6,7 @@ Controla fechas de vencimiento y trazabilidad FIFO
 """
 
 from app import db
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date, timedelta
 from sqlalchemy import CheckConstraint, Index, ForeignKey
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import validates
