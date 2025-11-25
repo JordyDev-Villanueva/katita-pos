@@ -135,12 +135,12 @@ export default function Profile() {
   return (
     <Layout>
       {/* DISEÑO COMPACTO: TODO EN UNA PANTALLA SIN SCROLL */}
-      <div className="h-[calc(100vh-80px)] overflow-hidden">
-        <div className="h-full flex flex-col gap-3 p-4">
+      <div className="h-[calc(100vh-80px)] overflow-y-auto md:overflow-hidden">
+        <div className="min-h-full md:h-full flex flex-col gap-3 p-4">
 
           {/* FILA SUPERIOR: Tarjeta de Usuario - Ancho Completo */}
           <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl shrink-0">
-            <div className="flex flex-col md:flex-row items-center gap-4 p-4">
+            <div className="flex flex-col md:flex-row items-center gap-4 p-3 md:p-4">
               {/* Avatar y nombre */}
               <div className="flex items-center gap-4 flex-1">
                 <div className="relative shrink-0">
@@ -192,10 +192,10 @@ export default function Profile() {
           </div>
 
           {/* FILA INFERIOR: Formularios lado a lado - 50/50 */}
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 min-h-0">
 
             {/* Formulario de Información Personal */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-full">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col min-h-0">
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2 shrink-0">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <User className="w-4 h-4" />
@@ -203,8 +203,8 @@ export default function Profile() {
                 </h3>
               </div>
 
-              <form onSubmit={handleSaveProfile} className="p-4 flex-1 flex flex-col overflow-hidden">
-                <div className="flex-1 space-y-3">
+              <form onSubmit={handleSaveProfile} className="p-4 flex-1 flex flex-col min-h-0">
+                <div className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1">
                   {/* Usuario (solo lectura) */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1.5">
@@ -279,7 +279,7 @@ export default function Profile() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm mt-4"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm mt-4 shrink-0"
                 >
                   {loading ? (
                     <>
@@ -297,7 +297,7 @@ export default function Profile() {
             </div>
 
             {/* Formulario de Cambio de Contraseña */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-full">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col min-h-0">
               <div className="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-2 shrink-0">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <Lock className="w-4 h-4" />
@@ -305,8 +305,8 @@ export default function Profile() {
                 </h3>
               </div>
 
-              <form onSubmit={handleChangePassword} className="p-4 flex-1 flex flex-col overflow-hidden">
-                <div className="flex-1 space-y-3">
+              <form onSubmit={handleChangePassword} className="p-4 flex-1 flex flex-col min-h-0">
+                <div className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1">
                   {/* Contraseña Actual */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1.5">
@@ -401,7 +401,7 @@ export default function Profile() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm mt-4"
+                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm mt-4 shrink-0"
                 >
                   {loading ? (
                     <>
