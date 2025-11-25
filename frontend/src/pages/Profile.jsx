@@ -192,10 +192,10 @@ export default function Profile() {
           </div>
 
           {/* FILA INFERIOR: Formularios lado a lado - 50/50 */}
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 min-h-0">
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3">
 
             {/* Formulario de Información Personal */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col min-h-0">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-full">
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2 shrink-0">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <User className="w-4 h-4" />
@@ -203,81 +203,83 @@ export default function Profile() {
                 </h3>
               </div>
 
-              <form onSubmit={handleSaveProfile} className="p-3 space-y-2 flex-1 flex flex-col overflow-y-auto">
-                {/* Usuario (solo lectura) */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">
-                    Usuario
-                  </label>
-                  <input
-                    type="text"
-                    value={user?.username || ''}
-                    disabled
-                    className="w-full px-3 py-1.5 text-sm border-2 border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
-                  />
-                  <p className="text-xs text-gray-400 mt-0.5">No se puede cambiar</p>
-                </div>
+              <form onSubmit={handleSaveProfile} className="p-3 flex-1 flex flex-col justify-between overflow-hidden">
+                <div className="space-y-2">
+                  {/* Usuario (solo lectura) */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                      Usuario
+                    </label>
+                    <input
+                      type="text"
+                      value={user?.username || ''}
+                      disabled
+                      className="w-full px-3 py-1.5 text-sm border-2 border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                    />
+                    <p className="text-xs text-gray-400 mt-0.5">No se puede cambiar</p>
+                  </div>
 
-                {/* Nombre completo */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">
-                    Nombre Completo *
-                  </label>
-                  <input
-                    type="text"
-                    name="nombre_completo"
-                    value={formData.nombre_completo}
-                    onChange={handleChange}
-                    className={`w-full px-3 py-1.5 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
-                      errors.nombre_completo ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                    }`}
-                    required
-                  />
-                  {errors.nombre_completo && (
-                    <p className="text-red-500 text-xs mt-0.5">{errors.nombre_completo}</p>
-                  )}
-                </div>
+                  {/* Nombre completo */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                      Nombre Completo *
+                    </label>
+                    <input
+                      type="text"
+                      name="nombre_completo"
+                      value={formData.nombre_completo}
+                      onChange={handleChange}
+                      className={`w-full px-3 py-1.5 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
+                        errors.nombre_completo ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                      }`}
+                      required
+                    />
+                    {errors.nombre_completo && (
+                      <p className="text-red-500 text-xs mt-0.5">{errors.nombre_completo}</p>
+                    )}
+                  </div>
 
-                {/* Email */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">
-                    Correo Electrónico *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={`w-full px-3 py-1.5 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
-                      errors.email ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                    }`}
-                    required
-                  />
-                  {errors.email && (
-                    <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>
-                  )}
-                </div>
+                  {/* Email */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                      Correo Electrónico *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className={`w-full px-3 py-1.5 text-sm border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
+                        errors.email ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                      }`}
+                      required
+                    />
+                    {errors.email && (
+                      <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>
+                    )}
+                  </div>
 
-                {/* Teléfono */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">
-                    Teléfono (Opcional)
-                  </label>
-                  <input
-                    type="tel"
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={handleChange}
-                    className="w-full px-3 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition"
-                    placeholder="+51 999 999 999"
-                  />
+                  {/* Teléfono */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                      Teléfono (Opcional)
+                    </label>
+                    <input
+                      type="tel"
+                      name="telefono"
+                      value={formData.telefono}
+                      onChange={handleChange}
+                      className="w-full px-3 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition"
+                      placeholder="+51 999 999 999"
+                    />
+                  </div>
                 </div>
 
                 {/* Botón guardar */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm mt-auto"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm"
                 >
                   {loading ? (
                     <>
@@ -295,7 +297,7 @@ export default function Profile() {
             </div>
 
             {/* Formulario de Cambio de Contraseña */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col min-h-0">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-full">
               <div className="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-2 shrink-0">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <Lock className="w-4 h-4" />
@@ -303,101 +305,103 @@ export default function Profile() {
                 </h3>
               </div>
 
-              <form onSubmit={handleChangePassword} className="p-3 space-y-2 flex-1 flex flex-col overflow-y-auto">
-                {/* Contraseña Actual */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">
-                    Contraseña Actual *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showCurrentPassword ? 'text' : 'password'}
-                      name="current_password"
-                      value={passwordData.current_password}
-                      onChange={handlePasswordChange}
-                      className={`w-full px-3 py-1.5 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
-                        errors.current_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                      }`}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+              <form onSubmit={handleChangePassword} className="p-3 flex-1 flex flex-col justify-between overflow-hidden">
+                <div className="space-y-2">
+                  {/* Contraseña Actual */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                      Contraseña Actual *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showCurrentPassword ? 'text' : 'password'}
+                        name="current_password"
+                        value={passwordData.current_password}
+                        onChange={handlePasswordChange}
+                        className={`w-full px-3 py-1.5 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
+                          errors.current_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                        }`}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {errors.current_password && (
+                      <p className="text-red-500 text-xs mt-0.5">{errors.current_password}</p>
+                    )}
                   </div>
-                  {errors.current_password && (
-                    <p className="text-red-500 text-xs mt-0.5">{errors.current_password}</p>
-                  )}
-                </div>
 
-                {/* Nueva Contraseña */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">
-                    Nueva Contraseña *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showNewPassword ? 'text' : 'password'}
-                      name="new_password"
-                      value={passwordData.new_password}
-                      onChange={handlePasswordChange}
-                      className={`w-full px-3 py-1.5 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
-                        errors.new_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                      }`}
-                      required
-                      minLength={6}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+                  {/* Nueva Contraseña */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                      Nueva Contraseña *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showNewPassword ? 'text' : 'password'}
+                        name="new_password"
+                        value={passwordData.new_password}
+                        onChange={handlePasswordChange}
+                        className={`w-full px-3 py-1.5 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
+                          errors.new_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                        }`}
+                        required
+                        minLength={6}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-0.5">Mínimo 6 caracteres</p>
+                    {errors.new_password && (
+                      <p className="text-red-500 text-xs mt-0.5">{errors.new_password}</p>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-400 mt-0.5">Mínimo 6 caracteres</p>
-                  {errors.new_password && (
-                    <p className="text-red-500 text-xs mt-0.5">{errors.new_password}</p>
-                  )}
-                </div>
 
-                {/* Confirmar Nueva Contraseña */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">
-                    Confirmar Nueva Contraseña *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      name="confirm_password"
-                      value={passwordData.confirm_password}
-                      onChange={handlePasswordChange}
-                      className={`w-full px-3 py-1.5 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
-                        errors.confirm_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                      }`}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+                  {/* Confirmar Nueva Contraseña */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                      Confirmar Nueva Contraseña *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        name="confirm_password"
+                        value={passwordData.confirm_password}
+                        onChange={handlePasswordChange}
+                        className={`w-full px-3 py-1.5 pr-10 text-sm border-2 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition ${
+                          errors.confirm_password ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                        }`}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {errors.confirm_password && (
+                      <p className="text-red-500 text-xs mt-0.5">{errors.confirm_password}</p>
+                    )}
                   </div>
-                  {errors.confirm_password && (
-                    <p className="text-red-500 text-xs mt-0.5">{errors.confirm_password}</p>
-                  )}
                 </div>
 
                 {/* Botón cambiar contraseña */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm mt-auto"
+                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm"
                 >
                   {loading ? (
                     <>
