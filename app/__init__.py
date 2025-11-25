@@ -86,8 +86,8 @@ def create_app(config_name=None):
             'status': 'healthy',
             'service': 'KATITA-POS API',
             'database_mode': app.config['DATABASE_MODE'],
-            'version': '1.0.1',
-            'database_fixed': True
+            'version': '1.0.2',
+            'ventas_logging_added': True
         }), 200
 
     app.logger.info(f"KATITA-POS started in {app.config['DATABASE_MODE']} mode")

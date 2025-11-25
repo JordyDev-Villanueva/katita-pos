@@ -141,11 +141,15 @@ def procesar_venta():
         }
     """
     try:
+        from flask import current_app
+        current_app.logger.info("[VENTAS] Iniciando creacion de venta...")
+
         print('\n' + '='*70)
         print('📥 RECIBIDA PETICIÓN: POST /api/ventas')
         print('='*70)
 
         data = request.json
+        current_app.logger.info(f"[VENTAS] Datos recibidos: {data}")
 
         print('📦 DATOS RECIBIDOS (RAW):')
         import json
@@ -429,11 +433,15 @@ def procesar_venta():
             message='Error de validacion en la venta'
         )
     except Exception as e:
+        from flask import current_app
+        import traceback
+        current_app.logger.error(f"[VENTAS] Exception: {str(e)}")
+        current_app.logger.error(f"[VENTAS] Traceback: {traceback.format_exc()}")
         db.session.rollback()
         return error_response(
             message='Error al procesar la venta',
             status_code=500,
-            errors={'exception': str(e)}
+            errors={'exception': str(e), 'traceback': traceback.format_exc()}
         )
 
 
