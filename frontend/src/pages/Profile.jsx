@@ -135,8 +135,8 @@ export default function Profile() {
   return (
     <Layout>
       {/* DISEÑO COMPACTO: TODO EN UNA PANTALLA SIN SCROLL */}
-      <div className="h-[calc(100vh-80px)] overflow-y-auto md:overflow-hidden">
-        <div className="min-h-full md:h-full flex flex-col gap-3 p-4">
+      <div className="h-[calc(100vh-80px)] flex flex-col overflow-y-auto md:overflow-hidden">
+        <div className="flex-1 flex flex-col gap-3 p-4">
 
           {/* FILA SUPERIOR: Tarjeta de Usuario - Ancho Completo */}
           <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl shrink-0">
@@ -192,7 +192,7 @@ export default function Profile() {
           </div>
 
           {/* FILA INFERIOR: Formularios lado a lado - 50/50 */}
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 min-h-0">
 
             {/* Formulario de Información Personal */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-full">
