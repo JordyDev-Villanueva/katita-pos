@@ -55,7 +55,7 @@ def generar_token(user_id: int, username: str, rol: str) -> Dict[str, Any]:
         'user_id': user_id,
         'username': username,
         'rol': rol,
-        'tipo': 'access',
+        'type': 'access',  # Cambio 'tipo' -> 'type' para compatibilidad con Flask-JWT-Extended
         'iat': now,
         'exp': now + timedelta(seconds=access_expires)
     }
@@ -70,7 +70,7 @@ def generar_token(user_id: int, username: str, rol: str) -> Dict[str, Any]:
     refresh_payload = {
         'user_id': user_id,
         'username': username,
-        'tipo': 'refresh',
+        'type': 'refresh',  # Cambio 'tipo' -> 'type' para compatibilidad con Flask-JWT-Extended
         'iat': now,
         'exp': now + timedelta(seconds=refresh_expires)
     }
@@ -125,9 +125,9 @@ def verificar_token(token: str, token_type: str = 'access') -> Dict[str, Any]:
             algorithms=['HS256']
         )
 
-        # Verificar tipo de token
-        if payload.get('tipo') != token_type:
-            raise ValueError(f"Token invalido: se esperaba tipo '{token_type}' pero se recibio '{payload.get('tipo')}'")
+        # Verificar tipo de token (compatibilidad con Flask-JWT-Extended que usa 'type')
+        if payload.get('type') != token_type:
+            raise ValueError(f"Token invalido: se esperaba tipo '{token_type}' pero se recibio '{payload.get('type')}'")
 
         return payload
 
@@ -198,7 +198,7 @@ def refrescar_token(refresh_token: str) -> Dict[str, Any]:
         'user_id': user.id,
         'username': user.username,
         'rol': user.rol,
-        'tipo': 'access',
+        'type': 'access',  # Cambio 'tipo' -> 'type' para compatibilidad con Flask-JWT-Extended
         'iat': now,
         'exp': now + timedelta(seconds=access_expires)
     }
