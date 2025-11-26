@@ -5,11 +5,11 @@ Gestiona CRUD completo de usuarios con horarios de trabajo.
 Solo accesible para administradores.
 """
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from datetime import datetime
 from app import db
 from app.models.user import User
-from app.decorators.auth_decorators import token_required, admin_required
+from app.decorators.auth_decorators import login_required, role_required
 import re
 
 usuarios_bp = Blueprint('usuarios', __name__, url_prefix='/api/usuarios')
@@ -20,9 +20,9 @@ usuarios_bp = Blueprint('usuarios', __name__, url_prefix='/api/usuarios')
 # ===========================
 
 @usuarios_bp.route('/', methods=['GET'])
-@token_required
-@admin_required
-def get_usuarios(current_user):
+@login_required
+@role_required('admin')
+def get_usuarios():
     """
     GET /api/usuarios/
 
@@ -77,9 +77,9 @@ def get_usuarios(current_user):
 # ===========================
 
 @usuarios_bp.route('/<int:user_id>', methods=['GET'])
-@token_required
-@admin_required
-def get_usuario(current_user, user_id):
+@login_required
+@role_required('admin')
+def get_usuario(user_id):
     """
     GET /api/usuarios/<id>
 
@@ -111,9 +111,9 @@ def get_usuario(current_user, user_id):
 # ===========================
 
 @usuarios_bp.route('/', methods=['POST'])
-@token_required
-@admin_required
-def crear_usuario(current_user):
+@login_required
+@role_required('admin')
+def crear_usuario():
     """
     POST /api/usuarios/
 
@@ -226,9 +226,9 @@ def crear_usuario(current_user):
 # ===========================
 
 @usuarios_bp.route('/<int:user_id>', methods=['PUT'])
-@token_required
-@admin_required
-def actualizar_usuario(current_user, user_id):
+@login_required
+@role_required('admin')
+def actualizar_usuario(user_id):
     """
     PUT /api/usuarios/<id>
 
@@ -337,9 +337,9 @@ def actualizar_usuario(current_user, user_id):
 # ===========================
 
 @usuarios_bp.route('/<int:user_id>/password', methods=['PUT'])
-@token_required
-@admin_required
-def cambiar_password(current_user, user_id):
+@login_required
+@role_required('admin')
+def cambiar_password(user_id):
     """
     PUT /api/usuarios/<id>/password
 
@@ -399,9 +399,9 @@ def cambiar_password(current_user, user_id):
 # ===========================
 
 @usuarios_bp.route('/<int:user_id>/toggle', methods=['PUT'])
-@token_required
-@admin_required
-def toggle_usuario(current_user, user_id):
+@login_required
+@role_required('admin')
+def toggle_usuario(user_id):
     """
     PUT /api/usuarios/<id>/toggle
 
@@ -417,7 +417,7 @@ def toggle_usuario(current_user, user_id):
             }), 404
 
         # No permitir desactivarse a sí mismo
-        if usuario.id == current_user.id:
+        if usuario.id == g.current_user['user_id']:
             return jsonify({
                 'success': False,
                 'error': 'No puedes desactivar tu propia cuenta'
@@ -449,9 +449,9 @@ def toggle_usuario(current_user, user_id):
 # ===========================
 
 @usuarios_bp.route('/<int:user_id>', methods=['DELETE'])
-@token_required
-@admin_required
-def eliminar_usuario(current_user, user_id):
+@login_required
+@role_required('admin')
+def eliminar_usuario(user_id):
     """
     DELETE /api/usuarios/<id>
 
@@ -470,7 +470,7 @@ def eliminar_usuario(current_user, user_id):
             }), 404
 
         # No permitir eliminarse a sí mismo
-        if usuario.id == current_user.id:
+        if usuario.id == g.current_user['user_id']:
             return jsonify({
                 'success': False,
                 'error': 'No puedes eliminar tu propia cuenta'
