@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
-import { Users, Plus, Edit2, Trash2, Key, Shield, Clock, Calendar, Mail, Phone, Search, UserCheck, UserX, Eye, EyeOff } from 'lucide-react';
+import { Users, Plus, Edit2, Trash2, Key, Shield, Clock, Calendar, Mail, Phone, Search, UserCheck, UserX, Eye, EyeOff, X } from 'lucide-react';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -393,27 +393,39 @@ export const Usuarios = () => {
           </div>
         </div>
 
-        {/* Modal Crear/Editar Vendedor - SIN SCROLL */}
+        {/* Modal Crear/Editar Vendedor */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Users className="w-6 h-6" />
-                  {editingUser ? 'Editar Vendedor' : 'Nuevo Vendedor'}
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowModal(false);
-                    resetForm();
-                  }}
-                  className="text-white hover:bg-white/20 rounded-lg p-2 transition"
-                >
-                  ✕
-                </button>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[98vh] overflow-hidden flex flex-col">
+              {/* Header */}
+              <div className="bg-blue-600 text-white p-4 flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white bg-opacity-20 p-3 rounded-lg">
+                      <Users className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">{editingUser ? 'Editar Vendedor' : 'Nuevo Vendedor'}</h2>
+                      <p className="text-blue-100 text-sm mt-1">
+                        Gestiona la información del vendedor
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowModal(false);
+                      resetForm();
+                    }}
+                    className="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-colors"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              {/* Body */}
+              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4">
+                <div className="space-y-4">
                 {/* Fila 1: Usuario y Contraseña */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -549,7 +561,7 @@ export const Usuarios = () => {
                           onClick={() => toggleDia(dia.value)}
                           className={`flex-1 py-2 rounded-lg font-semibold text-sm transition ${
                             formData.dias_trabajo.includes(dia.value)
-                              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                              ? 'bg-blue-600 text-white shadow-lg'
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           }`}
                         >
@@ -559,23 +571,24 @@ export const Usuarios = () => {
                     </div>
                   </div>
                 </div>
+                </div>
 
-                {/* Botones */}
-                <div className="flex gap-3 pt-3 border-t">
+                {/* Footer */}
+                <div className="mt-4 pt-4 border-t flex gap-3">
                   <button
                     type="button"
                     onClick={() => {
                       setShowModal(false);
                       resetForm();
                     }}
-                    className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition text-sm"
+                    className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition disabled:opacity-50 text-sm"
+                    className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
                   >
                     {loading ? 'Guardando...' : editingUser ? 'Actualizar' : 'Crear Vendedor'}
                   </button>
@@ -587,26 +600,38 @@ export const Usuarios = () => {
 
         {/* Modal Cambiar Contraseña */}
         {showPasswordModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-              <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Key className="w-6 h-6" />
-                  Cambiar Contraseña
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowPasswordModal(false);
-                    setPasswordData({ new_password: '' });
-                    setEditingUser(null);
-                  }}
-                  className="text-white hover:bg-white/20 rounded-lg p-2 transition"
-                >
-                  ✕
-                </button>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[98vh] overflow-hidden flex flex-col">
+              {/* Header */}
+              <div className="bg-blue-600 text-white p-4 flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white bg-opacity-20 p-3 rounded-lg">
+                      <Key className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">Cambiar Contraseña</h2>
+                      <p className="text-blue-100 text-sm mt-1">
+                        Actualiza la contraseña del vendedor
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowPasswordModal(false);
+                      setPasswordData({ new_password: '' });
+                      setEditingUser(null);
+                    }}
+                    className="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-colors"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
               </div>
 
-              <form onSubmit={handleChangePassword} className="p-6 space-y-4">
+              {/* Body */}
+              <form onSubmit={handleChangePassword} className="flex-1 overflow-y-auto p-4">
+                <div className="space-y-4">
                 <div>
                   <p className="text-gray-700 mb-4">
                     Cambiando contraseña para: <strong>{editingUser?.nombre_completo}</strong>
@@ -619,14 +644,16 @@ export const Usuarios = () => {
                     type="password"
                     value={passwordData.new_password}
                     onChange={(e) => setPasswordData({ new_password: e.target.value })}
-                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                     minLength={6}
                     placeholder="Mínimo 6 caracteres"
                   />
                 </div>
+                </div>
 
-                <div className="flex gap-3 pt-4 border-t">
+                {/* Footer */}
+                <div className="mt-4 pt-4 border-t flex gap-3">
                   <button
                     type="button"
                     onClick={() => {
@@ -634,13 +661,13 @@ export const Usuarios = () => {
                       setPasswordData({ new_password: '' });
                       setEditingUser(null);
                     }}
-                    className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
+                    className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition"
+                    className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
                   >
                     Cambiar Contraseña
                   </button>
