@@ -49,7 +49,8 @@ export const Usuarios = () => {
     try {
       const token = localStorage.getItem('access_token');
       console.log('🔑 Token encontrado:', token ? 'SÍ' : 'NO');
-      const response = await axios.get(`${API_URL}/usuarios/`, {
+      // Solo traer usuarios activos
+      const response = await axios.get(`${API_URL}/usuarios/?activo=true`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsuarios(response.data.usuarios || []);
