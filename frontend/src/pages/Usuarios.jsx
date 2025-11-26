@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Users, Plus, Edit2, Trash2, Key, Shield, Clock, Calendar, Mail, Phone, Search, UserCheck, UserX, Eye, EyeOff, X } from 'lucide-react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -57,7 +58,7 @@ export const Usuarios = () => {
     } catch (error) {
       console.error('❌ Error al cargar usuarios:', error);
       console.error('Token usado:', localStorage.getItem('access_token') ? 'existe' : 'NO EXISTE');
-      alert('Error al cargar usuarios');
+      toast.error('Error al cargar usuarios');
     } finally {
       setLoading(false);
     }
@@ -89,7 +90,7 @@ export const Usuarios = () => {
           updateData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        alert('Vendedor actualizado exitosamente');
+        toast.success('Vendedor actualizado exitosamente');
       } else {
         // Crear nuevo usuario
         await axios.post(
@@ -97,7 +98,7 @@ export const Usuarios = () => {
           submitData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        alert('Vendedor creado exitosamente');
+        toast.success('✅ Vendedor creado exitosamente');
       }
 
       setShowModal(false);
@@ -105,7 +106,7 @@ export const Usuarios = () => {
       fetchUsuarios();
     } catch (error) {
       console.error('Error:', error);
-      alert(error.response?.data?.error || 'Error al guardar vendedor');
+      toast.error(error.response?.data?.error || 'Error al guardar vendedor');
     } finally {
       setLoading(false);
     }
@@ -115,7 +116,7 @@ export const Usuarios = () => {
     e.preventDefault();
 
     if (!passwordData.new_password || passwordData.new_password.length < 6) {
-      alert('La contraseña debe tener al menos 6 caracteres');
+      toast.error('La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
@@ -127,13 +128,13 @@ export const Usuarios = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert('Contraseña actualizada exitosamente');
+      toast.success('🔐 Contraseña actualizada exitosamente');
       setShowPasswordModal(false);
       setPasswordData({ new_password: '' });
       setEditingUser(null);
     } catch (error) {
       console.error('Error:', error);
-      alert(error.response?.data?.error || 'Error al cambiar contraseña');
+      toast.error(error.response?.data?.error || 'Error al cambiar contraseña');
     }
   };
 
@@ -153,7 +154,7 @@ export const Usuarios = () => {
       fetchUsuarios();
     } catch (error) {
       console.error('Error:', error);
-      alert(error.response?.data?.error || 'Error al cambiar estado');
+      toast.error(error.response?.data?.error || 'Error al cambiar estado');
     }
   };
 
@@ -177,7 +178,7 @@ export const Usuarios = () => {
       fetchUsuarios();
     } catch (error) {
       console.error('Error:', error);
-      alert(error.response?.data?.error || 'Error al eliminar vendedor');
+      toast.error(error.response?.data?.error || 'Error al eliminar vendedor');
     }
   };
 
@@ -403,9 +404,9 @@ export const Usuarios = () => {
         {/* Modal Crear/Editar Vendedor */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[98vh] overflow-hidden flex flex-col">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[98vh] overflow-hidden flex flex-col">
               {/* Header */}
-              <div className="bg-blue-600 text-white p-4 rounded-t-2xl flex-shrink-0">
+              <div className="bg-blue-600 text-white p-4 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="bg-white bg-opacity-20 p-3 rounded-lg">
@@ -610,7 +611,7 @@ export const Usuarios = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[98vh] overflow-hidden flex flex-col">
               {/* Header */}
-              <div className="bg-blue-600 text-white p-4 rounded-t-2xl flex-shrink-0">
+              <div className="bg-blue-600 text-white p-4 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="bg-white bg-opacity-20 p-3 rounded-lg">
