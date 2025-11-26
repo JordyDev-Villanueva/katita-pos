@@ -404,9 +404,9 @@ export const Usuarios = () => {
         {/* Modal Crear/Editar Vendedor */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[98vh] overflow-hidden flex flex-col">
+            <div className="shadow-2xl w-full max-w-3xl max-h-[98vh] overflow-hidden rounded-2xl flex flex-col">
               {/* Header */}
-              <div className="bg-blue-600 text-white p-4 flex-shrink-0">
+              <div className="bg-blue-600 text-white p-4 rounded-t-2xl flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="bg-white bg-opacity-20 p-3 rounded-lg">
@@ -432,7 +432,7 @@ export const Usuarios = () => {
               </div>
 
               {/* Body */}
-              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4">
+              <form onSubmit={handleSubmit} className="bg-white flex-1 overflow-y-auto p-4 rounded-b-2xl">
                 <div className="space-y-4">
                 {/* Fila 1: Usuario y Contraseña */}
                 <div className="grid grid-cols-2 gap-4">
@@ -609,9 +609,9 @@ export const Usuarios = () => {
         {/* Modal Cambiar Contraseña */}
         {showPasswordModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[98vh] overflow-hidden flex flex-col">
+            <div className="shadow-2xl max-w-md w-full max-h-[98vh] overflow-hidden rounded-2xl flex flex-col">
               {/* Header */}
-              <div className="bg-blue-600 text-white p-4 flex-shrink-0">
+              <div className="bg-blue-600 text-white p-4 rounded-t-2xl flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="bg-white bg-opacity-20 p-3 rounded-lg">
@@ -638,7 +638,7 @@ export const Usuarios = () => {
               </div>
 
               {/* Body */}
-              <form onSubmit={handleChangePassword} className="flex-1 overflow-y-auto p-4">
+              <form onSubmit={handleChangePassword} className="bg-white flex-1 overflow-y-auto p-4 rounded-b-2xl">
                 <div className="space-y-4">
                 <div>
                   <p className="text-gray-700 mb-4">
