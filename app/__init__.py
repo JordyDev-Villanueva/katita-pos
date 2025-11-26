@@ -194,6 +194,10 @@ def register_blueprints(app):
     from app.blueprints.dashboard import dashboard_bp
     app.register_blueprint(dashboard_bp)
 
+    # Registrar blueprint de usuarios
+    from app.blueprints.usuarios import usuarios_bp
+    app.register_blueprint(usuarios_bp, url_prefix='/api/usuarios')
+
 
 def register_error_handlers(app):
     """

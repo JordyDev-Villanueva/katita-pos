@@ -6,6 +6,7 @@ import { Productos } from '../pages/Productos';
 import { Lotes } from '../pages/Lotes';
 import Reportes from '../pages/Reportes';
 import Profile from '../pages/Profile';
+import { Usuarios } from '../pages/Usuarios';
 import { PrivateRoute } from './PrivateRoute';
 import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
@@ -74,6 +75,15 @@ export const AppRoutes = () => {
           element={
             <PrivateRoute>
               <Profile />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/usuarios"
+          element={
+            <PrivateRoute requiredRoles={['admin']}>
+              <Usuarios />
             </PrivateRoute>
           }
         />

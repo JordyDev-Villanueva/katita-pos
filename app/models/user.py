@@ -48,6 +48,11 @@ class User(db.Model):
     nombre_completo = db.Column(String(200), nullable=False)
     telefono = db.Column(String(20), nullable=True)
 
+    # Horarios de trabajo (solo para vendedores)
+    hora_entrada = db.Column(String(5), nullable=True)  # Formato: "07:00"
+    hora_salida = db.Column(String(5), nullable=True)    # Formato: "14:00"
+    dias_trabajo = db.Column(String(50), nullable=True)  # Formato: "Lun-Vie" o "Lun,Mie,Vie"
+
     # Rol y estado
     rol = db.Column(String(20), nullable=False, default='vendedor', index=True)
     activo = db.Column(Boolean, default=True, nullable=False, index=True)
@@ -335,6 +340,9 @@ class User(db.Model):
             'email': self.email,
             'nombre_completo': self.nombre_completo,
             'telefono': self.telefono,
+            'hora_entrada': self.hora_entrada,
+            'hora_salida': self.hora_salida,
+            'dias_trabajo': self.dias_trabajo,
             'rol': self.rol,
             'activo': self.activo,
             'ultimo_acceso': self.ultimo_acceso.isoformat() if self.ultimo_acceso else None,

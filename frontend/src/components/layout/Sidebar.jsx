@@ -10,7 +10,8 @@ import {
   ShoppingBag,
   Menu,
   X,
-  User
+  User,
+  Users
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -42,6 +43,12 @@ export const Sidebar = () => {
       icon: Layers,
       path: '/lotes',
       roles: ['admin', 'bodeguero'],
+    },
+    {
+      name: 'Usuarios',
+      icon: Users,
+      path: '/usuarios',
+      roles: ['admin'],
     },
     {
       name: 'Reportes',
