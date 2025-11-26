@@ -12,7 +12,7 @@ from app.models.user import User
 from app.decorators.auth_decorator import token_required, admin_required
 import re
 
-usuarios_bp = Blueprint('usuarios', __name__)
+usuarios_bp = Blueprint('usuarios', __name__, url_prefix='/api/usuarios')
 
 
 # ===========================
