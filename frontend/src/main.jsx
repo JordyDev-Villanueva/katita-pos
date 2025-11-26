@@ -8,4 +8,4 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
-// Force redeploy ma., 25 de nov. de 2025 23:55:18
+// Force redeploy - fix token key - 26/11/2025 01:17
