@@ -42,7 +42,7 @@ class CuadroCaja(db.Model):
     vendedor_id = db.Column(Integer, db.ForeignKey('users.id'), nullable=False, index=True)
 
     # Fechas y horarios
-    fecha_apertura = db.Column(DateTime, default=lambda: datetime.now(PERU_TZ), nullable=False, index=True)
+    fecha_apertura = db.Column(DateTime, default=datetime.now, nullable=False, index=True)
     fecha_cierre = db.Column(DateTime, nullable=True)
 
     # Montos de apertura
@@ -68,11 +68,11 @@ class CuadroCaja(db.Model):
     observaciones = db.Column(Text, nullable=True)
 
     # Timestamps
-    created_at = db.Column(DateTime, default=lambda: datetime.now(PERU_TZ), nullable=False)
+    created_at = db.Column(DateTime, default=datetime.now, nullable=False)
     updated_at = db.Column(
         DateTime,
-        default=lambda: datetime.now(PERU_TZ),
-        onupdate=lambda: datetime.now(PERU_TZ),
+        default=datetime.now,
+        onupdate=datetime.now,
         nullable=False
     )
 
@@ -179,7 +179,8 @@ class CuadroCaja(db.Model):
         if not self.fecha_apertura:
             return 0
 
-        fecha_fin = self.fecha_cierre if self.fecha_cierre else datetime.now(PERU_TZ)
+        # Usar datetime sin timezone para evitar errores
+        fecha_fin = self.fecha_cierre if self.fecha_cierre else datetime.now()
         delta = fecha_fin - self.fecha_apertura
         return round(delta.total_seconds() / 3600, 2)  # Horas con 2 decimales
 
@@ -313,7 +314,7 @@ class CuadroCaja(db.Model):
         egresos_list.append({
             'monto': float(monto),
             'concepto': concepto,
-            'fecha': datetime.now(PERU_TZ).isoformat()
+            'fecha': datetime.now().isoformat()
         })
 
         self.detalle_egresos = json.dumps(egresos_list, ensure_ascii=False)
@@ -336,7 +337,7 @@ class CuadroCaja(db.Model):
         self.calcular_efectivo_esperado()
         self.calcular_diferencia()
 
-        self.fecha_cierre = datetime.now(PERU_TZ)
+        self.fecha_cierre = datetime.now()
         self.estado = 'cerrado'
 
         if observaciones:
@@ -449,7 +450,7 @@ class CuadroCaja(db.Model):
         """
         from datetime import date
         if fecha is None:
-            fecha = datetime.now(PERU_TZ).date()
+            fecha = datetime.now().date()
 
         inicio = datetime.combine(fecha, datetime.min.time())
         fin = datetime.combine(fecha, datetime.max.time())
@@ -474,9 +475,9 @@ class CuadroCaja(db.Model):
         """
         from datetime import date
         if fecha_inicio is None:
-            fecha_inicio = datetime.now(PERU_TZ).date()
+            fecha_inicio = datetime.now().date()
         if fecha_fin is None:
-            fecha_fin = datetime.now(PERU_TZ).date()
+            fecha_fin = datetime.now().date()
 
         inicio = datetime.combine(fecha_inicio, datetime.min.time())
         fin = datetime.combine(fecha_fin, datetime.max.time())
