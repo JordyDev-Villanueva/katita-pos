@@ -198,6 +198,10 @@ def register_blueprints(app):
     from app.blueprints.usuarios import usuarios_bp
     app.register_blueprint(usuarios_bp)
 
+    # Registrar blueprint de cuadro de caja
+    from app.blueprints.cuadro_caja import cuadro_caja_bp
+    app.register_blueprint(cuadro_caja_bp)
+
 
 def register_error_handlers(app):
     """

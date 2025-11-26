@@ -11,7 +11,8 @@ import {
   Menu,
   X,
   User,
-  Users
+  Users,
+  DollarSign
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -30,6 +31,12 @@ export const Sidebar = () => {
       name: 'Punto de Venta',
       icon: ShoppingCart,
       path: '/pos',
+      roles: ['admin', 'vendedor'],
+    },
+    {
+      name: 'Cuadro de Caja',
+      icon: DollarSign,
+      path: '/cuadro-caja',
       roles: ['admin', 'vendedor'],
     },
     {

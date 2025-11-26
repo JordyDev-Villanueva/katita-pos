@@ -11,8 +11,9 @@ from app.models.venta import Venta
 from app.models.detalle_venta import DetalleVenta
 from app.models.movimiento_stock import MovimientoStock
 from app.models.sync_queue import SyncQueue
+from app.models.cuadro_caja import CuadroCaja
 
 # Cuando se creen más modelos, importarlos aquí:
 # from app.models.category import Category
 
-__all__ = ['Product', 'Lote', 'User', 'Venta', 'DetalleVenta', 'MovimientoStock', 'SyncQueue']
+__all__ = ['Product', 'Lote', 'User', 'Venta', 'DetalleVenta', 'MovimientoStock', 'SyncQueue', 'CuadroCaja']

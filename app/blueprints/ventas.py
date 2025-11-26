@@ -40,6 +40,7 @@ from app.models.product import Product
 from app.models.lote import Lote
 from app.models.movimiento_stock import MovimientoStock
 from app.models.user import User
+from app.models.cuadro_caja import CuadroCaja
 from app.utils.responses import (
     success_response, error_response, created_response,
     not_found_response, validation_error_response
@@ -405,6 +406,17 @@ def procesar_venta():
         else:
             # Para pagos digitales, cambio siempre es 0
             nueva_venta.cambio = Decimal('0')
+
+        # ========== REGISTRAR EN CUADRO DE CAJA ==========
+        # Si el vendedor tiene un turno abierto, registrar la venta automáticamente
+        turno_activo = CuadroCaja.turno_abierto_vendedor(vendedor_id)
+        if turno_activo:
+            try:
+                turno_activo.registrar_venta(nueva_venta)
+                current_app.logger.info(f"[VENTAS] Venta registrada en cuadro de caja {turno_activo.numero_turno}")
+            except Exception as e:
+                current_app.logger.warning(f"[VENTAS] No se pudo registrar en cuadro de caja: {str(e)}")
+                # No lanzar error, solo advertencia - la venta debe procesarse igual
 
         # ========== COMMIT FINAL ==========
         db.session.commit()
