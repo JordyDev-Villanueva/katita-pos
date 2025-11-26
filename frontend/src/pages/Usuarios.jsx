@@ -45,7 +45,7 @@ export const Usuarios = () => {
   const fetchUsuarios = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/api/usuarios/`, {
+      const response = await axios.get(`${API_URL}/usuarios/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsuarios(response.data.usuarios || []);
@@ -79,7 +79,7 @@ export const Usuarios = () => {
         // Actualizar usuario existente (sin password)
         const { password, ...updateData } = submitData;
         await axios.put(
-          `${API_URL}/api/usuarios/${editingUser.id}`,
+          `${API_URL}/usuarios/${editingUser.id}`,
           updateData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -87,7 +87,7 @@ export const Usuarios = () => {
       } else {
         // Crear nuevo usuario
         await axios.post(
-          `${API_URL}/api/usuarios/`,
+          `${API_URL}/usuarios/`,
           submitData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -116,7 +116,7 @@ export const Usuarios = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `${API_URL}/api/usuarios/${editingUser.id}/password`,
+        `${API_URL}/usuarios/${editingUser.id}/password`,
         passwordData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -139,7 +139,7 @@ export const Usuarios = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `${API_URL}/api/usuarios/${user.id}/toggle`,
+        `${API_URL}/usuarios/${user.id}/toggle`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -159,7 +159,7 @@ export const Usuarios = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.delete(
-        `${API_URL}/api/usuarios/${user.id}`,
+        `${API_URL}/usuarios/${user.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
