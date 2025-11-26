@@ -12,14 +12,14 @@ export const Usuarios = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterRol, setFilterRol] = useState('todos');
+  const [filterRol, setFilterRol] = useState('vendedor'); // Por defecto solo vendedores
   const [formData, setFormData] = useState({
     username: '',
     password: '',
     email: '',
     nombre_completo: '',
     telefono: '',
-    rol: 'vendedor',
+    rol: 'vendedor', // Siempre vendedor
     hora_entrada: '',
     hora_salida: '',
     dias_trabajo: []
@@ -71,7 +71,8 @@ export const Usuarios = () => {
 
       const submitData = {
         ...formData,
-        dias_trabajo: diasString
+        dias_trabajo: diasString,
+        rol: 'vendedor' // Forzar siempre vendedor
       };
 
       if (editingUser) {
@@ -82,7 +83,7 @@ export const Usuarios = () => {
           updateData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        alert('Usuario actualizado exitosamente');
+        alert('Vendedor actualizado exitosamente');
       } else {
         // Crear nuevo usuario
         await axios.post(
@@ -90,7 +91,7 @@ export const Usuarios = () => {
           submitData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        alert('Usuario creado exitosamente');
+        alert('Vendedor creado exitosamente');
       }
 
       setShowModal(false);
@@ -98,7 +99,7 @@ export const Usuarios = () => {
       fetchUsuarios();
     } catch (error) {
       console.error('Error:', error);
-      alert(error.response?.data?.error || 'Error al guardar usuario');
+      alert(error.response?.data?.error || 'Error al guardar vendedor');
     } finally {
       setLoading(false);
     }
@@ -131,7 +132,7 @@ export const Usuarios = () => {
   };
 
   const handleToggleActive = async (user) => {
-    if (!confirm(`¿Deseas ${user.activo ? 'desactivar' : 'activar'} al usuario ${user.nombre_completo}?`)) {
+    if (!confirm(`¿Deseas ${user.activo ? 'desactivar' : 'activar'} al vendedor ${user.nombre_completo}?`)) {
       return;
     }
 
@@ -151,7 +152,7 @@ export const Usuarios = () => {
   };
 
   const handleDelete = async (user) => {
-    if (!confirm(`¿Estás seguro de eliminar al usuario ${user.nombre_completo}?`)) {
+    if (!confirm(`¿Estás seguro de eliminar al vendedor ${user.nombre_completo}?`)) {
       return;
     }
 
@@ -162,11 +163,11 @@ export const Usuarios = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert('Usuario eliminado exitosamente');
+      alert('Vendedor eliminado exitosamente');
       fetchUsuarios();
     } catch (error) {
       console.error('Error:', error);
-      alert(error.response?.data?.error || 'Error al eliminar usuario');
+      alert(error.response?.data?.error || 'Error al eliminar vendedor');
     }
   };
 
@@ -184,7 +185,7 @@ export const Usuarios = () => {
       email: user.email,
       nombre_completo: user.nombre_completo,
       telefono: user.telefono || '',
-      rol: user.rol,
+      rol: 'vendedor',
       hora_entrada: user.hora_entrada || '',
       hora_salida: user.hora_salida || '',
       dias_trabajo: diasArray
@@ -221,12 +222,12 @@ export const Usuarios = () => {
     }));
   };
 
-  // Filtrado de usuarios
+  // Filtrado de usuarios - solo vendedores
   const filteredUsuarios = usuarios.filter(user => {
     const matchSearch = user.nombre_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
                        user.username.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchRol = filterRol === 'todos' || user.rol === filterRol;
-    return matchSearch && matchRol;
+    // Solo mostrar vendedores
+    return matchSearch && user.rol === 'vendedor';
   });
 
   return (
@@ -237,7 +238,7 @@ export const Usuarios = () => {
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
               <Users className="w-8 h-8 text-indigo-600" />
-              Gestión de Usuarios
+              Gestión de Vendedores
             </h1>
             <p className="text-gray-600 mt-1">Administra vendedores y su información</p>
           </div>
@@ -249,37 +250,25 @@ export const Usuarios = () => {
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition shadow-lg"
           >
             <Plus className="w-5 h-5" />
-            Nuevo Usuario
+            Nuevo Vendedor
           </button>
         </div>
 
         {/* Filtros */}
         <div className="bg-white rounded-xl shadow-lg p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar por nombre o usuario..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-
-            <select
-              value={filterRol}
-              onChange={(e) => setFilterRol(e.target.value)}
-              className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="todos">Todos los roles</option>
-              <option value="admin">Administradores</option>
-              <option value="vendedor">Vendedores</option>
-            </select>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar por nombre o usuario..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
           </div>
         </div>
 
-        {/* Tabla de usuarios */}
+        {/* Tabla de vendedores */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -287,7 +276,6 @@ export const Usuarios = () => {
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Usuario</th>
                   <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Contacto</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Rol</th>
                   <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Horario</th>
                   <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Estado</th>
                   <th className="px-6 py-4 text-center text-sm font-bold uppercase tracking-wider">Acciones</th>
@@ -296,14 +284,14 @@ export const Usuarios = () => {
               <tbody className="divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
-                      Cargando usuarios...
+                    <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                      Cargando vendedores...
                     </td>
                   </tr>
                 ) : filteredUsuarios.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
-                      No se encontraron usuarios
+                    <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                      No se encontraron vendedores
                     </td>
                   </tr>
                 ) : (
@@ -328,16 +316,6 @@ export const Usuarios = () => {
                             </div>
                           )}
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${
-                          user.rol === 'admin'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          <Shield className="w-4 h-4" />
-                          {user.rol === 'admin' ? 'Administrador' : 'Vendedor'}
-                        </span>
                       </td>
                       <td className="px-6 py-4">
                         {user.hora_entrada && user.hora_salida ? (
@@ -384,7 +362,7 @@ export const Usuarios = () => {
                           <button
                             onClick={() => openEditModal(user)}
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                            title="Editar usuario"
+                            title="Editar vendedor"
                           >
                             <Edit2 className="w-5 h-5" />
                           </button>
@@ -398,7 +376,7 @@ export const Usuarios = () => {
                           <button
                             onClick={() => handleDelete(user)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                            title="Eliminar usuario"
+                            title="Eliminar vendedor"
                           >
                             <Trash2 className="w-5 h-5" />
                           </button>
@@ -412,14 +390,14 @@ export const Usuarios = () => {
           </div>
         </div>
 
-        {/* Modal Crear/Editar Usuario */}
+        {/* Modal Crear/Editar Vendedor - SIN SCROLL */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl">
+              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex justify-between items-center rounded-t-2xl">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                   <Users className="w-6 h-6" />
-                  {editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}
+                  {editingUser ? 'Editar Vendedor' : 'Nuevo Vendedor'}
                 </h2>
                 <button
                   onClick={() => {
@@ -432,18 +410,18 @@ export const Usuarios = () => {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                {/* Credenciales */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                {/* Fila 1: Usuario y Contraseña */}
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
                       Usuario *
                     </label>
                     <input
                       type="text"
                       value={formData.username}
                       onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                       required
                       disabled={editingUser}
                     />
@@ -451,14 +429,14 @@ export const Usuarios = () => {
 
                   {!editingUser && (
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
                         Contraseña *
                       </label>
                       <input
                         type="password"
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                         required={!editingUser}
                         minLength={6}
                         placeholder="Mínimo 6 caracteres"
@@ -467,104 +445,84 @@ export const Usuarios = () => {
                   )}
                 </div>
 
-                {/* Información Personal */}
+                {/* Fila 2: Nombre Completo */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Nombre Completo *
                   </label>
                   <input
                     type="text"
                     value={formData.nombre_completo}
                     onChange={(e) => setFormData({ ...formData, nombre_completo: e.target.value })}
-                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                     required
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Fila 3: Email y Teléfono */}
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
                       Email *
                     </label>
                     <input
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
                       Teléfono
                     </label>
                     <input
                       type="tel"
                       value={formData.telefono}
                       onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                       placeholder="987654321"
                     />
                   </div>
                 </div>
 
-                {/* Rol - SOLO Admin y Vendedor */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Rol *
-                  </label>
-                  <select
-                    value={formData.rol}
-                    onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
-                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                    disabled={editingUser}
-                  >
-                    <option value="vendedor">Vendedor</option>
-                    <option value="admin">Administrador</option>
-                  </select>
-                  {editingUser && (
-                    <p className="text-xs text-gray-500 mt-1">El rol no puede cambiarse después de crear el usuario</p>
-                  )}
-                </div>
-
                 {/* Horarios de Trabajo */}
-                <div className="border-t pt-4">
-                  <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-indigo-600" />
+                <div className="border-t pt-3">
+                  <h3 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-indigo-600" />
                     Horario de Trabajo
                   </h3>
 
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-2 gap-4 mb-3">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Hora de Entrada
                       </label>
                       <input
                         type="time"
                         value={formData.hora_entrada}
                         onChange={(e) => setFormData({ ...formData, hora_entrada: e.target.value })}
-                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Hora de Salida
                       </label>
                       <input
                         type="time"
                         value={formData.hora_salida}
                         onChange={(e) => setFormData({ ...formData, hora_salida: e.target.value })}
-                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-indigo-600" />
+                    <label className="block text-xs font-semibold text-gray-700 mb-2">
                       Días de Trabajo
                     </label>
                     <div className="flex gap-2">
@@ -573,7 +531,7 @@ export const Usuarios = () => {
                           key={dia.value}
                           type="button"
                           onClick={() => toggleDia(dia.value)}
-                          className={`flex-1 py-2 rounded-lg font-semibold transition ${
+                          className={`flex-1 py-2 rounded-lg font-semibold text-sm transition ${
                             formData.dias_trabajo.includes(dia.value)
                               ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -583,30 +541,27 @@ export const Usuarios = () => {
                         </button>
                       ))}
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Selecciona los días que trabaja este usuario
-                    </p>
                   </div>
                 </div>
 
                 {/* Botones */}
-                <div className="flex gap-3 pt-4 border-t">
+                <div className="flex gap-3 pt-3 border-t">
                   <button
                     type="button"
                     onClick={() => {
                       setShowModal(false);
                       resetForm();
                     }}
-                    className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
+                    className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition text-sm"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition disabled:opacity-50"
+                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition disabled:opacity-50 text-sm"
                   >
-                    {loading ? 'Guardando...' : editingUser ? 'Actualizar' : 'Crear Usuario'}
+                    {loading ? 'Guardando...' : editingUser ? 'Actualizar' : 'Crear Vendedor'}
                   </button>
                 </div>
               </form>
@@ -618,7 +573,7 @@ export const Usuarios = () => {
         {showPasswordModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-              <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex justify-between items-center">
+              <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex justify-between items-center rounded-t-2xl">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                   <Key className="w-6 h-6" />
                   Cambiar Contraseña

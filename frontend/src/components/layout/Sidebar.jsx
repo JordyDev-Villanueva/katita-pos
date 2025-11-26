@@ -45,7 +45,7 @@ export const Sidebar = () => {
       roles: ['admin', 'bodeguero'],
     },
     {
-      name: 'Usuarios',
+      name: 'Vendedores',
       icon: Users,
       path: '/usuarios',
       roles: ['admin'],
