@@ -79,8 +79,10 @@ def login_required(f):
             print(f"[DEBUG @login_required] Token válido. Payload: {payload}")
 
             # Guardar datos del usuario en g para acceso en el endpoint
+            # Flask-JWT-Extended usa 'sub' en lugar de 'user_id'
+            user_id = payload.get('user_id') or payload.get('sub')
             g.current_user = {
-                'user_id': payload['user_id'],
+                'user_id': int(user_id) if user_id else None,
                 'username': payload['username'],
                 'rol': payload['rol']
             }
