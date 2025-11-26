@@ -74,7 +74,9 @@ def login_required(f):
         # ========== VERIFICAR TOKEN ==========
         try:
             # Verificar que sea un access token valido
+            print(f"[DEBUG @login_required] Verificando token...")
             payload = verificar_token(token, token_type='access')
+            print(f"[DEBUG @login_required] Token válido. Payload: {payload}")
 
             # Guardar datos del usuario en g para acceso en el endpoint
             g.current_user = {
@@ -82,6 +84,7 @@ def login_required(f):
                 'username': payload['username'],
                 'rol': payload['rol']
             }
+            print(f"[DEBUG @login_required] g.current_user establecido: {g.current_user}")
 
         except jwt.ExpiredSignatureError:
             return unauthorized_response('Token expirado. Por favor, refresque su token.')

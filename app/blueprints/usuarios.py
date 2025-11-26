@@ -33,6 +33,10 @@ def get_usuarios():
     - activo: Filtrar por estado (true/false)
     - search: Buscar por nombre o username
     """
+    print("=" * 60)
+    print("[DEBUG] GET /api/usuarios/ - INICIO")
+    print(f"[DEBUG] Usuario actual: {g.current_user}")
+    print("=" * 60)
     try:
         query = User.query
 
