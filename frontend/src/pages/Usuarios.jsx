@@ -22,11 +22,21 @@ export const Usuarios = () => {
     rol: 'vendedor',
     hora_entrada: '',
     hora_salida: '',
-    dias_trabajo: ''
+    dias_trabajo: []
   });
   const [passwordData, setPasswordData] = useState({
     new_password: ''
   });
+
+  const diasSemana = [
+    { value: 'Lun', label: 'L' },
+    { value: 'Mar', label: 'M' },
+    { value: 'Mie', label: 'X' },
+    { value: 'Jue', label: 'J' },
+    { value: 'Vie', label: 'V' },
+    { value: 'Sab', label: 'S' },
+    { value: 'Dom', label: 'D' }
+  ];
 
   useEffect(() => {
     fetchUsuarios();
@@ -54,9 +64,19 @@ export const Usuarios = () => {
     try {
       const token = localStorage.getItem('token');
 
+      // Convertir array de días a string
+      const diasString = formData.dias_trabajo.length > 0
+        ? formData.dias_trabajo.join(',')
+        : '';
+
+      const submitData = {
+        ...formData,
+        dias_trabajo: diasString
+      };
+
       if (editingUser) {
         // Actualizar usuario existente (sin password)
-        const { password, ...updateData } = formData;
+        const { password, ...updateData } = submitData;
         await axios.put(
           `${API_URL}/api/usuarios/${editingUser.id}`,
           updateData,
@@ -67,7 +87,7 @@ export const Usuarios = () => {
         // Crear nuevo usuario
         await axios.post(
           `${API_URL}/api/usuarios/`,
-          formData,
+          submitData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         alert('Usuario creado exitosamente');
@@ -99,6 +119,7 @@ export const Usuarios = () => {
         passwordData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       alert('Contraseña actualizada exitosamente');
       setShowPasswordModal(false);
       setPasswordData({ new_password: '' });
@@ -109,18 +130,19 @@ export const Usuarios = () => {
     }
   };
 
-  const handleToggleActive = async (usuario) => {
-    if (!confirm(`¿Seguro que deseas ${usuario.activo ? 'desactivar' : 'activar'} a ${usuario.nombre_completo}?`)) {
+  const handleToggleActive = async (user) => {
+    if (!confirm(`¿Deseas ${user.activo ? 'desactivar' : 'activar'} al usuario ${user.nombre_completo}?`)) {
       return;
     }
 
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `${API_URL}/api/usuarios/${usuario.id}/toggle`,
+        `${API_URL}/api/usuarios/${user.id}/toggle`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       fetchUsuarios();
     } catch (error) {
       console.error('Error:', error);
@@ -128,17 +150,18 @@ export const Usuarios = () => {
     }
   };
 
-  const handleDelete = async (usuario) => {
-    if (!confirm(`¿Seguro que deseas eliminar a ${usuario.nombre_completo}? Esta acción no se puede deshacer.`)) {
+  const handleDelete = async (user) => {
+    if (!confirm(`¿Estás seguro de eliminar al usuario ${user.nombre_completo}?`)) {
       return;
     }
 
     try {
       const token = localStorage.getItem('token');
       await axios.delete(
-        `${API_URL}/api/usuarios/${usuario.id}`,
+        `${API_URL}/api/usuarios/${user.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       alert('Usuario eliminado exitosamente');
       fetchUsuarios();
     } catch (error) {
@@ -147,25 +170,30 @@ export const Usuarios = () => {
     }
   };
 
-  const openEditModal = (usuario) => {
-    setEditingUser(usuario);
+  const openEditModal = (user) => {
+    setEditingUser(user);
+
+    // Convertir string de días a array
+    const diasArray = user.dias_trabajo
+      ? user.dias_trabajo.split(',').map(d => d.trim())
+      : [];
+
     setFormData({
-      username: usuario.username,
-      password: '', // No mostrar password
-      email: usuario.email,
-      nombre_completo: usuario.nombre_completo,
-      telefono: usuario.telefono || '',
-      rol: usuario.rol,
-      hora_entrada: usuario.hora_entrada || '',
-      hora_salida: usuario.hora_salida || '',
-      dias_trabajo: usuario.dias_trabajo || ''
+      username: user.username,
+      password: '',
+      email: user.email,
+      nombre_completo: user.nombre_completo,
+      telefono: user.telefono || '',
+      rol: user.rol,
+      hora_entrada: user.hora_entrada || '',
+      hora_salida: user.hora_salida || '',
+      dias_trabajo: diasArray
     });
     setShowModal(true);
   };
 
-  const openPasswordModal = (usuario) => {
-    setEditingUser(usuario);
-    setPasswordData({ new_password: '' });
+  const openPasswordModal = (user) => {
+    setEditingUser(user);
     setShowPasswordModal(true);
   };
 
@@ -179,39 +207,35 @@ export const Usuarios = () => {
       rol: 'vendedor',
       hora_entrada: '',
       hora_salida: '',
-      dias_trabajo: ''
+      dias_trabajo: []
     });
     setEditingUser(null);
   };
 
+  const toggleDia = (dia) => {
+    setFormData(prev => ({
+      ...prev,
+      dias_trabajo: prev.dias_trabajo.includes(dia)
+        ? prev.dias_trabajo.filter(d => d !== dia)
+        : [...prev.dias_trabajo, dia]
+    }));
+  };
+
+  // Filtrado de usuarios
   const filteredUsuarios = usuarios.filter(user => {
-    const matchesSearch = user.nombre_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.username.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRol = filterRol === 'todos' || user.rol === filterRol;
-    return matchesSearch && matchesRol;
+    const matchSearch = user.nombre_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                       user.username.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchRol = filterRol === 'todos' || user.rol === filterRol;
+    return matchSearch && matchRol;
   });
-
-  const getRolBadge = (rol) => {
-    const badges = {
-      admin: 'bg-red-100 text-red-800',
-      vendedor: 'bg-blue-100 text-blue-800',
-      bodeguero: 'bg-green-100 text-green-800'
-    };
-    return badges[rol] || 'bg-gray-100 text-gray-800';
-  };
-
-  const getRolIcon = (rol) => {
-    if (rol === 'admin') return <Shield className="w-4 h-4" />;
-    return <Users className="w-4 h-4" />;
-  };
 
   return (
     <Layout>
-      <div className="p-6">
+      <div className="p-6 space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
               <Users className="w-8 h-8 text-indigo-600" />
               Gestión de Usuarios
             </h1>
@@ -222,7 +246,7 @@ export const Usuarios = () => {
               resetForm();
               setShowModal(true);
             }}
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 hover:from-indigo-700 hover:to-purple-700 transition shadow-lg"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition shadow-lg"
           >
             <Plus className="w-5 h-5" />
             Nuevo Usuario
@@ -230,11 +254,10 @@ export const Usuarios = () => {
         </div>
 
         {/* Filtros */}
-        <div className="bg-white rounded-xl shadow-md p-4 mb-6">
+        <div className="bg-white rounded-xl shadow-lg p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Búsqueda */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Buscar por nombre o usuario..."
@@ -244,7 +267,6 @@ export const Usuarios = () => {
               />
             </div>
 
-            {/* Filtro por rol */}
             <select
               value={filterRol}
               onChange={(e) => setFilterRol(e.target.value)}
@@ -253,7 +275,6 @@ export const Usuarios = () => {
               <option value="todos">Todos los roles</option>
               <option value="admin">Administradores</option>
               <option value="vendedor">Vendedores</option>
-              <option value="bodeguero">Bodegueros</option>
             </select>
           </div>
         </div>
@@ -264,12 +285,12 @@ export const Usuarios = () => {
             <table className="w-full">
               <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-bold">Usuario</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold">Contacto</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold">Rol</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold">Horario</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold">Estado</th>
-                  <th className="px-6 py-4 text-center text-sm font-bold">Acciones</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Usuario</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Contacto</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Rol</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Horario</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-4 text-center text-sm font-bold uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -286,109 +307,100 @@ export const Usuarios = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredUsuarios.map((usuario) => (
-                    <tr key={usuario.id} className="hover:bg-gray-50 transition">
-                      {/* Usuario */}
+                  filteredUsuarios.map((user) => (
+                    <tr key={user.id} className="hover:bg-gray-50 transition">
                       <td className="px-6 py-4">
                         <div>
-                          <div className="font-semibold text-gray-900">{usuario.nombre_completo}</div>
-                          <div className="text-sm text-gray-500">@{usuario.username}</div>
+                          <p className="font-semibold text-gray-900">{user.nombre_completo}</p>
+                          <p className="text-sm text-gray-500">@{user.username}</p>
                         </div>
                       </td>
-
-                      {/* Contacto */}
                       <td className="px-6 py-4">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 text-sm text-gray-700">
-                            <Mail className="w-4 h-4 text-gray-400" />
-                            {usuario.email}
+                            <Mail className="w-4 h-4 text-indigo-600" />
+                            {user.email}
                           </div>
-                          {usuario.telefono && (
+                          {user.telefono && (
                             <div className="flex items-center gap-2 text-sm text-gray-700">
-                              <Phone className="w-4 h-4 text-gray-400" />
-                              {usuario.telefono}
+                              <Phone className="w-4 h-4 text-indigo-600" />
+                              {user.telefono}
                             </div>
                           )}
                         </div>
                       </td>
-
-                      {/* Rol */}
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${getRolBadge(usuario.rol)}`}>
-                          {getRolIcon(usuario.rol)}
-                          {usuario.rol.charAt(0).toUpperCase() + usuario.rol.slice(1)}
+                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${
+                          user.rol === 'admin'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          <Shield className="w-4 h-4" />
+                          {user.rol === 'admin' ? 'Administrador' : 'Vendedor'}
                         </span>
                       </td>
-
-                      {/* Horario */}
                       <td className="px-6 py-4">
-                        {usuario.hora_entrada && usuario.hora_salida ? (
+                        {user.hora_entrada && user.hora_salida ? (
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 text-sm text-gray-700">
-                              <Clock className="w-4 h-4 text-gray-400" />
-                              {usuario.hora_entrada} - {usuario.hora_salida}
+                              <Clock className="w-4 h-4 text-purple-600" />
+                              {user.hora_entrada} - {user.hora_salida}
                             </div>
-                            {usuario.dias_trabajo && (
-                              <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <Calendar className="w-4 h-4 text-gray-400" />
-                                {usuario.dias_trabajo}
+                            {user.dias_trabajo && (
+                              <div className="flex items-center gap-2 text-xs text-gray-500">
+                                <Calendar className="w-3 h-3" />
+                                {user.dias_trabajo}
                               </div>
                             )}
                           </div>
                         ) : (
-                          <span className="text-sm text-gray-400">Sin horario</span>
+                          <span className="text-sm text-gray-400">No configurado</span>
                         )}
                       </td>
-
-                      {/* Estado */}
                       <td className="px-6 py-4">
-                        {usuario.activo ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
-                            <UserCheck className="w-4 h-4" />
-                            Activo
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">
-                            <UserX className="w-4 h-4" />
-                            Inactivo
-                          </span>
-                        )}
+                        <button
+                          onClick={() => handleToggleActive(user)}
+                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${
+                            user.activo
+                              ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                          } transition`}
+                        >
+                          {user.activo ? (
+                            <>
+                              <UserCheck className="w-4 h-4" />
+                              Activo
+                            </>
+                          ) : (
+                            <>
+                              <UserX className="w-4 h-4" />
+                              Inactivo
+                            </>
+                          )}
+                        </button>
                       </td>
-
-                      {/* Acciones */}
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => openEditModal(usuario)}
+                            onClick={() => openEditModal(user)}
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                            title="Editar"
+                            title="Editar usuario"
                           >
-                            <Edit2 className="w-4 h-4" />
+                            <Edit2 className="w-5 h-5" />
                           </button>
                           <button
-                            onClick={() => openPasswordModal(usuario)}
+                            onClick={() => openPasswordModal(user)}
                             className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition"
                             title="Cambiar contraseña"
                           >
-                            <Key className="w-4 h-4" />
+                            <Key className="w-5 h-5" />
                           </button>
                           <button
-                            onClick={() => handleToggleActive(usuario)}
-                            className={`p-2 rounded-lg transition ${
-                              usuario.activo
-                                ? 'text-orange-600 hover:bg-orange-50'
-                                : 'text-green-600 hover:bg-green-50'
-                            }`}
-                            title={usuario.activo ? 'Desactivar' : 'Activar'}
-                          >
-                            {usuario.activo ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
-                          </button>
-                          <button
-                            onClick={() => handleDelete(usuario)}
+                            onClick={() => handleDelete(user)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                            title="Eliminar"
+                            title="Eliminar usuario"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
                       </td>
@@ -403,8 +415,8 @@ export const Usuarios = () => {
         {/* Modal Crear/Editar Usuario */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex justify-between items-center">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                   <Users className="w-6 h-6" />
                   {editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}
@@ -420,8 +432,8 @@ export const Usuarios = () => {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                {/* Información de Acceso */}
+              <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                {/* Credenciales */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -433,7 +445,7 @@ export const Usuarios = () => {
                       onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                       className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       required
-                      disabled={editingUser} // No permitir cambiar username al editar
+                      disabled={editingUser}
                     />
                   </div>
 
@@ -449,8 +461,8 @@ export const Usuarios = () => {
                         className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         required={!editingUser}
                         minLength={6}
+                        placeholder="Mínimo 6 caracteres"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
                     </div>
                   )}
                 </div>
@@ -497,7 +509,7 @@ export const Usuarios = () => {
                   </div>
                 </div>
 
-                {/* Rol */}
+                {/* Rol - SOLO Admin y Vendedor */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Rol *
@@ -507,12 +519,14 @@ export const Usuarios = () => {
                     onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
                     className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     required
-                    disabled={editingUser} // No permitir cambiar rol al editar
+                    disabled={editingUser}
                   >
                     <option value="vendedor">Vendedor</option>
-                    <option value="bodeguero">Bodeguero</option>
                     <option value="admin">Administrador</option>
                   </select>
+                  {editingUser && (
+                    <p className="text-xs text-gray-500 mt-1">El rol no puede cambiarse después de crear el usuario</p>
+                  )}
                 </div>
 
                 {/* Horarios de Trabajo */}
@@ -522,7 +536,7 @@ export const Usuarios = () => {
                     Horario de Trabajo
                   </h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Hora de Entrada
@@ -548,19 +562,29 @@ export const Usuarios = () => {
                     </div>
                   </div>
 
-                  <div className="mt-4">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                      <Calendar className="w-5 h-5 text-indigo-600" />
                       Días de Trabajo
                     </label>
-                    <input
-                      type="text"
-                      value={formData.dias_trabajo}
-                      onChange={(e) => setFormData({ ...formData, dias_trabajo: e.target.value })}
-                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      placeholder="Ej: Lun-Vie, Lun-Sab, Lun,Mie,Vie"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Ejemplo: "Lun-Vie" o "Lun,Mie,Vie"
+                    <div className="flex gap-2">
+                      {diasSemana.map(dia => (
+                        <button
+                          key={dia.value}
+                          type="button"
+                          onClick={() => toggleDia(dia.value)}
+                          className={`flex-1 py-2 rounded-lg font-semibold transition ${
+                            formData.dias_trabajo.includes(dia.value)
+                              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        >
+                          {dia.label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Selecciona los días que trabaja este usuario
                     </p>
                   </div>
                 </div>
@@ -573,14 +597,14 @@ export const Usuarios = () => {
                       setShowModal(false);
                       resetForm();
                     }}
-                    className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
+                    className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition disabled:opacity-50"
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition disabled:opacity-50"
                   >
                     {loading ? 'Guardando...' : editingUser ? 'Actualizar' : 'Crear Usuario'}
                   </button>

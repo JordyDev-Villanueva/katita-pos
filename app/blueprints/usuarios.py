@@ -9,7 +9,7 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime
 from app import db
 from app.models.user import User
-from app.decorators.auth_decorator import token_required, admin_required
+from app.decorators.auth_decorators import token_required, admin_required
 import re
 
 usuarios_bp = Blueprint('usuarios', __name__, url_prefix='/api/usuarios')
@@ -158,11 +158,11 @@ def crear_usuario(current_user):
                 'error': 'El email ya está registrado'
             }), 400
 
-        # Validar rol
-        if data['rol'] not in ['admin', 'vendedor', 'bodeguero']:
+        # Validar rol (solo admin y vendedor permitidos)
+        if data['rol'] not in ['admin', 'vendedor']:
             return jsonify({
                 'success': False,
-                'error': 'Rol inválido. Debe ser: admin, vendedor o bodeguero'
+                'error': 'Rol inválido. Debe ser: admin o vendedor'
             }), 400
 
         # Validar horarios si se proporcionan
