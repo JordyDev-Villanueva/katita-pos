@@ -44,7 +44,7 @@ export const Usuarios = () => {
 
   const fetchUsuarios = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       const response = await axios.get(`${API_URL}/usuarios/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -62,7 +62,7 @@ export const Usuarios = () => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
 
       // Convertir array de días a string
       const diasString = formData.dias_trabajo.length > 0
@@ -114,7 +114,7 @@ export const Usuarios = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       await axios.put(
         `${API_URL}/usuarios/${editingUser.id}/password`,
         passwordData,
@@ -137,7 +137,7 @@ export const Usuarios = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       await axios.put(
         `${API_URL}/usuarios/${user.id}/toggle`,
         {},
@@ -157,7 +157,7 @@ export const Usuarios = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       await axios.delete(
         `${API_URL}/usuarios/${user.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
