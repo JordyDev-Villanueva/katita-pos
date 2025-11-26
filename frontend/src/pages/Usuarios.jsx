@@ -397,7 +397,7 @@ export const Usuarios = () => {
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex justify-between items-center">
+              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex justify-between items-center rounded-t-2xl">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                   <Users className="w-6 h-6" />
                   {editingUser ? 'Editar Vendedor' : 'Nuevo Vendedor'}
@@ -589,7 +589,7 @@ export const Usuarios = () => {
         {showPasswordModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-              <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex justify-between items-center">
+              <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex justify-between items-center rounded-t-2xl">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                   <Key className="w-6 h-6" />
                   Cambiar Contraseña
