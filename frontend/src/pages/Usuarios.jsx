@@ -28,6 +28,8 @@ export const Usuarios = () => {
     new_password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   const diasSemana = [
     { value: 'Lun', label: 'L' },
@@ -154,19 +156,23 @@ export const Usuarios = () => {
     }
   };
 
-  const handleDelete = async (user) => {
-    if (!confirm(`¿Estás seguro de eliminar al vendedor ${user.nombre_completo}?`)) {
-      return;
-    }
+  const handleDelete = (user) => {
+    setUserToDelete(user);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
 
     try {
       const token = localStorage.getItem('access_token');
       await axios.delete(
-        `${API_URL}/usuarios/${user.id}`,
+        `${API_URL}/usuarios/${userToDelete.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert('Vendedor eliminado exitosamente');
+      setShowDeleteModal(false);
+      setUserToDelete(null);
       fetchUsuarios();
     } catch (error) {
       console.error('Error:', error);
@@ -398,7 +404,7 @@ export const Usuarios = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[98vh] overflow-hidden flex flex-col">
               {/* Header */}
-              <div className="bg-blue-600 text-white p-4 flex-shrink-0">
+              <div className="bg-blue-600 text-white p-4 rounded-t-2xl flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="bg-white bg-opacity-20 p-3 rounded-lg">
@@ -603,7 +609,7 @@ export const Usuarios = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[98vh] overflow-hidden flex flex-col">
               {/* Header */}
-              <div className="bg-blue-600 text-white p-4 flex-shrink-0">
+              <div className="bg-blue-600 text-white p-4 rounded-t-2xl flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="bg-white bg-opacity-20 p-3 rounded-lg">
@@ -673,6 +679,69 @@ export const Usuarios = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Confirmación de Eliminación */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+              {/* Header */}
+              <div className="bg-red-600 text-white p-4 rounded-t-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white bg-opacity-20 p-3 rounded-lg">
+                    <Trash2 className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Confirmar Eliminación</h2>
+                    <p className="text-red-100 text-sm mt-1">
+                      Esta acción no se puede deshacer
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6">
+                <p className="text-gray-700 text-lg mb-2">
+                  ¿Estás seguro de eliminar al vendedor?
+                </p>
+                <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-red-500">
+                  <p className="font-bold text-gray-900 text-lg">{userToDelete?.nombre_completo}</p>
+                  <p className="text-gray-600 text-sm">@{userToDelete?.username}</p>
+                  {userToDelete?.email && (
+                    <p className="text-gray-600 text-sm flex items-center gap-1 mt-1">
+                      <Mail className="w-4 h-4" />
+                      {userToDelete.email}
+                    </p>
+                  )}
+                </div>
+                <p className="text-gray-600 text-sm mt-4">
+                  El vendedor será desactivado y ya no podrá acceder al sistema.
+                </p>
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 pt-0 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setUserToDelete(null);
+                  }}
+                  className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition"
+                >
+                  Eliminar Vendedor
+                </button>
+              </div>
             </div>
           </div>
         )}

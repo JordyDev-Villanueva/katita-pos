@@ -483,7 +483,10 @@ def eliminar_usuario(user_id):
         # Soft delete: solo desactivar
         usuario.activo = False
         usuario.username = f"{usuario.username}_deleted_{usuario.id}"
-        usuario.email = f"{usuario.email}_deleted_{usuario.id}"
+
+        # Solo modificar email si existe
+        if usuario.email:
+            usuario.email = f"{usuario.email}_deleted_{usuario.id}"
 
         db.session.commit()
 
