@@ -396,7 +396,7 @@ export const Usuarios = () => {
         {/* Modal Crear/Editar Vendedor - SIN SCROLL */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
+            <div className="shadow-2xl w-full max-w-2xl overflow-hidden rounded-2xl">
               <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex justify-between items-center rounded-t-2xl">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                   <Users className="w-6 h-6" />
@@ -413,7 +413,7 @@ export const Usuarios = () => {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <form onSubmit={handleSubmit} className="bg-white p-6 space-y-4 rounded-b-2xl">
                 {/* Fila 1: Usuario y Contraseña */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -588,7 +588,7 @@ export const Usuarios = () => {
         {/* Modal Cambiar Contraseña */}
         {showPasswordModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div className="shadow-2xl max-w-md w-full overflow-hidden rounded-2xl">
               <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex justify-between items-center rounded-t-2xl">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                   <Key className="w-6 h-6" />
@@ -606,7 +606,7 @@ export const Usuarios = () => {
                 </button>
               </div>
 
-              <form onSubmit={handleChangePassword} className="p-6 space-y-4">
+              <form onSubmit={handleChangePassword} className="bg-white p-6 space-y-4 rounded-b-2xl">
                 <div>
                   <p className="text-gray-700 mb-4">
                     Cambiando contraseña para: <strong>{editingUser?.nombre_completo}</strong>
