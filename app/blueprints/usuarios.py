@@ -484,8 +484,12 @@ def eliminar_usuario(user_id):
         usuario.activo = False
         usuario.username = f"{usuario.username}_deleted_{usuario.id}"
 
-        # Solo modificar email si existe
-        if usuario.email:
+        # Solo modificar email si existe - insertar sufijo ANTES del @
+        if usuario.email and '@' in usuario.email:
+            local, domain = usuario.email.rsplit('@', 1)
+            usuario.email = f"{local}_deleted_{usuario.id}@{domain}"
+        elif usuario.email:
+            # Si no tiene @, agregar al final (caso raro pero cubrimos)
             usuario.email = f"{usuario.email}_deleted_{usuario.id}"
 
         db.session.commit()
