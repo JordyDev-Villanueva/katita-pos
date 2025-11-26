@@ -45,12 +45,14 @@ export const Usuarios = () => {
   const fetchUsuarios = async () => {
     try {
       const token = localStorage.getItem('access_token');
+      console.log('🔑 Token encontrado:', token ? 'SÍ' : 'NO');
       const response = await axios.get(`${API_URL}/usuarios/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsuarios(response.data.usuarios || []);
     } catch (error) {
-      console.error('Error al cargar usuarios:', error);
+      console.error('❌ Error al cargar usuarios:', error);
+      console.error('Token usado:', localStorage.getItem('access_token') ? 'existe' : 'NO EXISTE');
       alert('Error al cargar usuarios');
     } finally {
       setLoading(false);
