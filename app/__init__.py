@@ -202,6 +202,10 @@ def register_blueprints(app):
     from app.blueprints.cuadro_caja import cuadro_caja_bp
     app.register_blueprint(cuadro_caja_bp)
 
+    # Registrar blueprint de migraciones
+    from app.blueprints.migrations import migrations_bp
+    app.register_blueprint(migrations_bp)
+
 
 def register_error_handlers(app):
     """
