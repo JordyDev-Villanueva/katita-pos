@@ -91,7 +91,7 @@ class CuadroCaja(db.Model):
         CheckConstraint('total_transferencia >= 0', name='check_total_transferencia_no_negativo'),
         CheckConstraint('total_egresos >= 0', name='check_total_egresos_no_negativo'),
         CheckConstraint(
-            "estado IN ('abierto', 'cerrado')",
+            "estado IN ('abierto', 'cerrado', 'pendiente_cierre')",
             name='check_estado_valido'
         ),
         Index('idx_vendedor_fecha', 'vendedor_id', 'fecha_apertura'),
@@ -128,7 +128,7 @@ class CuadroCaja(db.Model):
     @validates('estado')
     def validate_estado(self, key, estado):
         """Valida que el estado sea válido"""
-        estados_validos = ['abierto', 'cerrado']
+        estados_validos = ['abierto', 'cerrado', 'pendiente_cierre']
 
         if not estado or estado not in estados_validos:
             raise ValueError(f'El estado debe ser uno de: {", ".join(estados_validos)}')
