@@ -18,7 +18,13 @@ import {
   AlertCircle,
   Lock,
   Unlock,
-  ArrowLeft
+  ArrowLeft,
+  ClipboardList,
+  History,
+  ThumbsUp,
+  ThumbsDown,
+  Eye,
+  User
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://katita-pos-production.up.railway.app/api';
@@ -28,6 +34,9 @@ export const CuadroCaja = () => {
   const [turnoActual, setTurnoActual] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+
+  // Tabs
+  const [activeTab, setActiveTab] = useState('mi-turno');
 
   // Modales
   const [showAbrirModal, setShowAbrirModal] = useState(false);
@@ -41,10 +50,37 @@ export const CuadroCaja = () => {
   const [montoEgreso, setMontoEgreso] = useState('');
   const [conceptoEgreso, setConceptoEgreso] = useState('');
 
+  // Estados para Pendientes (Admin)
+  const [turnosPendientes, setTurnosPendientes] = useState([]);
+  const [loadingPendientes, setLoadingPendientes] = useState(false);
+  const [selectedTurno, setSelectedTurno] = useState(null);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const [motivoRechazo, setMotivoRechazo] = useState('');
+
+  // Estados para Historial (Admin)
+  const [todosLosTurnos, setTodosLosTurnos] = useState([]);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
+  const [filtroEstado, setFiltroEstado] = useState('todos');
+
+  const isAdmin = user?.rol === 'admin';
+
   useEffect(() => {
     fetchUserData();
     fetchTurnoActual();
   }, []);
+
+  useEffect(() => {
+    if (isAdmin && activeTab === 'pendientes') {
+      fetchTurnosPendientes();
+    }
+  }, [activeTab, isAdmin]);
+
+  useEffect(() => {
+    if (isAdmin && activeTab === 'historial') {
+      fetchTodosLosTurnos();
+    }
+  }, [activeTab, isAdmin]);
 
   const fetchUserData = () => {
     const userData = localStorage.getItem('user');
@@ -148,6 +184,84 @@ export const CuadroCaja = () => {
     }
   };
 
+  // Fetch functions para tabs de admin
+  const fetchTurnosPendientes = async () => {
+    try {
+      setLoadingPendientes(true);
+      const token = localStorage.getItem('access_token');
+      const response = await axios.get(`${API_URL}/cuadro-caja/turnos-pendientes`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTurnosPendientes(response.data.turnos || []);
+    } catch (error) {
+      console.error('Error al cargar turnos pendientes:', error);
+      toast.error('Error al cargar turnos pendientes');
+    } finally {
+      setLoadingPendientes(false);
+    }
+  };
+
+  const fetchTodosLosTurnos = async () => {
+    try {
+      setLoadingHistorial(true);
+      const token = localStorage.getItem('access_token');
+      const response = await axios.get(`${API_URL}/cuadro-caja/todos-los-turnos`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTodosLosTurnos(response.data.turnos || []);
+    } catch (error) {
+      console.error('Error al cargar historial:', error);
+      toast.error('Error al cargar historial de turnos');
+    } finally {
+      setLoadingHistorial(false);
+    }
+  };
+
+  const handleAprobarCierre = async () => {
+    if (!selectedTurno) return;
+    try {
+      const token = localStorage.getItem('access_token');
+      await axios.post(
+        `${API_URL}/cuadro-caja/aprobar-cierre/${selectedTurno.id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(`✅ Cierre de ${selectedTurno.vendedor_nombre} aprobado exitosamente`);
+      setShowApprovalModal(false);
+      setSelectedTurno(null);
+      fetchTurnosPendientes();
+      fetchTodosLosTurnos();
+    } catch (error) {
+      console.error('Error al aprobar cierre:', error);
+      toast.error(error.response?.data?.error || 'Error al aprobar cierre');
+    }
+  };
+
+  const handleRechazarCierre = async (e) => {
+    e.preventDefault();
+    if (!selectedTurno || !motivoRechazo.trim()) {
+      toast.error('Debes ingresar un motivo de rechazo');
+      return;
+    }
+    try {
+      const token = localStorage.getItem('access_token');
+      await axios.post(
+        `${API_URL}/cuadro-caja/rechazar-cierre/${selectedTurno.id}`,
+        { observaciones_rechazo: motivoRechazo },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(`❌ Cierre de ${selectedTurno.vendedor_nombre} rechazado`);
+      setShowRejectionModal(false);
+      setSelectedTurno(null);
+      setMotivoRechazo('');
+      fetchTurnosPendientes();
+      fetchTodosLosTurnos();
+    } catch (error) {
+      console.error('Error al rechazar cierre:', error);
+      toast.error(error.response?.data?.error || 'Error al rechazar cierre');
+    }
+  };
+
   const formatCurrency = (value) => {
     return `S/ ${Number(value).toFixed(2)}`;
   };
@@ -210,6 +324,55 @@ export const CuadroCaja = () => {
         </div>
       </div>
 
+      {/* Tabs Navigation (Solo para Admin) */}
+      {isAdmin && (
+        <div className="bg-white rounded-xl shadow-lg p-2">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveTab('mi-turno')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === 'mi-turno'
+                  ? 'bg-green-600 text-white shadow-md'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <User className="h-5 w-5" />
+              Mi Turno
+            </button>
+            <button
+              onClick={() => setActiveTab('pendientes')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === 'pendientes'
+                  ? 'bg-yellow-600 text-white shadow-md'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <ClipboardList className="h-5 w-5" />
+              Pendientes
+              {turnosPendientes.length > 0 && (
+                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                  {turnosPendientes.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('historial')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === 'historial'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <History className="h-5 w-5" />
+              Historial
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Contenido según tab activo */}
+      {activeTab === 'mi-turno' ? (
+        <>
       {/* Estado del turno */}
       {!turnoActual ? (
         <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
@@ -769,6 +932,343 @@ export const CuadroCaja = () => {
                   className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors"
                 >
                   Registrar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+        </>
+      ) : activeTab === 'pendientes' ? (
+        // Tab Pendientes (Admin)
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <ClipboardList className="h-7 w-7 text-yellow-600" />
+              Solicitudes de Cierre Pendientes
+            </h2>
+
+            {loadingPendientes ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
+              </div>
+            ) : turnosPendientes.length === 0 ? (
+              <div className="text-center py-12">
+                <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                <p className="text-gray-600 text-lg">No hay solicitudes pendientes</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {turnosPendientes.map((turno) => (
+                  <div
+                    key={turno.id}
+                    className="border border-yellow-200 rounded-xl p-6 bg-yellow-50 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                          <User className="h-5 w-5 text-yellow-600" />
+                          {turno.vendedor_nombre}
+                        </h3>
+                        <p className="text-sm text-gray-600">Turno #{turno.numero_turno}</p>
+                      </div>
+                      <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                        ⏳ Pendiente
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                      <div>
+                        <p className="text-xs text-gray-500">Apertura</p>
+                        <p className="font-semibold text-gray-800">{formatDateTime(turno.fecha_apertura)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Monto Inicial</p>
+                        <p className="font-semibold text-gray-800">{formatCurrency(turno.monto_inicial)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Efectivo Contado</p>
+                        <p className="font-semibold text-green-600">{formatCurrency(turno.efectivo_contado || 0)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Diferencia</p>
+                        <p className={`font-semibold ${
+                          (turno.efectivo_contado || 0) - turno.efectivo_esperado >= 0
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }`}>
+                          {formatCurrency((turno.efectivo_contado || 0) - turno.efectivo_esperado)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {turno.observaciones && (
+                      <div className="bg-white p-3 rounded-lg mb-4">
+                        <p className="text-xs text-gray-500 mb-1">Observaciones del vendedor:</p>
+                        <p className="text-sm text-gray-700">{turno.observaciones}</p>
+                      </div>
+                    )}
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => {
+                          setSelectedTurno(turno);
+                          setShowApprovalModal(true);
+                        }}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ThumbsUp className="h-5 w-5" />
+                        Aprobar Cierre
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedTurno(turno);
+                          setShowRejectionModal(true);
+                        }}
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ThumbsDown className="h-5 w-5" />
+                        Rechazar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        // Tab Historial (Admin)
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <History className="h-7 w-7 text-blue-600" />
+                Historial de Turnos
+              </h2>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setFiltroEstado('todos')}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                    filtroEstado === 'todos'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  Todos
+                </button>
+                <button
+                  onClick={() => setFiltroEstado('abierto')}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                    filtroEstado === 'abierto'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  Abiertos
+                </button>
+                <button
+                  onClick={() => setFiltroEstado('pendiente_cierre')}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                    filtroEstado === 'pendiente_cierre'
+                      ? 'bg-yellow-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  Pendientes
+                </button>
+                <button
+                  onClick={() => setFiltroEstado('cerrado')}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                    filtroEstado === 'cerrado'
+                      ? 'bg-gray-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  Cerrados
+                </button>
+              </div>
+            </div>
+
+            {loadingHistorial ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {todosLosTurnos
+                  .filter(t => filtroEstado === 'todos' || t.estado === filtroEstado)
+                  .map((turno) => (
+                    <div
+                      key={turno.id}
+                      className={`border rounded-xl p-6 hover:shadow-md transition-shadow ${
+                        turno.estado === 'abierto'
+                          ? 'border-green-200 bg-green-50'
+                          : turno.estado === 'pendiente_cierre'
+                          ? 'border-yellow-200 bg-yellow-50'
+                          : 'border-gray-200 bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <User className="h-5 w-5" />
+                            {turno.vendedor_nombre}
+                          </h3>
+                          <p className="text-sm text-gray-600">Turno #{turno.numero_turno}</p>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                          turno.estado === 'abierto'
+                            ? 'bg-green-500 text-white'
+                            : turno.estado === 'pendiente_cierre'
+                            ? 'bg-yellow-500 text-white'
+                            : 'bg-gray-500 text-white'
+                        }`}>
+                          {turno.estado === 'abierto' ? '🟢 Abierto' :
+                           turno.estado === 'pendiente_cierre' ? '⏳ Pendiente' :
+                           '🔒 Cerrado'}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div>
+                          <p className="text-xs text-gray-500">Apertura</p>
+                          <p className="font-semibold text-gray-800 text-sm">{formatDateTime(turno.fecha_apertura)}</p>
+                        </div>
+                        {turno.fecha_cierre && (
+                          <div>
+                            <p className="text-xs text-gray-500">Cierre</p>
+                            <p className="font-semibold text-gray-800 text-sm">{formatDateTime(turno.fecha_cierre)}</p>
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-xs text-gray-500">Inicial</p>
+                          <p className="font-semibold text-gray-800">{formatCurrency(turno.monto_inicial)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Ventas Efectivo</p>
+                          <p className="font-semibold text-green-600">{formatCurrency(turno.total_ventas_efectivo)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Egresos</p>
+                          <p className="font-semibold text-red-600">{formatCurrency(turno.total_egresos)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal Aprobar Cierre */}
+      {showApprovalModal && selectedTurno && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <ThumbsUp className="h-7 w-7 text-green-600" />
+              Aprobar Cierre de Turno
+            </h2>
+
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+              <p className="text-gray-700 mb-2">
+                <strong>Vendedor:</strong> {selectedTurno.vendedor_nombre}
+              </p>
+              <p className="text-gray-700 mb-2">
+                <strong>Turno:</strong> #{selectedTurno.numero_turno}
+              </p>
+              <p className="text-gray-700 mb-2">
+                <strong>Efectivo Esperado:</strong> {formatCurrency(selectedTurno.efectivo_esperado)}
+              </p>
+              <p className="text-gray-700 mb-2">
+                <strong>Efectivo Contado:</strong> {formatCurrency(selectedTurno.efectivo_contado || 0)}
+              </p>
+              <p className={`font-bold ${
+                (selectedTurno.efectivo_contado || 0) - selectedTurno.efectivo_esperado >= 0
+                  ? 'text-green-600'
+                  : 'text-red-600'
+              }`}>
+                Diferencia: {formatCurrency((selectedTurno.efectivo_contado || 0) - selectedTurno.efectivo_esperado)}
+              </p>
+            </div>
+
+            <p className="text-gray-600 mb-6">
+              ¿Estás seguro de aprobar el cierre de este turno? Esta acción no se puede deshacer.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowApprovalModal(false);
+                  setSelectedTurno(null);
+                }}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-lg font-semibold transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleAprobarCierre}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors"
+              >
+                Aprobar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Rechazar Cierre */}
+      {showRejectionModal && selectedTurno && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <ThumbsDown className="h-7 w-7 text-red-600" />
+              Rechazar Cierre de Turno
+            </h2>
+
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <p className="text-gray-700 mb-2">
+                <strong>Vendedor:</strong> {selectedTurno.vendedor_nombre}
+              </p>
+              <p className="text-gray-700">
+                <strong>Turno:</strong> #{selectedTurno.numero_turno}
+              </p>
+            </div>
+
+            <form onSubmit={handleRechazarCierre}>
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Motivo del rechazo <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={motivoRechazo}
+                  onChange={(e) => setMotivoRechazo(e.target.value)}
+                  placeholder="Explica por qué rechazas este cierre..."
+                  required
+                  rows="4"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRejectionModal(false);
+                    setSelectedTurno(null);
+                    setMotivoRechazo('');
+                  }}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-lg font-semibold transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors"
+                >
+                  Rechazar
                 </button>
               </div>
             </form>
