@@ -236,8 +236,10 @@ export const CuadroCaja = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-gray-800">Estado</h3>
-                {turnoActual.esta_abierto ? (
+                {turnoActual.estado === 'abierto' ? (
                   <CheckCircle className="h-8 w-8 text-green-500" />
+                ) : turnoActual.estado === 'pendiente_cierre' ? (
+                  <Clock className="h-8 w-8 text-yellow-500" />
                 ) : (
                   <XCircle className="h-8 w-8 text-red-500" />
                 )}
@@ -251,12 +253,16 @@ export const CuadroCaja = () => {
                   <p className="text-sm text-gray-600">Estado</p>
                   <span
                     className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold ${
-                      turnoActual.esta_abierto
+                      turnoActual.estado === 'abierto'
                         ? 'bg-green-100 text-green-700'
+                        : turnoActual.estado === 'pendiente_cierre'
+                        ? 'bg-yellow-100 text-yellow-700'
                         : 'bg-gray-100 text-gray-700'
                     }`}
                   >
-                    {turnoActual.esta_abierto ? '🟢 Abierto' : '🔒 Cerrado'}
+                    {turnoActual.estado === 'abierto' ? '🟢 Abierto' :
+                     turnoActual.estado === 'pendiente_cierre' ? '⏳ Pendiente Aprobación' :
+                     '🔒 Cerrado'}
                   </span>
                 </div>
                 <div>
