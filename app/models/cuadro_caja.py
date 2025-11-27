@@ -64,8 +64,9 @@ class CuadroCaja(db.Model):
     diferencia = db.Column(Numeric(10, 2), nullable=True)         # contado - esperado
 
     # Estado y observaciones
-    estado = db.Column(String(20), default='abierto', nullable=False, index=True)  # 'abierto', 'cerrado'
+    estado = db.Column(String(20), default='abierto', nullable=False, index=True)  # 'abierto', 'pendiente_cierre', 'cerrado'
     observaciones = db.Column(Text, nullable=True)
+    observaciones_rechazo = db.Column(Text, nullable=True)  # Razón si admin rechaza el cierre
 
     # Timestamps
     created_at = db.Column(DateTime, default=datetime.now, nullable=False)
@@ -319,9 +320,65 @@ class CuadroCaja(db.Model):
 
         self.detalle_egresos = json.dumps(egresos_list, ensure_ascii=False)
 
+    def solicitar_cierre(self, efectivo_contado, observaciones=None):
+        """
+        Vendedor solicita cierre de turno (requiere aprobación de admin)
+
+        Args:
+            efectivo_contado (Decimal): Monto de efectivo contado físicamente
+            observaciones (str): Observaciones del cierre (opcional)
+
+        Raises:
+            ValueError: Si el turno no está abierto
+        """
+        if self.estado != 'abierto':
+            raise ValueError('Solo puedes solicitar cierre de un turno abierto')
+
+        self.efectivo_contado = Decimal(str(efectivo_contado))
+        self.calcular_efectivo_esperado()
+        self.calcular_diferencia()
+
+        self.estado = 'pendiente_cierre'
+
+        if observaciones:
+            self.observaciones = observaciones
+
+    def aprobar_cierre(self):
+        """
+        Admin aprueba el cierre solicitado por el vendedor
+
+        Raises:
+            ValueError: Si el turno no está pendiente de cierre
+        """
+        if self.estado != 'pendiente_cierre':
+            raise ValueError('Solo puedes aprobar cierres pendientes')
+
+        self.fecha_cierre = datetime.now()
+        self.estado = 'cerrado'
+
+    def rechazar_cierre(self, observaciones_rechazo):
+        """
+        Admin rechaza el cierre solicitado por el vendedor
+
+        Args:
+            observaciones_rechazo (str): Razón del rechazo
+
+        Raises:
+            ValueError: Si el turno no está pendiente de cierre
+        """
+        if self.estado != 'pendiente_cierre':
+            raise ValueError('Solo puedes rechazar cierres pendientes')
+
+        self.observaciones_rechazo = observaciones_rechazo
+        self.estado = 'abierto'
+        # Limpiar datos del cierre rechazado
+        self.efectivo_contado = None
+        self.efectivo_esperado = None
+        self.diferencia = None
+
     def cerrar_turno(self, efectivo_contado, observaciones=None):
         """
-        Cierra el turno de caja
+        Cierra el turno de caja directamente (solo para admin)
 
         Args:
             efectivo_contado (Decimal): Monto de efectivo contado físicamente
@@ -398,6 +455,7 @@ class CuadroCaja(db.Model):
             'diferencia': float(self.diferencia) if self.diferencia else None,
             'estado': self.estado,
             'observaciones': self.observaciones,
+            'observaciones_rechazo': self.observaciones_rechazo,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
             # Propiedades calculadas

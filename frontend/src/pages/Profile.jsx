@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Lock, Mail, Phone, Save, Eye, EyeOff, Shield, UserCircle2 } from 'lucide-react';
+import { User, Lock, Mail, Phone, Save, Eye, EyeOff, Shield, UserCircle2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { authAPI } from '../api/auth';
 import { Layout } from '../components/layout/Layout';
@@ -194,7 +194,7 @@ export default function Profile() {
           {/* FORMULARIOS - Stack en móvil, lado a lado en desktop */}
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
 
-            {/* Formulario de Información Personal */}
+            {/* Información Personal - Vista diferente según rol */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-3 md:px-4 py-2 shrink-0">
                 <h3 className="text-sm md:text-base font-bold text-white flex items-center gap-2">
@@ -203,81 +203,103 @@ export default function Profile() {
                 </h3>
               </div>
 
-              <form onSubmit={handleSaveProfile} className="p-3 md:p-5 flex-1 flex flex-col">
-                <div className="space-y-3 md:space-y-5 mb-auto">
-                  {/* Usuario (solo lectura) */}
-                  <div>
-                    <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1.5">
-                      Usuario
-                    </label>
-                    <input
-                      type="text"
-                      value={user?.username || ''}
-                      disabled
-                      className="w-full px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base border-2 border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">No se puede cambiar</p>
+              {isVendedor ? (
+                /* Vista de solo lectura para vendedores */
+                <div className="p-3 md:p-5 space-y-4">
+                  {/* Usuario */}
+                  <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg border-l-4 border-blue-500">
+                    <p className="text-xs font-semibold text-gray-500 mb-1">Usuario</p>
+                    <p className="text-base md:text-lg font-bold text-gray-800">{user?.username}</p>
                   </div>
 
                   {/* Nombre completo */}
-                  <div>
-                    <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1.5">
-                      Nombre Completo *
-                    </label>
-                    <input
-                      type="text"
-                      name="nombre_completo"
-                      value={formData.nombre_completo}
-                      onChange={handleChange}
-                      disabled={isVendedor}
-                      className={`w-full px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base border-2 rounded-lg transition ${
-                        isVendedor
-                          ? 'border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed'
-                          : errors.nombre_completo
-                            ? 'border-red-400 bg-red-50 focus:ring-2 focus:ring-blue-300 focus:border-blue-500'
-                            : 'border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-500'
-                      }`}
-                      required={!isVendedor}
-                    />
-                    {isVendedor && (
-                      <p className="text-xs text-gray-500 mt-1">Solo lectura</p>
-                    )}
-                    {errors.nombre_completo && (
-                      <p className="text-red-500 text-xs md:text-sm mt-1">{errors.nombre_completo}</p>
-                    )}
+                  <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg border-l-4 border-green-500">
+                    <p className="text-xs font-semibold text-gray-500 mb-1">Nombre Completo</p>
+                    <p className="text-base md:text-lg font-bold text-gray-800">{user?.nombre_completo}</p>
                   </div>
 
                   {/* Email */}
-                  <div>
-                    <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1.5">
-                      Correo Electrónico *
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      disabled={isVendedor}
-                      className={`w-full px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base border-2 rounded-lg transition ${
-                        isVendedor
-                          ? 'border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed'
-                          : errors.email
-                            ? 'border-red-400 bg-red-50 focus:ring-2 focus:ring-blue-300 focus:border-blue-500'
-                            : 'border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-500'
-                      }`}
-                      required={!isVendedor}
-                    />
-                    {isVendedor && (
-                      <p className="text-xs text-gray-500 mt-1">Solo lectura</p>
-                    )}
-                    {errors.email && (
-                      <p className="text-red-500 text-xs md:text-sm mt-1">{errors.email}</p>
-                    )}
+                  <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg border-l-4 border-purple-500">
+                    <p className="text-xs font-semibold text-gray-500 mb-1">Correo Electrónico</p>
+                    <p className="text-base md:text-lg font-bold text-gray-800">{user?.email || 'No configurado'}</p>
+                  </div>
+
+                  {/* Teléfono */}
+                  {user?.telefono && (
+                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg border-l-4 border-orange-500">
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Teléfono</p>
+                      <p className="text-base md:text-lg font-bold text-gray-800">{user.telefono}</p>
+                    </div>
+                  )}
+
+                  {/* Mensaje informativo */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
+                    <p className="text-xs md:text-sm text-blue-700 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>Tu información personal es administrada por el administrador del sistema.</span>
+                    </p>
                   </div>
                 </div>
+              ) : (
+                /* Formulario editable para admin/bodeguero */
+                <form onSubmit={handleSaveProfile} className="p-3 md:p-5 flex-1 flex flex-col">
+                  <div className="space-y-3 md:space-y-5 mb-auto">
+                    {/* Usuario (solo lectura) */}
+                    <div>
+                      <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1.5">
+                        Usuario
+                      </label>
+                      <input
+                        type="text"
+                        value={user?.username || ''}
+                        disabled
+                        className="w-full px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base border-2 border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">No se puede cambiar</p>
+                    </div>
 
-                {/* Botón guardar - Solo para admin y bodeguero */}
-                {!isVendedor && (
+                    {/* Nombre completo */}
+                    <div>
+                      <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1.5">
+                        Nombre Completo *
+                      </label>
+                      <input
+                        type="text"
+                        name="nombre_completo"
+                        value={formData.nombre_completo}
+                        onChange={handleChange}
+                        className={`w-full px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
+                          errors.nombre_completo ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                        }`}
+                        required
+                      />
+                      {errors.nombre_completo && (
+                        <p className="text-red-500 text-xs md:text-sm mt-1">{errors.nombre_completo}</p>
+                      )}
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                      <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1.5">
+                        Correo Electrónico *
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className={`w-full px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
+                          errors.email ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                        }`}
+                        required
+                      />
+                      {errors.email && (
+                        <p className="text-red-500 text-xs md:text-sm mt-1">{errors.email}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Botón guardar */}
                   <button
                     type="submit"
                     disabled={loading}
@@ -295,8 +317,8 @@ export default function Profile() {
                       </>
                     )}
                   </button>
-                )}
-              </form>
+                </form>
+              )}
             </div>
 
             {/* Formulario de Cambio de Contraseña - Solo para admin y bodeguero */}

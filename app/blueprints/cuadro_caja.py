@@ -169,11 +169,11 @@ def agregar_egreso():
         return jsonify({'error': f'Error al registrar egreso: {str(e)}'}), 500
 
 
-@cuadro_caja_bp.route('/cerrar', methods=['POST'])
+@cuadro_caja_bp.route('/solicitar-cierre', methods=['POST'])
 @jwt_required()
-def cerrar_turno():
+def solicitar_cierre():
     """
-    Cierra el turno actual realizando arqueo de caja
+    Vendedor solicita cierre de turno (requiere aprobación de admin)
 
     Body:
         {
@@ -182,7 +182,7 @@ def cerrar_turno():
         }
 
     Returns:
-        200: Turno cerrado exitosamente
+        200: Solicitud de cierre registrada
         400: Datos inválidos o no hay turno abierto
     """
     try:
@@ -203,7 +203,161 @@ def cerrar_turno():
         if efectivo_contado < 0:
             return jsonify({'error': 'El efectivo contado no puede ser negativo'}), 400
 
-        # Cerrar turno
+        # Solicitar cierre
+        turno.solicitar_cierre(efectivo_contado, observaciones)
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Solicitud de cierre enviada. Esperando aprobación del administrador.',
+            'turno': turno.to_dict(include_vendedor=True)
+        }), 200
+
+    except ValueError as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error al solicitar cierre: {str(e)}'}), 500
+
+
+@cuadro_caja_bp.route('/aprobar-cierre/<int:turno_id>', methods=['POST'])
+@jwt_required()
+def aprobar_cierre(turno_id):
+    """
+    Admin aprueba el cierre solicitado por el vendedor
+
+    Returns:
+        200: Cierre aprobado
+        403: No autorizado (no es admin)
+        404: Turno no encontrado
+        400: El turno no está pendiente de cierre
+    """
+    try:
+        current_user_id = get_jwt_identity()
+
+        # Verificar que el usuario es admin
+        usuario = User.query.get(current_user_id)
+        if not usuario or usuario.rol != 'admin':
+            return jsonify({'error': 'No autorizado. Solo administradores pueden aprobar cierres.'}), 403
+
+        # Buscar el turno
+        turno = CuadroCaja.query.get(turno_id)
+        if not turno:
+            return jsonify({'error': 'Turno no encontrado'}), 404
+
+        # Aprobar cierre
+        turno.aprobar_cierre()
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Cierre aprobado exitosamente',
+            'turno': turno.to_dict(include_vendedor=True)
+        }), 200
+
+    except ValueError as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error al aprobar cierre: {str(e)}'}), 500
+
+
+@cuadro_caja_bp.route('/rechazar-cierre/<int:turno_id>', methods=['POST'])
+@jwt_required()
+def rechazar_cierre(turno_id):
+    """
+    Admin rechaza el cierre solicitado por el vendedor
+
+    Body:
+        {
+            "observaciones_rechazo": "Razón del rechazo"
+        }
+
+    Returns:
+        200: Cierre rechazado
+        403: No autorizado (no es admin)
+        404: Turno no encontrado
+        400: Datos inválidos o el turno no está pendiente de cierre
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        data = request.get_json()
+
+        # Verificar que el usuario es admin
+        usuario = User.query.get(current_user_id)
+        if not usuario or usuario.rol != 'admin':
+            return jsonify({'error': 'No autorizado. Solo administradores pueden rechazar cierres.'}), 403
+
+        if not data or 'observaciones_rechazo' not in data:
+            return jsonify({'error': 'Debe proporcionar la razón del rechazo'}), 400
+
+        # Buscar el turno
+        turno = CuadroCaja.query.get(turno_id)
+        if not turno:
+            return jsonify({'error': 'Turno no encontrado'}), 404
+
+        observaciones_rechazo = data['observaciones_rechazo'].strip()
+        if not observaciones_rechazo:
+            return jsonify({'error': 'La razón del rechazo no puede estar vacía'}), 400
+
+        # Rechazar cierre
+        turno.rechazar_cierre(observaciones_rechazo)
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Cierre rechazado. El turno vuelve a estar abierto.',
+            'turno': turno.to_dict(include_vendedor=True)
+        }), 200
+
+    except ValueError as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error al rechazar cierre: {str(e)}'}), 500
+
+
+@cuadro_caja_bp.route('/cerrar', methods=['POST'])
+@jwt_required()
+def cerrar_turno():
+    """
+    Admin cierra turno directamente (sin aprobación)
+
+    Body:
+        {
+            "efectivo_contado": 150.50,
+            "observaciones": "Todo correcto" (opcional)
+        }
+
+    Returns:
+        200: Turno cerrado exitosamente
+        403: No autorizado (no es admin)
+        400: Datos inválidos o no hay turno abierto
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        data = request.get_json()
+
+        # Verificar que el usuario es admin
+        usuario = User.query.get(current_user_id)
+        if not usuario or usuario.rol != 'admin':
+            return jsonify({'error': 'No autorizado. Los vendedores deben usar /solicitar-cierre'}), 403
+
+        if not data or 'efectivo_contado' not in data:
+            return jsonify({'error': 'Debe proporcionar el efectivo contado'}), 400
+
+        # Buscar turno abierto
+        turno = CuadroCaja.turno_abierto_vendedor(current_user_id)
+        if not turno:
+            return jsonify({'error': 'No tienes un turno abierto'}), 400
+
+        efectivo_contado = Decimal(str(data['efectivo_contado']))
+        observaciones = data.get('observaciones', None)
+
+        if efectivo_contado < 0:
+            return jsonify({'error': 'El efectivo contado no puede ser negativo'}), 400
+
+        # Cerrar turno directamente
         turno.cerrar_turno(efectivo_contado, observaciones)
         db.session.commit()
 
@@ -344,6 +498,107 @@ def obtener_turnos_abiertos():
 
     except Exception as e:
         return jsonify({'error': f'Error al obtener turnos abiertos: {str(e)}'}), 500
+
+
+@cuadro_caja_bp.route('/turnos-pendientes', methods=['GET'])
+@jwt_required()
+def obtener_turnos_pendientes():
+    """
+    Obtiene todos los turnos pendientes de cierre (solo admin)
+
+    Returns:
+        200: Lista de turnos pendientes de cierre
+        403: No autorizado
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+
+        # Solo admin puede ver todos los turnos pendientes
+        if user.rol != 'admin':
+            return jsonify({'error': 'No tienes permiso para esta operación'}), 403
+
+        turnos = CuadroCaja.query.filter_by(estado='pendiente_cierre').order_by(CuadroCaja.fecha_apertura.desc()).all()
+
+        return jsonify({
+            'turnos': [turno.to_dict(include_vendedor=True) for turno in turnos],
+            'total': len(turnos)
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener turnos pendientes: {str(e)}'}), 500
+
+
+@cuadro_caja_bp.route('/todos-los-turnos', methods=['GET'])
+@jwt_required()
+def obtener_todos_los_turnos():
+    """
+    Obtiene todos los turnos de todos los vendedores (solo admin)
+    Incluye filtros por estado y fechas
+
+    Query params:
+        - estado: abierto, pendiente_cierre, cerrado (opcional)
+        - fecha_inicio: YYYY-MM-DD (opcional)
+        - fecha_fin: YYYY-MM-DD (opcional)
+
+    Returns:
+        200: Lista de todos los turnos
+        403: No autorizado
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+
+        # Solo admin puede ver todos los turnos
+        if user.rol != 'admin':
+            return jsonify({'error': 'No tienes permiso para esta operación'}), 403
+
+        # Construir query base
+        query = CuadroCaja.query
+
+        # Filtrar por estado si se proporciona
+        estado = request.args.get('estado')
+        if estado:
+            query = query.filter_by(estado=estado)
+
+        # Filtrar por fechas si se proporcionan
+        fecha_inicio_str = request.args.get('fecha_inicio')
+        fecha_fin_str = request.args.get('fecha_fin')
+
+        if fecha_inicio_str:
+            try:
+                fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
+                inicio = datetime.combine(fecha_inicio, datetime.min.time())
+                query = query.filter(CuadroCaja.fecha_apertura >= inicio)
+            except:
+                return jsonify({'error': 'Formato de fecha_inicio inválido (use YYYY-MM-DD)'}), 400
+
+        if fecha_fin_str:
+            try:
+                fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
+                fin = datetime.combine(fecha_fin, datetime.max.time())
+                query = query.filter(CuadroCaja.fecha_apertura <= fin)
+            except:
+                return jsonify({'error': 'Formato de fecha_fin inválido (use YYYY-MM-DD)'}), 400
+
+        # Ordenar y ejecutar
+        turnos = query.order_by(CuadroCaja.fecha_apertura.desc()).all()
+
+        # Agrupar estadísticas
+        stats = {
+            'total': len(turnos),
+            'abiertos': len([t for t in turnos if t.estado == 'abierto']),
+            'pendientes': len([t for t in turnos if t.estado == 'pendiente_cierre']),
+            'cerrados': len([t for t in turnos if t.estado == 'cerrado'])
+        }
+
+        return jsonify({
+            'turnos': [turno.to_dict(include_vendedor=True) for turno in turnos],
+            'estadisticas': stats
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener turnos: {str(e)}'}), 500
 
 
 @cuadro_caja_bp.route('/estadisticas', methods=['GET'])

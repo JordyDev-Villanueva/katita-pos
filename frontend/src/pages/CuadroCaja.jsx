@@ -148,12 +148,15 @@ export const CuadroCaja = () => {
   const formatDateTime = (datetime) => {
     if (!datetime) return '-';
     const date = new Date(datetime);
+    // Usar zona horaria de Perú (America/Lima)
     return date.toLocaleString('es-PE', {
+      timeZone: 'America/Lima',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: true
     });
   };
 
