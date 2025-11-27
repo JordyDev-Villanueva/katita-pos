@@ -8,6 +8,9 @@ import toast from 'react-hot-toast';
 export default function Profile() {
   const { user } = useAuth();
 
+  // Determinar si el usuario es vendedor (solo lectura)
+  const isVendedor = user?.rol === 'vendedor';
+
   // Estados para el formulario
   const [formData, setFormData] = useState({
     nombre_completo: '',
@@ -226,11 +229,19 @@ export default function Profile() {
                       name="nombre_completo"
                       value={formData.nombre_completo}
                       onChange={handleChange}
-                      className={`w-full px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
-                        errors.nombre_completo ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                      disabled={isVendedor}
+                      className={`w-full px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base border-2 rounded-lg transition ${
+                        isVendedor
+                          ? 'border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed'
+                          : errors.nombre_completo
+                            ? 'border-red-400 bg-red-50 focus:ring-2 focus:ring-blue-300 focus:border-blue-500'
+                            : 'border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-500'
                       }`}
-                      required
+                      required={!isVendedor}
                     />
+                    {isVendedor && (
+                      <p className="text-xs text-gray-500 mt-1">Solo lectura</p>
+                    )}
                     {errors.nombre_completo && (
                       <p className="text-red-500 text-xs md:text-sm mt-1">{errors.nombre_completo}</p>
                     )}
@@ -246,46 +257,57 @@ export default function Profile() {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className={`w-full px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base border-2 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition ${
-                        errors.email ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                      disabled={isVendedor}
+                      className={`w-full px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base border-2 rounded-lg transition ${
+                        isVendedor
+                          ? 'border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed'
+                          : errors.email
+                            ? 'border-red-400 bg-red-50 focus:ring-2 focus:ring-blue-300 focus:border-blue-500'
+                            : 'border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-500'
                       }`}
-                      required
+                      required={!isVendedor}
                     />
+                    {isVendedor && (
+                      <p className="text-xs text-gray-500 mt-1">Solo lectura</p>
+                    )}
                     {errors.email && (
                       <p className="text-red-500 text-xs md:text-sm mt-1">{errors.email}</p>
                     )}
                   </div>
                 </div>
 
-                {/* Botón guardar */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-2.5 md:py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl text-sm md:text-base mt-3 md:mt-5"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Guardando...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4" />
-                      Guardar Cambios
-                    </>
-                  )}
-                </button>
+                {/* Botón guardar - Solo para admin y bodeguero */}
+                {!isVendedor && (
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-2.5 md:py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl text-sm md:text-base mt-3 md:mt-5"
+                  >
+                    {loading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Guardando...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        Guardar Cambios
+                      </>
+                    )}
+                  </button>
+                )}
               </form>
             </div>
 
-            {/* Formulario de Cambio de Contraseña */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
-              <div className="bg-gradient-to-r from-purple-500 to-purple-600 px-3 md:px-4 py-2 shrink-0">
-                <h3 className="text-sm md:text-base font-bold text-white flex items-center gap-2">
-                  <Lock className="w-4 h-4" />
-                  Cambiar Contraseña
-                </h3>
-              </div>
+            {/* Formulario de Cambio de Contraseña - Solo para admin y bodeguero */}
+            {!isVendedor && (
+              <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
+                <div className="bg-gradient-to-r from-purple-500 to-purple-600 px-3 md:px-4 py-2 shrink-0">
+                  <h3 className="text-sm md:text-base font-bold text-white flex items-center gap-2">
+                    <Lock className="w-4 h-4" />
+                    Cambiar Contraseña
+                  </h3>
+                </div>
 
               <form onSubmit={handleChangePassword} className="p-3 md:p-5 flex-1 flex flex-col">
                 <div className="space-y-3 md:space-y-5 mb-auto">
@@ -399,6 +421,7 @@ export default function Profile() {
                 </button>
               </form>
             </div>
+            )}
 
           </div>
         </div>

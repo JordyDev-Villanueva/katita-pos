@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import {
@@ -16,12 +17,14 @@ import {
   Building2,
   AlertCircle,
   Lock,
-  Unlock
+  Unlock,
+  ArrowLeft
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://katita-pos-production.up.railway.app/api';
 
 export const CuadroCaja = () => {
+  const navigate = useNavigate();
   const [turnoActual, setTurnoActual] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -167,11 +170,20 @@ export const CuadroCaja = () => {
       {/* Header */}
       <div className="bg-gradient-to-r from-green-600 to-green-500 rounded-2xl shadow-xl p-6 text-white">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Cuadro de Caja</h1>
-            <p className="text-green-100">
-              {turnoActual ? 'Gestiona tu turno actual' : 'Abre un nuevo turno para comenzar'}
-            </p>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="bg-white bg-opacity-20 hover:bg-opacity-30 p-2 rounded-lg transition-colors"
+              title="Volver al Dashboard"
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </button>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Cuadro de Caja</h1>
+              <p className="text-green-100">
+                {turnoActual ? 'Gestiona tu turno actual' : 'Abre un nuevo turno para comenzar'}
+              </p>
+            </div>
           </div>
           <div className="bg-white bg-opacity-20 p-4 rounded-xl">
             <DollarSign className="h-12 w-12" />

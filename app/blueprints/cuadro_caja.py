@@ -49,6 +49,20 @@ def abrir_turno():
                 'turno_actual': turno_existente.to_dict(include_vendedor=True)
             }), 400
 
+        # Verificar si ya existe un turno para hoy (abierto o cerrado)
+        # Esto previene abrir múltiples turnos en el mismo día
+        hoy = date.today()
+        turno_hoy = CuadroCaja.query.filter(
+            CuadroCaja.vendedor_id == current_user_id,
+            db.func.date(CuadroCaja.fecha_apertura) == hoy
+        ).first()
+
+        if turno_hoy:
+            return jsonify({
+                'error': 'Ya existe un turno para hoy. No puedes abrir otro turno en el mismo día.',
+                'turno_existente': turno_hoy.to_dict(include_vendedor=True)
+            }), 400
+
         # Crear nuevo turno
         monto_inicial = Decimal(str(data.get('monto_inicial', 0)))
 
