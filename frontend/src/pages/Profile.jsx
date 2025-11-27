@@ -191,8 +191,8 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* FORMULARIOS - Stack en móvil, lado a lado en desktop */}
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
+          {/* FORMULARIOS - Stack en móvil, lado a lado en desktop (solo para admin/bodeguero) */}
+          <div className={`flex-1 grid grid-cols-1 gap-4 min-h-0 ${!isVendedor ? 'lg:grid-cols-2' : 'lg:max-w-2xl lg:mx-auto'}`}>
 
             {/* Información Personal - Vista diferente según rol */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
@@ -225,12 +225,10 @@ export default function Profile() {
                   </div>
 
                   {/* Teléfono */}
-                  {user?.telefono && (
-                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg border-l-4 border-orange-500">
-                      <p className="text-xs font-semibold text-gray-500 mb-1">Teléfono</p>
-                      <p className="text-base md:text-lg font-bold text-gray-800">{user.telefono}</p>
-                    </div>
-                  )}
+                  <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg border-l-4 border-orange-500">
+                    <p className="text-xs font-semibold text-gray-500 mb-1">Teléfono</p>
+                    <p className="text-base md:text-lg font-bold text-gray-800">{user?.telefono || 'No configurado'}</p>
+                  </div>
 
                   {/* Mensaje informativo */}
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">

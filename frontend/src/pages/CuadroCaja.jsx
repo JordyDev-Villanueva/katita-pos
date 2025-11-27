@@ -96,8 +96,15 @@ export const CuadroCaja = () => {
 
     try {
       const token = localStorage.getItem('access_token');
+
+      // Vendedores usan /solicitar-cierre, admins usan /cerrar
+      const endpoint = user?.rol === 'vendedor' ? '/solicitar-cierre' : '/cerrar';
+      const successMessage = user?.rol === 'vendedor'
+        ? 'Solicitud de cierre enviada. Espera la aprobación del administrador.'
+        : 'Turno cerrado exitosamente';
+
       const response = await axios.post(
-        `${API_URL}/cuadro-caja/cerrar`,
+        `${API_URL}/cuadro-caja${endpoint}`,
         {
           efectivo_contado: parseFloat(efectivoContado),
           observaciones: observacionesCierre || null
@@ -109,7 +116,7 @@ export const CuadroCaja = () => {
       setShowCerrarModal(false);
       setEfectivoContado('');
       setObservacionesCierre('');
-      toast.success('✅ Turno cerrado exitosamente');
+      toast.success(successMessage);
     } catch (error) {
       console.error('Error al cerrar turno:', error);
       toast.error(error.response?.data?.error || 'Error al cerrar turno');
@@ -147,8 +154,17 @@ export const CuadroCaja = () => {
 
   const formatDateTime = (datetime) => {
     if (!datetime) return '-';
-    const date = new Date(datetime);
-    // Usar zona horaria de Perú (America/Lima)
+
+    // El backend devuelve fechas UTC en formato ISO
+    // Si la fecha no tiene 'Z' al final, añadirla para indicar UTC
+    let dateString = datetime;
+    if (!dateString.endsWith('Z') && !dateString.includes('+')) {
+      dateString = dateString + 'Z';
+    }
+
+    const date = new Date(dateString);
+
+    // Convertir a hora de Perú (UTC-5)
     return date.toLocaleString('es-PE', {
       timeZone: 'America/Lima',
       day: '2-digit',
