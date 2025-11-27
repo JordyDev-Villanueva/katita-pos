@@ -1095,6 +1095,30 @@ export const CuadroCaja = () => {
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
               </div>
+            ) : todosLosTurnos.filter(t => filtroEstado === 'todos' || t.estado === filtroEstado).length === 0 ? (
+              <div className="text-center py-12">
+                {filtroEstado === 'todos' ? (
+                  <>
+                    <History className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 text-lg">No hay turnos registrados</p>
+                  </>
+                ) : filtroEstado === 'abierto' ? (
+                  <>
+                    <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                    <p className="text-gray-600 text-lg">No hay turnos abiertos</p>
+                  </>
+                ) : filtroEstado === 'pendiente_cierre' ? (
+                  <>
+                    <Clock className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+                    <p className="text-gray-600 text-lg">No hay turnos pendientes de cierre</p>
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="h-16 w-16 text-gray-500 mx-auto mb-4" />
+                    <p className="text-gray-600 text-lg">No hay turnos cerrados</p>
+                  </>
+                )}
+              </div>
             ) : (
               <div className="space-y-4">
                 {todosLosTurnos
