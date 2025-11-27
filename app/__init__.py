@@ -78,6 +78,43 @@ def create_app(config_name=None):
             db.create_all()
             app.logger.info(f"Database initialized: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
+        # AUTO-MIGRACIÓN: Actualizar constraint de estado si es necesario
+        if app.config['DATABASE_MODE'] == 'production':
+            try:
+                from sqlalchemy import text
+                app.logger.info("Verificando constraint de estado...")
+
+                # Intentar actualizar constraint (idempotente - no falla si ya existe)
+                try:
+                    db.session.execute(text("""
+                        ALTER TABLE cuadros_caja
+                        DROP CONSTRAINT IF EXISTS check_estado_valido
+                    """))
+                    db.session.commit()
+                    app.logger.info("Constraint antiguo eliminado")
+                except Exception as e:
+                    app.logger.warning(f"No se pudo eliminar constraint: {e}")
+                    db.session.rollback()
+
+                try:
+                    db.session.execute(text("""
+                        ALTER TABLE cuadros_caja
+                        ADD CONSTRAINT check_estado_valido
+                        CHECK (estado IN ('abierto', 'cerrado', 'pendiente_cierre'))
+                    """))
+                    db.session.commit()
+                    app.logger.info("✓ Constraint actualizado: estados = ['abierto', 'cerrado', 'pendiente_cierre']")
+                except Exception as e:
+                    if 'already exists' in str(e).lower() or 'duplicate' in str(e).lower():
+                        app.logger.info("✓ Constraint ya existe con configuración correcta")
+                    else:
+                        app.logger.warning(f"Advertencia al crear constraint: {e}")
+                    db.session.rollback()
+
+            except Exception as e:
+                app.logger.error(f"Error en auto-migración: {e}")
+                db.session.rollback()
+
     # Ruta de health check
     @app.route('/health')
     def health_check():
@@ -86,70 +123,10 @@ def create_app(config_name=None):
             'status': 'healthy',
             'service': 'KATITA-POS API',
             'database_mode': app.config['DATABASE_MODE'],
-            'version': '1.0.6',
-            'optimized_dashboard': True
+            'version': '1.0.7',
+            'optimized_dashboard': True,
+            'auto_migration': 'enabled'
         }), 200
-
-    # Ruta especial para migración de constraint (solo admin)
-    @app.route('/api/migrate-constraint', methods=['POST', 'OPTIONS'])
-    def migrate_constraint():
-        """Migración de constraint de estado - Endpoint con CORS"""
-        from flask import request, jsonify
-        from flask_jwt_extended import jwt_required, get_jwt_identity
-        from app.models.user import User
-        from sqlalchemy import text
-
-        # Manejar preflight OPTIONS
-        if request.method == 'OPTIONS':
-            response = jsonify({'status': 'ok'})
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-            response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
-            return response, 200
-
-        try:
-            # Verificar token JWT
-            from flask_jwt_extended import verify_jwt_in_request
-            verify_jwt_in_request()
-            current_user_id = get_jwt_identity()
-
-            # Verificar que es admin
-            usuario = User.query.get(current_user_id)
-            if not usuario or usuario.rol != 'admin':
-                response = jsonify({'error': 'No autorizado. Solo administradores.'})
-                response.headers.add('Access-Control-Allow-Origin', '*')
-                return response, 403
-
-            # Ejecutar migración
-            db.session.execute(text("""
-                ALTER TABLE cuadros_caja
-                DROP CONSTRAINT IF EXISTS check_estado_valido
-            """))
-            db.session.commit()
-
-            db.session.execute(text("""
-                ALTER TABLE cuadros_caja
-                ADD CONSTRAINT check_estado_valido
-                CHECK (estado IN ('abierto', 'cerrado', 'pendiente_cierre'))
-            """))
-            db.session.commit()
-
-            response = jsonify({
-                'success': True,
-                'message': 'Constraint actualizado exitosamente',
-                'estados_validos': ['abierto', 'cerrado', 'pendiente_cierre']
-            })
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            return response, 200
-
-        except Exception as e:
-            db.session.rollback()
-            response = jsonify({
-                'success': False,
-                'error': f'Error: {str(e)}'
-            })
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            return response, 500
 
     app.logger.info(f"KATITA-POS started in {app.config['DATABASE_MODE']} mode")
 
@@ -262,10 +239,6 @@ def register_blueprints(app):
     # Registrar blueprint de cuadro de caja
     from app.blueprints.cuadro_caja import cuadro_caja_bp
     app.register_blueprint(cuadro_caja_bp)
-
-    # Registrar blueprint de migraciones
-    from app.blueprints.migrations import migrations_bp
-    app.register_blueprint(migrations_bp)
 
 
 def register_error_handlers(app):
