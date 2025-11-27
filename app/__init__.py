@@ -79,7 +79,8 @@ def create_app(config_name=None):
             app.logger.info(f"Database initialized: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
         # AUTO-MIGRACIÓN: Actualizar constraint de estado si es necesario
-        if app.config['DATABASE_MODE'] == 'production':
+        # Ejecutar en producción (cloud) y también en modo production
+        if app.config['DATABASE_MODE'] in ['production', 'cloud']:
             try:
                 from sqlalchemy import text
                 app.logger.info("Verificando constraint de estado...")
