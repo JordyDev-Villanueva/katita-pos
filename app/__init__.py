@@ -90,6 +90,67 @@ def create_app(config_name=None):
             'optimized_dashboard': True
         }), 200
 
+    # Ruta especial para migración de constraint (solo admin)
+    @app.route('/api/migrate-constraint', methods=['POST', 'OPTIONS'])
+    def migrate_constraint():
+        """Migración de constraint de estado - Endpoint con CORS"""
+        from flask import request, jsonify
+        from flask_jwt_extended import jwt_required, get_jwt_identity
+        from app.models.user import User
+        from sqlalchemy import text
+
+        # Manejar preflight OPTIONS
+        if request.method == 'OPTIONS':
+            response = jsonify({'status': 'ok'})
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+            response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
+            return response, 200
+
+        try:
+            # Verificar token JWT
+            from flask_jwt_extended import verify_jwt_in_request
+            verify_jwt_in_request()
+            current_user_id = get_jwt_identity()
+
+            # Verificar que es admin
+            usuario = User.query.get(current_user_id)
+            if not usuario or usuario.rol != 'admin':
+                response = jsonify({'error': 'No autorizado. Solo administradores.'})
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response, 403
+
+            # Ejecutar migración
+            db.session.execute(text("""
+                ALTER TABLE cuadros_caja
+                DROP CONSTRAINT IF EXISTS check_estado_valido
+            """))
+            db.session.commit()
+
+            db.session.execute(text("""
+                ALTER TABLE cuadros_caja
+                ADD CONSTRAINT check_estado_valido
+                CHECK (estado IN ('abierto', 'cerrado', 'pendiente_cierre'))
+            """))
+            db.session.commit()
+
+            response = jsonify({
+                'success': True,
+                'message': 'Constraint actualizado exitosamente',
+                'estados_validos': ['abierto', 'cerrado', 'pendiente_cierre']
+            })
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response, 200
+
+        except Exception as e:
+            db.session.rollback()
+            response = jsonify({
+                'success': False,
+                'error': f'Error: {str(e)}'
+            })
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response, 500
+
     app.logger.info(f"KATITA-POS started in {app.config['DATABASE_MODE']} mode")
 
     return app

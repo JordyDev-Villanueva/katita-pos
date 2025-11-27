@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Lock, Mail, Phone, Save, Eye, EyeOff, Shield, UserCircle2, AlertCircle } from 'lucide-react';
+import { User, Lock, Save, Eye, EyeOff, Shield, UserCircle2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { authAPI } from '../api/auth';
 import { Layout } from '../components/layout/Layout';
@@ -143,50 +143,33 @@ export default function Profile() {
 
           {/* FILA SUPERIOR: Tarjeta de Usuario */}
           <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl shrink-0">
-            <div className="p-4">
+            <div className="p-4 md:p-6">
               {/* Avatar y nombre - Siempre horizontal */}
-              <div className="flex items-center gap-4 mb-4">
+              <div className="flex items-center gap-4">
                 <div className="relative shrink-0">
-                  <div className="bg-white/20 backdrop-blur-sm p-2 md:p-3 rounded-full border-4 border-white/30">
-                    <UserCircle2 className="w-12 h-12 md:w-16 md:h-16 text-white" />
-                    <div className="absolute -bottom-1 -right-1 bg-green-400 w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-white"></div>
+                  <div className="bg-white/20 backdrop-blur-sm p-3 md:p-4 rounded-full border-4 border-white/30">
+                    <UserCircle2 className="w-14 h-14 md:w-20 md:h-20 text-white" />
+                    <div className="absolute -bottom-1 -right-1 bg-green-400 w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-white"></div>
                   </div>
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg md:text-2xl font-bold text-white truncate">{user?.nombre_completo}</h2>
-                  <p className="text-indigo-200 text-xs md:text-base font-medium">@{user?.username}</p>
-                </div>
-              </div>
+                  <h2 className="text-xl md:text-3xl font-bold text-white truncate mb-1">{user?.nombre_completo}</h2>
+                  <p className="text-indigo-200 text-sm md:text-lg font-medium mb-2">@{user?.username}</p>
 
-              {/* Badge de rol + Info rápida - Stack en móvil */}
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                {/* Badge de rol */}
-                <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs md:text-sm font-bold shadow-lg ${
-                  user?.rol === 'admin'
-                    ? 'bg-yellow-400 text-yellow-900'
-                    : user?.rol === 'vendedor'
-                    ? 'bg-blue-400 text-blue-900'
-                    : 'bg-green-400 text-green-900'
-                }`}>
-                  <Shield className="w-3 h-3 md:w-4 md:h-4" />
-                  {user?.rol === 'admin' ? 'Administrador' :
-                   user?.rol === 'vendedor' ? 'Vendedor' : 'Bodeguero'}
-                </div>
-
-                {/* Email */}
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg flex-1 min-w-0">
-                  <Mail className="w-3 h-3 md:w-4 md:h-4 text-white shrink-0" />
-                  <p className="text-xs md:text-sm font-semibold text-white truncate">{user?.email || 'No configurado'}</p>
-                </div>
-
-                {/* Teléfono */}
-                {user?.telefono && (
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg">
-                    <Phone className="w-3 h-3 md:w-4 md:h-4 text-white shrink-0" />
-                    <p className="text-xs md:text-sm font-semibold text-white">{user.telefono}</p>
+                  {/* Badge de rol */}
+                  <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold shadow-lg ${
+                    user?.rol === 'admin'
+                      ? 'bg-yellow-400 text-yellow-900'
+                      : user?.rol === 'vendedor'
+                      ? 'bg-blue-400 text-blue-900'
+                      : 'bg-green-400 text-green-900'
+                  }`}>
+                    <Shield className="w-3 h-3 md:w-4 md:h-4" />
+                    {user?.rol === 'admin' ? 'Administrador' :
+                     user?.rol === 'vendedor' ? 'Vendedor' : 'Bodeguero'}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
