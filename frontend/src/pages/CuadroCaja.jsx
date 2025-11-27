@@ -263,7 +263,12 @@ export const CuadroCaja = () => {
   };
 
   const formatCurrency = (value) => {
-    return `S/ ${Number(value).toFixed(2)}`;
+    const numValue = Number(value);
+    // Si es NaN, null, undefined o cualquier valor inválido, retornar 0.00
+    if (isNaN(numValue) || value === null || value === undefined) {
+      return 'S/ 0.00';
+    }
+    return `S/ ${numValue.toFixed(2)}`;
   };
 
   const formatDateTime = (datetime) => {
