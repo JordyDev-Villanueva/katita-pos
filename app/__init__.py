@@ -112,6 +112,38 @@ def create_app(config_name=None):
                         app.logger.warning(f"Advertencia al crear constraint: {e}")
                     db.session.rollback()
 
+                # MIGRACIÓN 2: Agregar columna cuadro_caja_id a ventas (FASE 4)
+                try:
+                    # Verificar si la columna ya existe (PostgreSQL)
+                    result = db.session.execute(text("""
+                        SELECT column_name
+                        FROM information_schema.columns
+                        WHERE table_name='ventas' AND column_name='cuadro_caja_id'
+                    """))
+                    exists = result.fetchone() is not None
+
+                    if not exists:
+                        app.logger.info("Agregando columna cuadro_caja_id a ventas...")
+                        db.session.execute(text("""
+                            ALTER TABLE ventas
+                            ADD COLUMN cuadro_caja_id INTEGER
+                            REFERENCES cuadros_caja(id)
+                        """))
+
+                        # Crear índice
+                        db.session.execute(text("""
+                            CREATE INDEX IF NOT EXISTS idx_ventas_cuadro_caja_id
+                            ON ventas(cuadro_caja_id)
+                        """))
+
+                        db.session.commit()
+                        app.logger.info("✓ Columna cuadro_caja_id agregada a ventas")
+                    else:
+                        app.logger.info("✓ Columna cuadro_caja_id ya existe en ventas")
+                except Exception as e:
+                    app.logger.warning(f"Error al agregar columna cuadro_caja_id: {e}")
+                    db.session.rollback()
+
             except Exception as e:
                 app.logger.error(f"Error en auto-migración: {e}")
                 db.session.rollback()
