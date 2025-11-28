@@ -732,8 +732,8 @@ def obtener_ventas_turno():
             estado='completada'
         ).order_by(Venta.fecha.desc()).all()
 
-        # Serializar ventas
-        ventas_data = [venta.to_dict(include_detalles=True) for venta in ventas]
+        # Serializar ventas (sin detalles para mejor performance)
+        ventas_data = [venta.to_dict(include_detalles=False) for venta in ventas]
 
         # Calcular totales por método de pago
         from decimal import Decimal
@@ -765,4 +765,5 @@ def obtener_ventas_turno():
         }), 200
 
     except Exception as e:
+        current_app.logger.error(f'Error en obtener_ventas_turno: {str(e)}', exc_info=True)
         return jsonify({'error': f'Error al obtener ventas del turno: {str(e)}'}), 500
