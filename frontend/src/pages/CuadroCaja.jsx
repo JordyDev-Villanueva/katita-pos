@@ -63,12 +63,30 @@ export const CuadroCaja = () => {
   const [loadingHistorial, setLoadingHistorial] = useState(false);
   const [filtroEstado, setFiltroEstado] = useState('todos');
 
+  // Estados para Ventas del Turno
+  const [ventasTurno, setVentasTurno] = useState([]);
+  const [loadingVentas, setLoadingVentas] = useState(false);
+  const [totalesVentas, setTotalesVentas] = useState({
+    efectivo: 0,
+    yape: 0,
+    plin: 0,
+    transferencia: 0,
+    total: 0
+  });
+  const [filtroMetodo, setFiltroMetodo] = useState('todos');
+
   const isAdmin = user?.rol === 'admin';
 
   useEffect(() => {
     fetchUserData();
     fetchTurnoActual();
   }, []);
+
+  useEffect(() => {
+    if (turnoActual && turnoActual.estado === 'abierto') {
+      fetchVentasTurno();
+    }
+  }, [turnoActual]);
 
   useEffect(() => {
     if (isAdmin && activeTab === 'pendientes') {
@@ -259,6 +277,32 @@ export const CuadroCaja = () => {
     } catch (error) {
       console.error('Error al rechazar cierre:', error);
       toast.error(error.response?.data?.error || 'Error al rechazar cierre');
+    }
+  };
+
+  const fetchVentasTurno = async () => {
+    try {
+      setLoadingVentas(true);
+      const token = localStorage.getItem('access_token');
+      const response = await axios.get(`${API_URL}/cuadro-caja/ventas-turno`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setVentasTurno(response.data.ventas || []);
+      setTotalesVentas(response.data.totales || {
+        efectivo: 0,
+        yape: 0,
+        plin: 0,
+        transferencia: 0,
+        total: 0
+      });
+    } catch (error) {
+      console.error('Error al cargar ventas del turno:', error);
+      // No mostrar error si no hay turno abierto
+      if (error.response?.status !== 404) {
+        toast.error('Error al cargar ventas del turno');
+      }
+    } finally {
+      setLoadingVentas(false);
     }
   };
 
@@ -728,6 +772,162 @@ export const CuadroCaja = () => {
               )}
             </div>
           </div>
+
+          {/* Ventas del Turno */}
+          {turnoActual.esta_abierto && (
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <Smartphone className="h-6 w-6 text-blue-600" />
+                  Ventas del Turno
+                </h3>
+                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                  {ventasTurno.length} {ventasTurno.length === 1 ? 'venta' : 'ventas'}
+                </span>
+              </div>
+
+              {/* Filtros por método de pago */}
+              <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+                <button
+                  onClick={() => setFiltroMetodo('todos')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${
+                    filtroMetodo === 'todos'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Todos ({ventasTurno.length})
+                </button>
+                <button
+                  onClick={() => setFiltroMetodo('efectivo')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${
+                    filtroMetodo === 'efectivo'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Efectivo ({ventasTurno.filter(v => v.metodo_pago === 'efectivo').length})
+                </button>
+                <button
+                  onClick={() => setFiltroMetodo('yape')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${
+                    filtroMetodo === 'yape'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Yape ({ventasTurno.filter(v => v.metodo_pago === 'yape').length})
+                </button>
+                <button
+                  onClick={() => setFiltroMetodo('plin')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${
+                    filtroMetodo === 'plin'
+                      ? 'bg-pink-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Plin ({ventasTurno.filter(v => v.metodo_pago === 'plin').length})
+                </button>
+                <button
+                  onClick={() => setFiltroMetodo('transferencia')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${
+                    filtroMetodo === 'transferencia'
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Transferencia ({ventasTurno.filter(v => v.metodo_pago === 'transferencia').length})
+                </button>
+              </div>
+
+              {/* Totales por método de pago */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <p className="text-xs text-green-700 mb-1">Efectivo</p>
+                  <p className="text-lg font-bold text-green-600">{formatCurrency(totalesVentas.efectivo)}</p>
+                </div>
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                  <p className="text-xs text-purple-700 mb-1">Yape</p>
+                  <p className="text-lg font-bold text-purple-600">{formatCurrency(totalesVentas.yape)}</p>
+                </div>
+                <div className="bg-pink-50 border border-pink-200 rounded-lg p-3">
+                  <p className="text-xs text-pink-700 mb-1">Plin</p>
+                  <p className="text-lg font-bold text-pink-600">{formatCurrency(totalesVentas.plin)}</p>
+                </div>
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                  <p className="text-xs text-indigo-700 mb-1">Transferencia</p>
+                  <p className="text-lg font-bold text-indigo-600">{formatCurrency(totalesVentas.transferencia)}</p>
+                </div>
+              </div>
+
+              {/* Tabla de ventas */}
+              {loadingVentas ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+              ) : ventasTurno.filter(v => filtroMetodo === 'todos' || v.metodo_pago === filtroMetodo).length === 0 ? (
+                <div className="text-center py-8">
+                  <Banknote className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-600">
+                    {filtroMetodo === 'todos'
+                      ? 'No hay ventas en este turno aún'
+                      : `No hay ventas con método ${filtroMetodo}`}
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b-2 border-gray-200">
+                        <th className="text-left py-3 px-2 text-xs font-semibold text-gray-600">VENTA</th>
+                        <th className="text-left py-3 px-2 text-xs font-semibold text-gray-600">HORA</th>
+                        <th className="text-left py-3 px-2 text-xs font-semibold text-gray-600">MÉTODO</th>
+                        <th className="text-left py-3 px-2 text-xs font-semibold text-gray-600">ITEMS</th>
+                        <th className="text-right py-3 px-2 text-xs font-semibold text-gray-600">TOTAL</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ventasTurno
+                        .filter(v => filtroMetodo === 'todos' || v.metodo_pago === filtroMetodo)
+                        .map((venta) => (
+                          <tr key={venta.id} className="border-b border-gray-100 hover:bg-gray-50">
+                            <td className="py-3 px-2 text-sm font-semibold text-gray-800">
+                              {venta.numero_venta}
+                            </td>
+                            <td className="py-3 px-2 text-xs text-gray-600">
+                              {new Date(venta.fecha).toLocaleTimeString('es-PE', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                              })}
+                            </td>
+                            <td className="py-3 px-2">
+                              <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
+                                venta.metodo_pago === 'efectivo'
+                                  ? 'bg-green-100 text-green-700'
+                                  : venta.metodo_pago === 'yape'
+                                  ? 'bg-purple-100 text-purple-700'
+                                  : venta.metodo_pago === 'plin'
+                                  ? 'bg-pink-100 text-pink-700'
+                                  : 'bg-indigo-100 text-indigo-700'
+                              }`}>
+                                {venta.metodo_pago.toUpperCase()}
+                              </span>
+                            </td>
+                            <td className="py-3 px-2 text-sm text-gray-700">
+                              {venta.cantidad_items} {venta.cantidad_items === 1 ? 'item' : 'items'}
+                            </td>
+                            <td className="py-3 px-2 text-right text-sm font-bold text-gray-900">
+                              {formatCurrency(venta.total)}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
         </>
       )}
 

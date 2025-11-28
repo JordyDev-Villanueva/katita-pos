@@ -673,3 +673,96 @@ def obtener_estadisticas():
 
     except Exception as e:
         return jsonify({'error': f'Error al obtener estadísticas: {str(e)}'}), 500
+
+
+# ==================================================================================
+# ENDPOINT 11: GET /api/cuadro-caja/ventas-turno - Obtener ventas del turno actual
+# ==================================================================================
+
+@cuadro_caja_bp.route('/ventas-turno', methods=['GET'])
+@jwt_required()
+def obtener_ventas_turno():
+    """
+    Obtiene todas las ventas del turno actual del vendedor autenticado.
+
+    Si el vendedor es admin, puede obtener las ventas de cualquier turno
+    especificando el parámetro turno_id.
+
+    Query params:
+        - turno_id (int, opcional): ID del turno (solo para admin)
+
+    Returns:
+        200: Lista de ventas del turno
+        404: No hay turno abierto o turno no encontrado
+        500: Error interno
+    """
+    try:
+        from flask import current_app
+
+        # Obtener usuario autenticado
+        user_id = get_jwt_identity()
+        claims = get_jwt()
+        user_rol = claims.get('rol')
+
+        # Obtener parámetros
+        turno_id = request.args.get('turno_id', type=int)
+
+        # Si es admin y especifica turno_id, obtener ese turno
+        if user_rol == 'admin' and turno_id:
+            turno = CuadroCaja.query.get(turno_id)
+            if not turno:
+                return jsonify({'error': 'Turno no encontrado'}), 404
+        else:
+            # Obtener turno abierto del vendedor
+            turno = CuadroCaja.query.filter_by(
+                vendedor_id=user_id,
+                estado='abierto'
+            ).first()
+
+            if not turno:
+                return jsonify({
+                    'message': 'No hay turno abierto',
+                    'ventas': []
+                }), 200
+
+        # Obtener ventas del turno
+        from app.models.venta import Venta
+        ventas = Venta.query.filter_by(
+            cuadro_caja_id=turno.id,
+            estado='completada'
+        ).order_by(Venta.fecha.desc()).all()
+
+        # Serializar ventas
+        ventas_data = [venta.to_dict(include_detalles=True) for venta in ventas]
+
+        # Calcular totales por método de pago
+        from decimal import Decimal
+        total_efectivo = sum(
+            Decimal(str(v.total)) for v in ventas if v.metodo_pago == 'efectivo'
+        )
+        total_yape = sum(
+            Decimal(str(v.total)) for v in ventas if v.metodo_pago == 'yape'
+        )
+        total_plin = sum(
+            Decimal(str(v.total)) for v in ventas if v.metodo_pago == 'plin'
+        )
+        total_transferencia = sum(
+            Decimal(str(v.total)) for v in ventas if v.metodo_pago == 'transferencia'
+        )
+
+        return jsonify({
+            'turno_id': turno.id,
+            'turno_numero': turno.numero_turno,
+            'cantidad_ventas': len(ventas),
+            'totales': {
+                'efectivo': float(total_efectivo),
+                'yape': float(total_yape),
+                'plin': float(total_plin),
+                'transferencia': float(total_transferencia),
+                'total': float(total_efectivo + total_yape + total_plin + total_transferencia)
+            },
+            'ventas': ventas_data
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener ventas del turno: {str(e)}'}), 500

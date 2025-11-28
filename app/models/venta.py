@@ -56,8 +56,9 @@ class Venta(db.Model):
     cliente_nombre = db.Column(String(200), nullable=True)
     cliente_dni = db.Column(String(8), nullable=True)
 
-    # Vendedor
+    # Vendedor y Turno de Caja
     vendedor_id = db.Column(Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    cuadro_caja_id = db.Column(Integer, db.ForeignKey('cuadros_caja.id'), nullable=True, index=True)
 
     # Estado y sincronización
     estado = db.Column(String(20), default='completada', nullable=False, index=True)
@@ -81,6 +82,7 @@ class Venta(db.Model):
     # === RELACIONES ===
 
     vendedor = relationship('User', backref='ventas')
+    cuadro_caja = relationship('CuadroCaja', backref='ventas')
     # detalles: relationship con DetalleVenta (se definirá en modelo DetalleVenta)
     # movimientos: relationship con MovimientoStock (se definirá en modelo MovimientoStock)
 
@@ -430,6 +432,7 @@ class Venta(db.Model):
             'cliente_nombre': self.cliente_nombre,
             'cliente_dni': self.cliente_dni,
             'vendedor_id': self.vendedor_id,
+            'cuadro_caja_id': self.cuadro_caja_id,
             'estado': self.estado,
             'notas': self.notas,
             'created_offline': self.created_offline,

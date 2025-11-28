@@ -291,6 +291,12 @@ def procesar_venta():
         if errores:
             return validation_error_response(errores)
 
+        # ========== BUSCAR TURNO ABIERTO DEL VENDEDOR ==========
+        turno_abierto = CuadroCaja.query.filter_by(
+            vendedor_id=vendedor_id,
+            estado='abierto'
+        ).first()
+
         # ========== CREAR VENTA MAESTRA ==========
         descuento = Decimal(str(data.get('descuento', 0)))
 
@@ -303,6 +309,7 @@ def procesar_venta():
 
         nueva_venta = Venta(
             vendedor_id=vendedor_id,
+            cuadro_caja_id=turno_abierto.id if turno_abierto else None,
             metodo_pago=metodo_pago,
             monto_recibido=monto_recibido,
             cliente_nombre=data.get('cliente_nombre', ''),
