@@ -25,6 +25,9 @@ from sqlalchemy import func, and_
 from decimal import Decimal
 from datetime import datetime, timezone, date, timedelta
 from io import BytesIO
+
+# Zona horaria de Perú (UTC-5)
+PERU_TZ = timezone(timedelta(hours=-5))
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
@@ -526,8 +529,10 @@ def listar_ventas():
             print(f'[DEBUG] Filtrando por fecha específica: {fecha_str}')
             try:
                 fecha_dt = datetime.strptime(fecha_str, '%Y-%m-%d').date()
-                fecha_inicio = datetime.combine(fecha_dt, datetime.min.time())
-                fecha_fin = datetime.combine(fecha_dt, datetime.max.time())
+                # IMPORTANTE: Usar timezone de Perú para comparar con datos timezone-aware
+                fecha_inicio = datetime.combine(fecha_dt, datetime.min.time()).replace(tzinfo=PERU_TZ)
+                fecha_fin = datetime.combine(fecha_dt, datetime.max.time()).replace(tzinfo=PERU_TZ)
+                print(f'[DEBUG] Rango timezone-aware: {fecha_inicio} a {fecha_fin}')
                 query = query.filter(
                     Venta.fecha >= fecha_inicio,
                     Venta.fecha <= fecha_fin
@@ -549,11 +554,11 @@ def listar_ventas():
                 desde_dt = datetime.strptime(desde_str, '%Y-%m-%d').date()
                 hasta_dt = datetime.strptime(hasta_str, '%Y-%m-%d').date()
 
-                # Convertir a datetime con hora completa del día
-                desde_full = datetime.combine(desde_dt, datetime.min.time())
-                hasta_full = datetime.combine(hasta_dt, datetime.max.time())
+                # IMPORTANTE: Usar timezone de Perú para comparar con datos timezone-aware
+                desde_full = datetime.combine(desde_dt, datetime.min.time()).replace(tzinfo=PERU_TZ)
+                hasta_full = datetime.combine(hasta_dt, datetime.max.time()).replace(tzinfo=PERU_TZ)
 
-                print(f'[DEBUG] Rango convertido: {desde_full} a {hasta_full}')
+                print(f'[DEBUG] Rango timezone-aware: {desde_full} a {hasta_full}')
 
                 query = query.filter(
                     Venta.fecha >= desde_full,
