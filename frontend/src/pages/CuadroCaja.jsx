@@ -771,22 +771,22 @@ export const CuadroCaja = () => {
               </div>
 
               {/* Totales por método de pago */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <p className="text-xs text-green-700 mb-1">Efectivo</p>
-                  <p className="text-lg font-bold text-green-600">{formatCurrency(totalesVentas.efectivo)}</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 shadow-sm">
+                  <p className="text-sm font-semibold text-green-700 mb-2">Efectivo</p>
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(totalesVentas.efectivo)}</p>
                 </div>
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                  <p className="text-xs text-purple-700 mb-1">Yape</p>
-                  <p className="text-lg font-bold text-purple-600">{formatCurrency(totalesVentas.yape)}</p>
+                <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4 shadow-sm">
+                  <p className="text-sm font-semibold text-purple-700 mb-2">Yape</p>
+                  <p className="text-2xl font-bold text-purple-600">{formatCurrency(totalesVentas.yape)}</p>
                 </div>
-                <div className="bg-pink-50 border border-pink-200 rounded-lg p-3">
-                  <p className="text-xs text-pink-700 mb-1">Plin</p>
-                  <p className="text-lg font-bold text-pink-600">{formatCurrency(totalesVentas.plin)}</p>
+                <div className="bg-pink-50 border-2 border-pink-200 rounded-xl p-4 shadow-sm">
+                  <p className="text-sm font-semibold text-pink-700 mb-2">Plin</p>
+                  <p className="text-2xl font-bold text-pink-600">{formatCurrency(totalesVentas.plin)}</p>
                 </div>
-                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
-                  <p className="text-xs text-indigo-700 mb-1">Transferencia</p>
-                  <p className="text-lg font-bold text-indigo-600">{formatCurrency(totalesVentas.transferencia)}</p>
+                <div className="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4 shadow-sm">
+                  <p className="text-sm font-semibold text-indigo-700 mb-2">Transferencia</p>
+                  <p className="text-2xl font-bold text-indigo-600">{formatCurrency(totalesVentas.transferencia)}</p>
                 </div>
               </div>
 
@@ -812,7 +812,7 @@ export const CuadroCaja = () => {
                         <th className="text-left py-3 px-2 text-xs font-semibold text-gray-600">VENTA</th>
                         <th className="text-left py-3 px-2 text-xs font-semibold text-gray-600">HORA</th>
                         <th className="text-left py-3 px-2 text-xs font-semibold text-gray-600">MÉTODO</th>
-                        <th className="text-left py-3 px-2 text-xs font-semibold text-gray-600">ITEMS</th>
+                        <th className="text-center py-3 px-2 text-xs font-semibold text-gray-600">CANT.</th>
                         <th className="text-right py-3 px-2 text-xs font-semibold text-gray-600">TOTAL</th>
                       </tr>
                     </thead>
@@ -824,11 +824,10 @@ export const CuadroCaja = () => {
                             <td className="py-3 px-2 text-sm font-semibold text-gray-800">
                               {venta.numero_venta}
                             </td>
-                            <td className="py-3 px-2 text-xs text-gray-600">
+                            <td className="py-3 px-2 text-sm text-gray-600">
                               {new Date(venta.fecha).toLocaleTimeString('es-PE', {
                                 hour: '2-digit',
-                                minute: '2-digit',
-                                hour12: true
+                                minute: '2-digit'
                               })}
                             </td>
                             <td className="py-3 px-2">
@@ -844,8 +843,8 @@ export const CuadroCaja = () => {
                                 {venta.metodo_pago.toUpperCase()}
                               </span>
                             </td>
-                            <td className="py-3 px-2 text-sm text-gray-700">
-                              {venta.cantidad_items} {venta.cantidad_items === 1 ? 'item' : 'items'}
+                            <td className="py-3 px-2 text-center text-sm font-semibold text-gray-700">
+                              {venta.cantidad_items}
                             </td>
                             <td className="py-3 px-2 text-right text-sm font-bold text-gray-900">
                               {formatCurrency(venta.total)}
