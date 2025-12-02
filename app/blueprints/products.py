@@ -16,6 +16,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from sqlalchemy.exc import IntegrityError
 from decimal import Decimal
+import requests  # FASE 5: Para Open Food Facts API
 from app import db
 from app.models.product import Product
 from app.models.lote import Lote
@@ -765,7 +766,6 @@ def buscar_producto_por_barcode(barcode):
         }
     """
     try:
-        import requests
         from flask import current_app
 
         # Validar que el código de barras tenga longitud válida

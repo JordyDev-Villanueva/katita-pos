@@ -22,6 +22,9 @@ python-dotenv==1.0.0
 marshmallow==3.20.1
 python-dateutil==2.8.2
 
+# HTTP Requests (FASE 5 - Open Food Facts API)
+requests==2.31.0
+
 # Reports & Export
 reportlab==4.0.7
 openpyxl==3.1.2
