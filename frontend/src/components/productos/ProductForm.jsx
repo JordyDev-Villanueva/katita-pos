@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Loader } from 'lucide-react';
 import { Input } from '../common/Input';
 import { Button } from '../common/Button';
 import { ImagePreview } from './ImagePreview';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const ProductForm = ({ isOpen, onClose, onSubmit, producto = null, loading = false }) => {
   const [formData, setFormData] = useState({
@@ -18,6 +22,7 @@ export const ProductForm = ({ isOpen, onClose, onSubmit, producto = null, loadin
   });
 
   const [errors, setErrors] = useState({});
+  const [buscandoAPI, setBuscandoAPI] = useState(false);
 
   // Cargar datos si es edición
   useEffect(() => {
@@ -49,6 +54,46 @@ export const ProductForm = ({ isOpen, onClose, onSubmit, producto = null, loadin
       setErrors({});
     }
   }, [producto, isOpen]);
+
+  // 🔍 FASE 5: Auto-búsqueda en Open Food Facts cuando se ingresa código de barras
+  useEffect(() => {
+    // Solo buscar si:
+    // 1. No es modo edición (producto === null)
+    // 2. El código tiene al menos 8 dígitos
+    // 3. Los campos nombre e imagen están vacíos (no sobrescribir datos ya ingresados)
+    if (!producto && formData.codigo_barras.length >= 8 && !formData.nombre && !formData.imagen_url) {
+      buscarProductoEnAPI();
+    }
+  }, [formData.codigo_barras, producto]);
+
+  // Función para buscar producto en Open Food Facts API
+  const buscarProductoEnAPI = async () => {
+    setBuscandoAPI(true);
+    try {
+      const response = await axios.get(`${API_URL}/products/buscar-barcode/${formData.codigo_barras}`);
+
+      if (response.data.encontrado) {
+        // Auto-llenar campos con datos encontrados
+        setFormData(prev => ({
+          ...prev,
+          nombre: response.data.nombre || prev.nombre,
+          imagen_url: response.data.foto_url || prev.imagen_url,
+          categoria: response.data.categoria || prev.categoria,
+        }));
+
+        toast.success('¡Producto encontrado! Completa precio y stock');
+      } else {
+        toast('Producto no encontrado. Ingresa datos manualmente', {
+          icon: 'ℹ️',
+        });
+      }
+    } catch (error) {
+      console.error('Error buscando producto:', error);
+      // No mostrar error toast para no molestar al usuario
+    } finally {
+      setBuscandoAPI(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -161,17 +206,30 @@ export const ProductForm = ({ isOpen, onClose, onSubmit, producto = null, loadin
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Columna Izquierda */}
             <div className="space-y-3">
-              <Input
-                label="Código de Barras"
-                name="codigo_barras"
-                type="text"
-                value={formData.codigo_barras}
-                onChange={handleChange}
-                error={errors.codigo_barras}
-                required
-                disabled={!!producto}
-                placeholder="7750670009999"
-              />
+              {/* Código de Barras con indicador de búsqueda */}
+              <div className="relative">
+                <Input
+                  label="Código de Barras"
+                  name="codigo_barras"
+                  type="text"
+                  value={formData.codigo_barras}
+                  onChange={handleChange}
+                  error={errors.codigo_barras}
+                  required
+                  disabled={!!producto}
+                  placeholder="Escanea o escribe el código de barras"
+                />
+                {buscandoAPI && (
+                  <div className="absolute right-3 top-9">
+                    <Loader className="animate-spin h-5 w-5 text-blue-600" />
+                  </div>
+                )}
+              </div>
+              {!producto && (
+                <p className="text-xs text-gray-500 -mt-2">
+                  💡 Escanea con pistola o escribe manualmente. Búsqueda automática activada.
+                </p>
+              )}
 
               <Input
                 label="Nombre del Producto"

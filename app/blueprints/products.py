@@ -730,3 +730,106 @@ def actualizar_producto(id):
     except Exception as e:
         db.session.rollback()
         return error_response(f"Error interno del servidor: {str(e)}", 500)
+
+# ==================================================================================
+# ENDPOINT NUEVO - FASE 5: Búsqueda automática por código de barras (Open Food Facts)
+# ==================================================================================
+
+@products_bp.route('/buscar-barcode/<barcode>', methods=['GET'])
+def buscar_producto_por_barcode(barcode):
+    """
+    Busca información de producto en Open Food Facts API usando código de barras.
+
+    Permite auto-completar datos del producto (nombre, foto, marca, categoría)
+    cuando el usuario escanea o ingresa un código de barras.
+
+    Args:
+        barcode (str): Código de barras del producto (8-13 dígitos)
+
+    Returns:
+        JSON: Información del producto si se encuentra, o not_found
+
+    Ejemplo de respuesta exitosa:
+        {
+            "encontrado": true,
+            "nombre": "Coca Cola Original 500ml",
+            "foto_url": "https://...",
+            "marca": "Coca-Cola",
+            "categoria": "Bebidas"
+        }
+
+    Ejemplo de respuesta no encontrada:
+        {
+            "encontrado": false,
+            "mensaje": "Producto no encontrado en Open Food Facts"
+        }
+    """
+    try:
+        import requests
+        from flask import current_app
+
+        # Validar que el código de barras tenga longitud válida
+        if not barcode or len(barcode) < 8 or len(barcode) > 13:
+            return jsonify({
+                'encontrado': False,
+                'mensaje': 'Código de barras inválido. Debe tener entre 8 y 13 dígitos.'
+            }), 400
+
+        # Buscar en Open Food Facts API
+        url = f"https://world.openfoodfacts.org/api/v0/product/{barcode}.json"
+        current_app.logger.info(f"Buscando producto en Open Food Facts: {barcode}")
+
+        response = requests.get(url, timeout=5)
+
+        if response.status_code == 200:
+            data = response.json()
+
+            # Verificar si el producto fue encontrado
+            if data.get('status') == 1:
+                producto = data.get('product', {})
+
+                # Extraer información relevante
+                nombre = producto.get('product_name', '') or producto.get('product_name_es', '')
+                foto_url = producto.get('image_url', '') or producto.get('image_front_url', '')
+                marca = producto.get('brands', '')
+
+                # Categorías en Open Food Facts vienen como tags
+                categorias = producto.get('categories_tags', [])
+                categoria = categorias[0].replace('en:', '') if categorias else None
+
+                current_app.logger.info(f"✓ Producto encontrado: {nombre}")
+
+                return jsonify({
+                    'encontrado': True,
+                    'nombre': nombre,
+                    'foto_url': foto_url,
+                    'marca': marca,
+                    'categoria': categoria,
+                    'barcode': barcode
+                })
+            else:
+                current_app.logger.info(f"Producto no encontrado en Open Food Facts: {barcode}")
+                return jsonify({
+                    'encontrado': False,
+                    'mensaje': 'Producto no encontrado en Open Food Facts. Puedes registrarlo manualmente.'
+                })
+        else:
+            current_app.logger.warning(f"Error en API Open Food Facts: {response.status_code}")
+            return jsonify({
+                'encontrado': False,
+                'mensaje': 'Error al consultar Open Food Facts. Intenta nuevamente.'
+            }), 503
+
+    except requests.Timeout:
+        current_app.logger.error("Timeout al consultar Open Food Facts API")
+        return jsonify({
+            'encontrado': False,
+            'mensaje': 'Timeout al buscar producto. Verifica tu conexión.'
+        }), 504
+
+    except Exception as e:
+        current_app.logger.error(f"Error buscando producto: {str(e)}")
+        return jsonify({
+            'encontrado': False,
+            'mensaje': f'Error al buscar producto: {str(e)}'
+        }), 500
