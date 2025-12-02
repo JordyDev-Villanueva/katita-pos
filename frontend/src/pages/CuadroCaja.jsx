@@ -828,6 +828,7 @@ export const CuadroCaja = () => {
                               {new Date(venta.fecha).toLocaleTimeString('es-PE', {
                                 hour: '2-digit',
                                 minute: '2-digit',
+                                hour12: false,
                                 timeZone: 'America/Lima'
                               })}
                             </td>
