@@ -827,7 +827,8 @@ export const CuadroCaja = () => {
                             <td className="py-3 px-2 text-sm text-gray-600">
                               {new Date(venta.fecha).toLocaleTimeString('es-PE', {
                                 hour: '2-digit',
-                                minute: '2-digit'
+                                minute: '2-digit',
+                                timeZone: 'America/Lima'
                               })}
                             </td>
                             <td className="py-3 px-2">
