@@ -33,11 +33,13 @@ export const Dashboard = () => {
   const [topProductos, setTopProductos] = useState([]);
 
   // ==================== FUNCIÓN HELPER PARA FECHAS ====================
-  // Obtener fecha local en formato YYYY-MM-DD sin conversión UTC
+  // Obtener fecha en timezone de Perú (America/Lima) en formato YYYY-MM-DD
   const obtenerFechaLocal = (fecha = new Date()) => {
-    const year = fecha.getFullYear();
-    const month = String(fecha.getMonth() + 1).padStart(2, '0');
-    const day = String(fecha.getDate()).padStart(2, '0');
+    // Convertir a timezone de Perú (UTC-5)
+    const fechaPeru = new Date(fecha.toLocaleString('en-US', { timeZone: 'America/Lima' }));
+    const year = fechaPeru.getFullYear();
+    const month = String(fechaPeru.getMonth() + 1).padStart(2, '0');
+    const day = String(fechaPeru.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
 

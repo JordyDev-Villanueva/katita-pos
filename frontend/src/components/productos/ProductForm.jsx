@@ -66,6 +66,45 @@ export const ProductForm = ({ isOpen, onClose, onSubmit, producto = null, loadin
     }
   }, [formData.codigo_barras, producto]);
 
+  // Mapear categorías de Open Food Facts a categorías del sistema
+  const mapearCategoria = (categoriaAPI) => {
+    if (!categoriaAPI) return '';
+
+    const categoria = categoriaAPI.toLowerCase();
+
+    // Mapeo de categorías Open Food Facts -> KATITA-POS
+    if (categoria.includes('beverage') || categoria.includes('drink') || categoria.includes('bebida')) {
+      return 'Bebidas';
+    }
+    if (categoria.includes('dairy') || categoria.includes('milk') || categoria.includes('lácteo') || categoria.includes('lacteo')) {
+      return 'Lácteos';
+    }
+    if (categoria.includes('snack') || categoria.includes('chip') || categoria.includes('galleta')) {
+      return 'Snacks';
+    }
+    if (categoria.includes('pasta') || categoria.includes('rice') || categoria.includes('arroz') || categoria.includes('cereal')) {
+      return 'Abarrotes';
+    }
+    if (categoria.includes('bread') || categoria.includes('pan') || categoria.includes('bakery')) {
+      return 'Panadería';
+    }
+    if (categoria.includes('cleaning') || categoria.includes('limpieza')) {
+      return 'Limpieza';
+    }
+    if (categoria.includes('personal-care') || categoria.includes('cosmetic') || categoria.includes('cuidado')) {
+      return 'Cuidado Personal';
+    }
+    if (categoria.includes('frozen') || categoria.includes('congelado')) {
+      return 'Congelados';
+    }
+    if (categoria.includes('fruit') || categoria.includes('vegetable') || categoria.includes('fruta') || categoria.includes('verdura')) {
+      return 'Frutas y Verduras';
+    }
+
+    // Default: Abarrotes para productos no clasificados
+    return 'Abarrotes';
+  };
+
   // Función para buscar producto en Open Food Facts API
   const buscarProductoEnAPI = async () => {
     setBuscandoAPI(true);
@@ -73,12 +112,15 @@ export const ProductForm = ({ isOpen, onClose, onSubmit, producto = null, loadin
       const response = await axios.get(`${API_URL}/products/buscar-barcode/${formData.codigo_barras}`);
 
       if (response.data.encontrado) {
+        // Mapear categoría de la API a categoría del sistema
+        const categoriaMapeada = mapearCategoria(response.data.categoria);
+
         // Auto-llenar campos con datos encontrados
         setFormData(prev => ({
           ...prev,
           nombre: response.data.nombre || prev.nombre,
           imagen_url: response.data.foto_url || prev.imagen_url,
-          categoria: response.data.categoria || prev.categoria,
+          categoria: categoriaMapeada || prev.categoria,
         }));
 
         toast.success('¡Producto encontrado! Completa precio y stock');
