@@ -418,11 +418,14 @@ class Venta(db.Model):
         Returns:
             dict: Diccionario con los datos de la venta
         """
+        # Convertir fecha a timezone de Perú para serialización
+        fecha_peru = self.fecha.astimezone(PERU_TZ) if self.fecha else None
+
         data = {
             'id': self.id,
             'numero_venta': self.numero_venta,
-            'fecha': self.fecha.isoformat() if self.fecha else None,
-            'fecha_venta': self.fecha.isoformat() if self.fecha else None,  # Alias para compatibilidad
+            'fecha': fecha_peru.isoformat() if fecha_peru else None,
+            'fecha_venta': fecha_peru.isoformat() if fecha_peru else None,  # Alias para compatibilidad
             'subtotal': float(self.subtotal) if self.subtotal else 0.0,
             'descuento': float(self.descuento) if self.descuento else 0.0,
             'total': float(self.total) if self.total else 0.0,
