@@ -68,11 +68,16 @@ export const ProductForm = ({ isOpen, onClose, onSubmit, producto = null, loadin
 
   // Mapear categorías de Open Food Facts a categorías del sistema
   const mapearCategoria = (categoriaAPI) => {
-    if (!categoriaAPI) return '';
+    if (!categoriaAPI) return 'Abarrotes';
 
     const categoria = categoriaAPI.toLowerCase();
 
     // Mapeo de categorías Open Food Facts -> KATITA-POS
+    // IMPORTANTE: Pasta debe ir PRIMERO antes que beverages
+    if (categoria.includes('pasta') || categoria.includes('spaghetti') || categoria.includes('rice') ||
+        categoria.includes('arroz') || categoria.includes('cereal') || categoria.includes('grain')) {
+      return 'Abarrotes';
+    }
     if (categoria.includes('beverage') || categoria.includes('drink') || categoria.includes('bebida')) {
       return 'Bebidas';
     }
@@ -81,9 +86,6 @@ export const ProductForm = ({ isOpen, onClose, onSubmit, producto = null, loadin
     }
     if (categoria.includes('snack') || categoria.includes('chip') || categoria.includes('galleta')) {
       return 'Snacks';
-    }
-    if (categoria.includes('pasta') || categoria.includes('rice') || categoria.includes('arroz') || categoria.includes('cereal')) {
-      return 'Abarrotes';
     }
     if (categoria.includes('bread') || categoria.includes('pan') || categoria.includes('bakery')) {
       return 'Panadería';
