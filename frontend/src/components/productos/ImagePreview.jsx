@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Image, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '../common/Button';
 
@@ -6,6 +6,15 @@ export const ImagePreview = ({ url, onUrlChange }) => {
   const [imageUrl, setImageUrl] = useState(url || '');
   const [imageStatus, setImageStatus] = useState('idle'); // idle, loading, success, error
   const [previewUrl, setPreviewUrl] = useState(url || '');
+
+  // FASE 5: Actualizar cuando la URL cambia desde el padre (auto-búsqueda)
+  useEffect(() => {
+    if (url && url !== imageUrl) {
+      setImageUrl(url);
+      setPreviewUrl(url);
+      setImageStatus('success');
+    }
+  }, [url]);
 
   const handleTestUrl = () => {
     if (!imageUrl.trim()) {
