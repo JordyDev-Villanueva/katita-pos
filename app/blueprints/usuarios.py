@@ -16,6 +16,19 @@ usuarios_bp = Blueprint('usuarios', __name__, url_prefix='/api/usuarios')
 
 
 # ===========================
+# HANDLER PARA OPTIONS (CORS Preflight)
+# ===========================
+
+@usuarios_bp.route('/', methods=['OPTIONS'])
+@usuarios_bp.route('/<int:user_id>', methods=['OPTIONS'])
+@usuarios_bp.route('/<int:user_id>/password', methods=['OPTIONS'])
+@usuarios_bp.route('/<int:user_id>/toggle', methods=['OPTIONS'])
+def handle_options(user_id=None):
+    """Maneja peticiones OPTIONS para CORS preflight"""
+    return '', 204
+
+
+# ===========================
 # LISTAR TODOS LOS USUARIOS
 # ===========================
 

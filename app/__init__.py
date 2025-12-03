@@ -57,9 +57,13 @@ def create_app(config_name=None):
     # Configurar CORS de forma robusta para permitir peticiones del frontend
     CORS(
         app,
-        resources={r"/api/*": {"origins": "*"}},
-        allow_headers=["Content-Type", "Authorization"],
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+        resources={r"/api/*": {
+            "origins": "*",
+            "allow_headers": ["Content-Type", "Authorization"],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+            "expose_headers": ["Content-Type", "Authorization"],
+            "max_age": 3600
+        }},
         supports_credentials=False
     )
 
