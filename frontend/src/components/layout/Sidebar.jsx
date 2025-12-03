@@ -7,7 +7,6 @@ import {
   Layers,
   BarChart3,
   LogOut,
-  ShoppingBag,
   Menu,
   X,
   User,
@@ -97,9 +96,11 @@ export const Sidebar = () => {
         {/* Logo */}
         <div className="p-6 border-b border-primary-800">
           <div className="flex items-center gap-3">
-            <div className="bg-primary-500 p-2 rounded-lg">
-              <ShoppingBag className="h-6 w-6 text-white" />
-            </div>
+            <img
+              src="/katita-logo.svg"
+              alt="KATITA POS Logo"
+              className="h-12 w-12"
+            />
             <div>
               <h1 className="text-xl font-bold text-white">KATITA POS</h1>
               <p className="text-xs text-primary-200">Guadalupito, Perú</p>
