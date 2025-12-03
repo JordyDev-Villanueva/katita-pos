@@ -62,12 +62,24 @@ export const Dashboard = () => {
       console.log('='.repeat(70));
       console.log('📅 Fecha inicio:', inicio);
       console.log('📅 Fecha fin:', fin);
+      console.log('👤 Usuario:', user?.nombre_completo, '| Rol:', user?.rol);
+
+      // FASE 6: Filtrar por vendedor si NO es admin
+      const params = {
+        fecha_inicio: inicio,
+        fecha_fin: fin
+      };
+
+      // Si es vendedor, agregar filtro por su ID
+      if (user?.rol === 'vendedor') {
+        params.vendedor_id = user.id;
+        console.log('🔒 VENDEDOR: Filtrando solo ventas propias (vendedor_id:', user.id, ')');
+      } else {
+        console.log('👑 ADMIN: Mostrando TODAS las ventas');
+      }
 
       const response = await axiosInstance.get('/ventas', {
-        params: {
-          fecha_inicio: inicio,
-          fecha_fin: fin
-        }
+        params: params
       });
 
       console.log('\n📦 RESPUESTA RAW DEL BACKEND:');
@@ -354,8 +366,18 @@ export const Dashboard = () => {
       console.log('📅 Desde:', inicio);
       console.log('📅 Hasta:', fin);
 
+      // FASE 6: Filtrar por vendedor si NO es admin
+      const params = { fecha_inicio: inicio, fecha_fin: fin };
+
+      if (user?.rol === 'vendedor') {
+        params.vendedor_id = user.id;
+        console.log('🔒 VENDEDOR: Gráfico solo con ventas propias');
+      } else {
+        console.log('👑 ADMIN: Gráfico con TODAS las ventas');
+      }
+
       const response = await axiosInstance.get('/ventas', {
-        params: { fecha_inicio: inicio, fecha_fin: fin }
+        params: params
       });
 
       // Extraer array de ventas (mismo manejo que las otras funciones)
@@ -468,8 +490,18 @@ export const Dashboard = () => {
       console.log('📅 Desde:', inicio);
       console.log('📅 Hasta:', fin);
 
+      // FASE 6: Filtrar por vendedor si NO es admin
+      const params = { fecha_inicio: inicio, fecha_fin: fin };
+
+      if (user?.rol === 'vendedor') {
+        params.vendedor_id = user.id;
+        console.log('🔒 VENDEDOR: Top 10 solo con productos que ÉL vendió');
+      } else {
+        console.log('👑 ADMIN: Top 10 con productos vendidos por TODOS');
+      }
+
       const response = await axiosInstance.get('/ventas', {
-        params: { fecha_inicio: inicio, fecha_fin: fin }
+        params: params
       });
 
       // Extraer array de ventas (mismo manejo que loadFilteredData)
@@ -660,9 +692,12 @@ export const Dashboard = () => {
   }, []);
 
   const getCardLabel = (base) => {
-    if (filtroActivo === 'hoy') return `${base} Hoy`;
-    if (filtroActivo === 'ayer') return `${base} Ayer`;
-    return base;
+    // FASE 6: Diferenciar labels según rol
+    const prefix = user?.rol === 'vendedor' ? 'Mis ' : '';
+
+    if (filtroActivo === 'hoy') return `${prefix}${base} Hoy`;
+    if (filtroActivo === 'ayer') return `${prefix}${base} Ayer`;
+    return `${prefix}${base}`;
   };
 
   // ==================== RENDER ====================

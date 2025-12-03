@@ -1,12 +1,17 @@
 import { TrendingUp, Award } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 
 export const TopProductos = ({ productos }) => {
+  const { user } = useAuth();
+
+  // FASE 6: Título dinámico según rol
+  const titulo = user?.rol === 'vendedor' ? 'Mis Top 10 Productos Más Vendidos' : 'Top 10 Productos Más Vendidos';
   if (!productos || productos.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full flex flex-col">
         <div className="flex items-center gap-2 mb-4">
           <Award className="h-5 w-5 text-gray-600" />
-          <h3 className="font-semibold text-gray-900">Top 10 Productos Más Vendidos</h3>
+          <h3 className="font-semibold text-gray-900">{titulo}</h3>
         </div>
         <div className="flex items-center justify-center flex-1">
           <div className="text-center">
@@ -42,7 +47,7 @@ export const TopProductos = ({ productos }) => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Award className="h-5 w-5 text-gray-600" />
-          <h3 className="font-semibold text-gray-900">Top 10 Productos Más Vendidos</h3>
+          <h3 className="font-semibold text-gray-900">{titulo}</h3>
         </div>
         <TrendingUp className="h-4 w-4 text-green-600" />
       </div>

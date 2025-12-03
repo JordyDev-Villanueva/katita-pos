@@ -9,14 +9,20 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 
 export const VentasChart = ({ data }) => {
+  const { user } = useAuth();
+
+  // FASE 6: Título dinámico según rol
+  const titulo = user?.rol === 'vendedor' ? 'Mis Ventas Últimos 7 Días' : 'Ventas Últimos 7 Días';
+
   if (!data || data.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center gap-2 mb-4">
           <TrendingUp className="h-5 w-5 text-gray-600" />
-          <h3 className="font-semibold text-gray-900">Ventas Últimos 7 Días</h3>
+          <h3 className="font-semibold text-gray-900">{titulo}</h3>
         </div>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
@@ -60,7 +66,7 @@ export const VentasChart = ({ data }) => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-gray-600" />
-          <h3 className="font-semibold text-gray-900">Ventas Últimos 7 Días</h3>
+          <h3 className="font-semibold text-gray-900">{titulo}</h3>
         </div>
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1">
