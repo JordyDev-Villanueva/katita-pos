@@ -35,6 +35,9 @@ def create_app(config_name=None):
     """
     app = Flask(__name__, instance_relative_config=True)
 
+    # Deshabilitar strict_slashes para evitar redirecciones 308
+    app.url_map.strict_slashes = False
+
     # Cargar configuración
     if config_name:
         app.config.from_object(f'config.{config_name.capitalize()}Config')
