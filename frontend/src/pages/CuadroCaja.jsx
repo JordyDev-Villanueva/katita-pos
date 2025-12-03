@@ -244,7 +244,7 @@ export const CuadroCaja = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success(`✅ Cierre de ${selectedTurno.vendedor_nombre} aprobado exitosamente`);
+      toast.success(`Cierre de ${selectedTurno.vendedor_nombre} aprobado exitosamente`);
       setShowApprovalModal(false);
       setSelectedTurno(null);
       fetchTurnosPendientes();

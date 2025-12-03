@@ -134,7 +134,14 @@ export const SalesReport = ({ data }) => {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={vendedoresData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="vendedor" />
+                <XAxis
+                  dataKey="vendedor"
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  interval={0}
+                  tick={{ fontSize: 12 }}
+                />
                 <YAxis />
                 <Tooltip
                   formatter={(value) => `S/ ${value.toFixed(2)}`}
