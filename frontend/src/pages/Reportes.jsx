@@ -41,9 +41,10 @@ const Reportes = () => {
 
   const loadVendedores = async () => {
     try {
-      const response = await axiosInstance.get('/users');
+      const response = await axiosInstance.get('/usuarios');
       if (response.data?.success) {
-        const vendedoresList = response.data.data.filter(u => u.rol === 'vendedor' || u.rol === 'admin');
+        // El endpoint devuelve 'usuarios' no 'data'
+        const vendedoresList = response.data.usuarios.filter(u => u.rol === 'vendedor' || u.rol === 'admin');
         setVendedores(vendedoresList);
       }
     } catch (error) {
