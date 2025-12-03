@@ -51,18 +51,23 @@ def get_usuarios():
     print(f"[DEBUG] Usuario actual: {g.current_user}")
     print("=" * 60)
     try:
-        query = User.query
+        # Por defecto, solo mostrar usuarios activos (excluir soft-deleted)
+        query = User.query.filter_by(activo=True)
 
         # Filtro por rol
         rol = request.args.get('rol')
         if rol:
             query = query.filter_by(rol=rol)
 
-        # Filtro por estado activo
-        activo = request.args.get('activo')
-        if activo is not None:
-            activo_bool = activo.lower() == 'true'
-            query = query.filter_by(activo=activo_bool)
+        # Permitir override del filtro de activo si se especifica explícitamente
+        activo_param = request.args.get('activo')
+        if activo_param is not None:
+            activo_bool = activo_param.lower() == 'true'
+            # Si se pasa activo=false, permitir ver inactivos
+            if not activo_bool:
+                query = User.query.filter_by(activo=False)
+                if rol:
+                    query = query.filter_by(rol=rol)
 
         # Búsqueda por nombre o username
         search = request.args.get('search')
