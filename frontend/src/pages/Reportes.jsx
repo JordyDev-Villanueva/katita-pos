@@ -7,8 +7,10 @@ import { ProfitReport } from '../components/reportes/ProfitReport';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '../api/axios';
 import { format } from 'date-fns';
+import { useAuth } from '../hooks/useAuth';
 
 const Reportes = () => {
+  const { user } = useAuth(); // FASE 7: Obtener rol del usuario
   const [tipoReporte, setTipoReporte] = useState('ventas'); // ventas, inventario, ganancias
   const [fechaInicio, setFechaInicio] = useState(() => {
     const fecha = new Date();
@@ -19,24 +21,53 @@ const Reportes = () => {
   const [loading, setLoading] = useState(false);
   const [salesData, setSalesData] = useState(null);
 
+  // FASE 7: Estados para filtro de vendedor
+  const [vendedorSeleccionado, setVendedorSeleccionado] = useState('todos');
+  const [vendedores, setVendedores] = useState([]);
+
+  // FASE 7: Cargar lista de vendedores al montar (solo admin)
+  useEffect(() => {
+    if (user?.rol === 'admin') {
+      loadVendedores();
+    }
+  }, [user]);
+
   // Cargar reporte automáticamente cuando cambian los filtros
   useEffect(() => {
     if (tipoReporte === 'ventas' || tipoReporte === 'ganancias') {
       loadSalesReport();
     }
-  }, [tipoReporte, fechaInicio, fechaFin]);
+  }, [tipoReporte, fechaInicio, fechaFin, vendedorSeleccionado]);
+
+  const loadVendedores = async () => {
+    try {
+      const response = await axiosInstance.get('/users');
+      if (response.data?.success) {
+        const vendedoresList = response.data.data.filter(u => u.rol === 'vendedor' || u.rol === 'admin');
+        setVendedores(vendedoresList);
+      }
+    } catch (error) {
+      console.error('Error cargando vendedores:', error);
+    }
+  };
 
   const loadSalesReport = async () => {
     try {
       setLoading(true);
 
+      // FASE 7: Construir params con filtro de vendedor opcional
+      const params = {
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin
+      };
+
+      // Si hay un vendedor específico seleccionado, agregarlo
+      if (vendedorSeleccionado !== 'todos') {
+        params.vendedor_id = vendedorSeleccionado;
+      }
+
       // Obtener reporte de ventas del backend
-      const response = await axiosInstance.get('/ventas/reportes/resumen', {
-        params: {
-          fecha_inicio: fechaInicio,
-          fecha_fin: fechaFin
-        }
-      });
+      const response = await axiosInstance.get('/ventas/reportes/resumen', { params });
 
       if (response.data?.success) {
         setSalesData(response.data.data);
@@ -54,8 +85,18 @@ const Reportes = () => {
 
   const exportarPDF = async () => {
     try {
+      // FASE 7: Incluir vendedor_id en params si está seleccionado
+      const params = {
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin
+      };
+
+      if (vendedorSeleccionado !== 'todos') {
+        params.vendedor_id = vendedorSeleccionado;
+      }
+
       const response = await axiosInstance.get('/ventas/reportes/pdf', {
-        params: { fecha_inicio: fechaInicio, fecha_fin: fechaFin },
+        params,
         responseType: 'blob'
       });
 
@@ -76,8 +117,18 @@ const Reportes = () => {
 
   const exportarExcel = async () => {
     try {
+      // FASE 7: Incluir vendedor_id en params si está seleccionado
+      const params = {
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin
+      };
+
+      if (vendedorSeleccionado !== 'todos') {
+        params.vendedor_id = vendedorSeleccionado;
+      }
+
       const response = await axiosInstance.get('/ventas/reportes/excel', {
-        params: { fecha_inicio: fechaInicio, fecha_fin: fechaFin },
+        params,
         responseType: 'blob'
       });
 
@@ -153,7 +204,7 @@ const Reportes = () => {
 
         {/* Filtros */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-2 border-gray-200">
-          <div className={`grid gap-4 ${tipoReporte === 'inventario' ? 'grid-cols-1 md:grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>
+          <div className={`grid gap-4 ${tipoReporte === 'inventario' ? 'grid-cols-1 md:grid-cols-1' : user?.rol === 'admin' ? 'grid-cols-1 md:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'}`}>
             {/* Tipo de Reporte */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -169,6 +220,25 @@ const Reportes = () => {
                 <option value="ganancias">Ganancias</option>
               </select>
             </div>
+
+            {/* FASE 7: Filtro por Vendedor (solo admin) */}
+            {user?.rol === 'admin' && tipoReporte !== 'inventario' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Vendedor
+                </label>
+                <select
+                  value={vendedorSeleccionado}
+                  onChange={(e) => setVendedorSeleccionado(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="todos">Todos los vendedores</option>
+                  {vendedores.map(v => (
+                    <option key={v.id} value={v.id}>{v.nombre_completo}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Fecha Inicio - ocultar si es inventario */}
             {tipoReporte !== 'inventario' && (
@@ -256,7 +326,11 @@ const Reportes = () => {
           {tipoReporte === 'inventario' && <InventoryReport />}
 
           {tipoReporte === 'ganancias' && (
-            <ProfitReport fechaInicio={fechaInicio} fechaFin={fechaFin} />
+            <ProfitReport
+              fechaInicio={fechaInicio}
+              fechaFin={fechaFin}
+              vendedorId={vendedorSeleccionado !== 'todos' ? vendedorSeleccionado : null}
+            />
           )}
         </div>
       </div>

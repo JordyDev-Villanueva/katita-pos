@@ -1098,6 +1098,7 @@ def resumen_ventas():
         # ========== OBTENER PARAMETROS ==========
         desde_str = request.args.get('fecha_inicio') or request.args.get('desde')
         hasta_str = request.args.get('fecha_fin') or request.args.get('hasta')
+        vendedor_id = request.args.get('vendedor_id', type=int)  # FASE 7: Filtro por vendedor
 
         # Defaults: hoy
         hoy = date.today()
@@ -1133,12 +1134,20 @@ def resumen_ventas():
         print(f'📊 ENDPOINT /ventas/reportes/resumen')
         print(f'   📅 fecha_inicio recibida: "{desde_str}"')
         print(f'   📅 fecha_fin recibida: "{hasta_str}"')
+        print(f'   👤 vendedor_id recibido: {vendedor_id}')
         print(f'   📅 Fechas parseadas: {desde} a {hasta} (tipo: {type(desde).__name__})')
 
         # ========== CONSULTAR VENTAS DEL PERIODO ==========
         # SOLUCIÓN: Obtener TODAS las ventas y filtrar en Python por .date()
         # Esto evita problemas de zona horaria en SQL
-        todas_ventas = Venta.query.filter(Venta.estado == 'completada').all()
+        query = Venta.query.filter(Venta.estado == 'completada')
+
+        # FASE 7: Filtrar por vendedor si se especifica
+        if vendedor_id:
+            query = query.filter(Venta.vendedor_id == vendedor_id)
+            print(f'   🔒 Filtrando por vendedor ID: {vendedor_id}')
+
+        todas_ventas = query.all()
 
         print(f'\n   📦 Total ventas en BD (completadas): {len(todas_ventas)}')
 

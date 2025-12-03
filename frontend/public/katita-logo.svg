@@ -1,0 +1,35 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo circular con gradiente -->
+  <circle cx="100" cy="100" r="95" fill="url(#gradient1)"/>
+
+  <!-- Definir gradientes -->
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563EB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FBBF24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Letra K estilizada -->
+  <text x="50" y="130" font-family="Arial, sans-serif" font-size="100" font-weight="bold" fill="white">K</text>
+
+  <!-- Carrito de compras integrado -->
+  <g transform="translate(120, 60)">
+    <!-- Cuerpo del carrito -->
+    <path d="M 0 10 L 5 0 L 45 0 L 50 20 L 10 20 Z" fill="url(#gradient2)" stroke="white" stroke-width="2"/>
+    <circle cx="15" cy="28" r="4" fill="white"/>
+    <circle cx="40" cy="28" r="4" fill="white"/>
+
+    <!-- Producto en el carrito -->
+    <rect x="12" y="8" width="30" height="10" rx="2" fill="white" opacity="0.8"/>
+  </g>
+
+  <!-- Detalles decorativos -->
+  <circle cx="40" cy="40" r="8" fill="#FBBF24" opacity="0.3"/>
+  <circle cx="160" cy="160" r="12" fill="#10B981" opacity="0.3"/>
+  <circle cx="30" cy="170" r="6" fill="#F59E0B" opacity="0.4"/>
+</svg>

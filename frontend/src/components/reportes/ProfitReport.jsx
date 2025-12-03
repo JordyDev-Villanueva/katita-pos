@@ -7,14 +7,14 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { extractDateOnly } from '../../utils/timezone';
 
-export const ProfitReport = ({ fechaInicio, fechaFin }) => {
+export const ProfitReport = ({ fechaInicio, fechaFin, vendedorId = null }) => {
   const [loading, setLoading] = useState(true);
   const [profitData, setProfitData] = useState(null);
   const [evolucion, setEvolucion] = useState([]);
 
   useEffect(() => {
     loadProfitData();
-  }, [fechaInicio, fechaFin]);
+  }, [fechaInicio, fechaFin, vendedorId]);
 
   const loadProfitData = async () => {
     try {
@@ -24,12 +24,17 @@ export const ProfitReport = ({ fechaInicio, fechaFin }) => {
       console.log(`📊 Cargando ganancias con fechas: ${fechaInicio} al ${fechaFin}`);
 
       // CORRECCIÓN: Usar el endpoint de resumen que filtra correctamente en backend
-      const resumenResponse = await axiosInstance.get('/ventas/reportes/resumen', {
-        params: {
-          fecha_inicio: fechaInicio,
-          fecha_fin: fechaFin
-        }
-      });
+      // FASE 7: Incluir vendedor_id si se especifica
+      const params = {
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin
+      };
+
+      if (vendedorId) {
+        params.vendedor_id = vendedorId;
+      }
+
+      const resumenResponse = await axiosInstance.get('/ventas/reportes/resumen', { params });
 
       console.log('📊 Respuesta del backend (raw):', resumenResponse.data);
 
@@ -38,13 +43,18 @@ export const ProfitReport = ({ fechaInicio, fechaFin }) => {
       console.log('📊 Datos extraídos:', backendData);
 
       // Obtener todas las ventas para el gráfico de evolución
-      const ventasResponse = await axiosInstance.get('/ventas', {
-        params: {
-          fecha_inicio: fechaInicio,
-          fecha_fin: fechaFin,
-          limit: 1000
-        }
-      });
+      // FASE 7: Incluir vendedor_id si se especifica
+      const ventasParams = {
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin,
+        limit: 1000
+      };
+
+      if (vendedorId) {
+        ventasParams.vendedor_id = vendedorId;
+      }
+
+      const ventasResponse = await axiosInstance.get('/ventas', { params: ventasParams });
 
       let ventas = [];
       if (ventasResponse.data?.success) {
