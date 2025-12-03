@@ -300,6 +300,17 @@ def procesar_venta():
             estado='abierto'
         ).first()
 
+        # VALIDACIÓN CRÍTICA: El vendedor DEBE tener un turno abierto
+        if not turno_abierto:
+            print('❌ ERROR: Vendedor intenta vender SIN turno de caja abierto')
+            return error_response(
+                'Debe abrir un turno de caja antes de realizar ventas',
+                status_code=403,
+                errors={'cuadro_caja': 'No hay turno abierto para este vendedor'}
+            )
+
+        print(f'✅ Turno abierto encontrado: #{turno_abierto.id} - Monto inicial: S/ {turno_abierto.monto_inicial}')
+
         # ========== CREAR VENTA MAESTRA ==========
         descuento = Decimal(str(data.get('descuento', 0)))
 
@@ -312,7 +323,7 @@ def procesar_venta():
 
         nueva_venta = Venta(
             vendedor_id=vendedor_id,
-            cuadro_caja_id=turno_abierto.id if turno_abierto else None,
+            cuadro_caja_id=turno_abierto.id,  # Ya validado que existe
             metodo_pago=metodo_pago,
             monto_recibido=monto_recibido,
             cliente_nombre=data.get('cliente_nombre', ''),

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { ProductGrid } from '../components/pos/ProductGrid';
 import { Cart } from '../components/pos/Cart';
@@ -11,6 +12,7 @@ import { ShoppingCart, Package, Search, X, Barcode } from 'lucide-react';
 
 export const POS = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Estados
   const [productos, setProductos] = useState([]);
@@ -338,6 +340,18 @@ export const POS = () => {
       }
     } catch (error) {
       console.error('Error procesando venta:', error);
+
+      // FASE 6: Detectar error de turno de caja no abierto
+      if (error.response?.status === 403 && error.response?.data?.errors?.cuadro_caja) {
+        toast.error('⚠️ Debe abrir un turno de caja antes de realizar ventas', { duration: 5000 });
+
+        // Redirigir a Cuadro de Caja después de 2 segundos
+        setTimeout(() => {
+          navigate('/cuadro-caja');
+        }, 2000);
+        return;
+      }
+
       const message = error.response?.data?.message || 'Error al procesar la venta';
       toast.error(message);
     }
