@@ -45,7 +45,17 @@ const Reportes = () => {
       if (response.data?.success) {
         // El endpoint devuelve 'usuarios' no 'data'
         const vendedoresList = response.data.usuarios.filter(u => u.rol === 'vendedor' || u.rol === 'admin');
-        setVendedores(vendedoresList);
+
+        // Eliminar duplicados por ID (por si hay usuarios duplicados en BD)
+        const vendedoresUnicos = vendedoresList.reduce((acc, vendedor) => {
+          if (!acc.find(v => v.id === vendedor.id)) {
+            acc.push(vendedor);
+          }
+          return acc;
+        }, []);
+
+        setVendedores(vendedoresUnicos);
+        console.log('✅ Vendedores cargados:', vendedoresUnicos);
       }
     } catch (error) {
       console.error('Error cargando vendedores:', error);
