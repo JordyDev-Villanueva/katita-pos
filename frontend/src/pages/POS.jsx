@@ -336,8 +336,18 @@ export const POS = () => {
           toast.success(`Cambio: S/ ${venta.cambio.toFixed(2)}`, { duration: 5000 });
         }
 
-        // FASE 8: Guardar venta completada y mostrar modal de ticket
-        setVentaCompletada(venta);
+        // FASE 8: Guardar venta completada con datos completos
+        const ventaConDatos = {
+          ...venta,
+          vendedor_nombre: user?.nombre_completo || 'N/A',
+          detalles: cart.map(item => ({
+            producto_nombre: item.nombre,
+            cantidad: item.quantity,
+            precio_unitario: item.precio_venta,
+            subtotal: item.quantity * item.precio_venta
+          }))
+        };
+        setVentaCompletada(ventaConDatos);
         setShowTicketModal(true);
 
         // Limpiar carrito y cerrar modal de pago
@@ -662,56 +672,76 @@ export const POS = () => {
         onConfirmPayment={handleConfirmPayment}
       />
 
-      {/* FASE 8: Modal de Ticket Completado */}
+      {/* FASE 8: Modal de Ticket Completado - Profesional */}
       {showTicketModal && ventaCompletada && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="p-6 border-b">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[95vh] overflow-y-auto">
+            {/* Header Success */}
+            <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 text-white">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-white bg-opacity-20 backdrop-blur rounded-full flex items-center justify-center animate-pulse">
+                  <CheckCircle className="w-10 h-10" />
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">¡Venta Completada!</h2>
-                  <p className="text-sm text-gray-600">Venta #{ventaCompletada.numero_venta}</p>
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold">¡Venta Procesada Exitosamente!</h2>
+                  <p className="text-green-100 text-sm mt-1">
+                    N° Venta: <span className="font-semibold">{ventaCompletada.numero_venta}</span>
+                  </p>
                 </div>
+                <button
+                  onClick={() => setShowTicketModal(false)}
+                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-colors"
+                  title="Cerrar"
+                >
+                  <X className="w-6 h-6" />
+                </button>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-600">Total:</span>
-                  <span className="text-2xl font-bold text-green-600">
-                    S/ {Number(ventaCompletada.total || 0).toFixed(2)}
-                  </span>
-                </div>
-                {ventaCompletada.metodo_pago === 'efectivo' && ventaCompletada.cambio > 0 && (
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">Cambio:</span>
-                    <span className="font-semibold text-gray-900">
-                      S/ {Number(ventaCompletada.cambio).toFixed(2)}
-                    </span>
+              {/* Resumen de Venta */}
+              <div className="mt-4 bg-white bg-opacity-10 backdrop-blur rounded-lg p-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-green-100 text-xs mb-1">Total</p>
+                    <p className="text-3xl font-bold">S/ {Number(ventaCompletada.total || 0).toFixed(2)}</p>
                   </div>
-                )}
+                  {ventaCompletada.metodo_pago === 'efectivo' && ventaCompletada.cambio > 0 && (
+                    <div>
+                      <p className="text-green-100 text-xs mb-1">Cambio</p>
+                      <p className="text-2xl font-semibold">S/ {Number(ventaCompletada.cambio).toFixed(2)}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-green-100 text-xs mb-1">Método de Pago</p>
+                    <p className="text-lg font-semibold capitalize">{ventaCompletada.metodo_pago}</p>
+                  </div>
+                  <div>
+                    <p className="text-green-100 text-xs mb-1">Productos</p>
+                    <p className="text-lg font-semibold">{ventaCompletada.detalles?.length || 0} items</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="p-6 space-y-3">
+            {/* Ticket Preview */}
+            <div className="p-6">
               <TicketPrint
                 venta={ventaCompletada}
                 onPrintComplete={() => {
-                  console.log('Ticket impreso');
+                  setShowTicketModal(false);
                 }}
               />
 
-              <button
-                onClick={() => setShowTicketModal(false)}
-                className="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-              >
-                Cerrar (sin imprimir)
-              </button>
+              <div className="mt-4 pt-4 border-t flex justify-center gap-3">
+                <button
+                  onClick={() => setShowTicketModal(false)}
+                  className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cerrar sin Imprimir
+                </button>
+              </div>
 
-              <p className="text-xs text-center text-gray-500">
-                Puedes reimprimir el ticket desde el historial de ventas
+              <p className="text-xs text-center text-gray-500 mt-3">
+                💡 Tip: Puedes reimprimir este ticket desde "Ventas" → Ver Detalles
               </p>
             </div>
           </div>

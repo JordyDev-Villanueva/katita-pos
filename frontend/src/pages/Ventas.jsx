@@ -78,14 +78,32 @@ const Ventas = () => {
     }
   };
 
-  const handleVerDetalle = (venta) => {
-    setVentaSeleccionada(venta);
-    setShowDetalleModal(true);
+  const handleVerDetalle = async (venta) => {
+    try {
+      // Cargar detalles completos de la venta
+      const response = await axiosInstance.get(`/ventas/${venta.id}`);
+      if (response.data?.success) {
+        setVentaSeleccionada(response.data.data);
+        setShowDetalleModal(true);
+      }
+    } catch (error) {
+      console.error('Error cargando detalle:', error);
+      toast.error('Error al cargar los detalles de la venta');
+    }
   };
 
-  const handleImprimirTicket = (venta) => {
-    setVentaSeleccionada(venta);
-    setShowTicketModal(true);
+  const handleImprimirTicket = async (venta) => {
+    try {
+      // Cargar detalles completos para el ticket
+      const response = await axiosInstance.get(`/ventas/${venta.id}`);
+      if (response.data?.success) {
+        setVentaSeleccionada(response.data.data);
+        setShowTicketModal(true);
+      }
+    } catch (error) {
+      console.error('Error cargando venta:', error);
+      toast.error('Error al cargar la venta para imprimir');
+    }
   };
 
   const handleDevolucion = (venta) => {
