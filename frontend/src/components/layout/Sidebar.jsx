@@ -11,7 +11,9 @@ import {
   X,
   User,
   Users,
-  DollarSign
+  DollarSign,
+  Receipt,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -39,6 +41,12 @@ export const Sidebar = () => {
       roles: ['admin', 'vendedor'],
     },
     {
+      name: 'Ventas', // FASE 8: Historial completo de ventas
+      icon: Receipt,
+      path: '/ventas',
+      roles: ['admin'],
+    },
+    {
       name: 'Productos',
       icon: Package,
       path: '/productos',
@@ -49,6 +57,12 @@ export const Sidebar = () => {
       icon: Layers,
       path: '/lotes',
       roles: ['admin', 'bodeguero'],
+    },
+    {
+      name: 'Ajustes Inventario', // FASE 8: Ajustes de stock
+      icon: Settings,
+      path: '/ajustes-inventario',
+      roles: ['admin'],
     },
     {
       name: 'Vendedores',

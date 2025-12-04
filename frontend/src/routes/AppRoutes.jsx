@@ -8,6 +8,8 @@ import Reportes from '../pages/Reportes';
 import Profile from '../pages/Profile';
 import { Usuarios } from '../pages/Usuarios';
 import { CuadroCaja } from '../pages/CuadroCaja';
+import Ventas from '../pages/Ventas'; // FASE 8: Historial de ventas
+import AjustesInventario from '../pages/AjustesInventario'; // FASE 8: Ajustes de inventario
 import { PrivateRoute } from './PrivateRoute';
 import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
@@ -94,6 +96,26 @@ export const AppRoutes = () => {
           element={
             <PrivateRoute requiredRoles={['admin', 'vendedor']}>
               <CuadroCaja />
+            </PrivateRoute>
+          }
+        />
+
+        {/* FASE 8: Historial de Ventas */}
+        <Route
+          path="/ventas"
+          element={
+            <PrivateRoute requiredRoles={['admin']}>
+              <Ventas />
+            </PrivateRoute>
+          }
+        />
+
+        {/* FASE 8: Ajustes de Inventario */}
+        <Route
+          path="/ajustes-inventario"
+          element={
+            <PrivateRoute requiredRoles={['admin']}>
+              <AjustesInventario />
             </PrivateRoute>
           }
         />
