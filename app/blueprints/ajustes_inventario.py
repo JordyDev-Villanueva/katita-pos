@@ -9,7 +9,7 @@ from flask import Blueprint, request, jsonify, g
 from datetime import datetime
 from app import db
 from app.models.ajuste_inventario import AjusteInventario
-from app.models.producto import Product
+from app.models.product import Product
 from app.models.lote import Lote
 from app.decorators.auth_decorators import login_required, role_required
 

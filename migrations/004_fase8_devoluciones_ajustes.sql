@@ -86,7 +86,7 @@ $$;
 
 CREATE TABLE IF NOT EXISTS ajustes_inventario (
     id SERIAL PRIMARY KEY,
-    producto_id INTEGER NOT NULL REFERENCES productos(id) ON DELETE RESTRICT,
+    producto_id INTEGER NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
     lote_id INTEGER REFERENCES lotes(id) ON DELETE SET NULL,
     admin_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
 

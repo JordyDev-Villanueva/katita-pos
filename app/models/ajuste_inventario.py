@@ -22,7 +22,7 @@ class AjusteInventario(db.Model):
     __tablename__ = 'ajustes_inventario'
 
     id = db.Column(db.Integer, primary_key=True)
-    producto_id = db.Column(db.Integer, db.ForeignKey('productos.id'), nullable=False)
+    producto_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     lote_id = db.Column(db.Integer, db.ForeignKey('lotes.id'), nullable=True)  # Opcional
     admin_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
@@ -45,7 +45,7 @@ class AjusteInventario(db.Model):
     fecha = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     # Relaciones
-    producto = db.relationship('Producto', backref='ajustes')
+    producto = db.relationship('Product', backref='ajustes')
     lote = db.relationship('Lote', backref='ajustes')
     admin = db.relationship('User', backref='ajustes_realizados')
 
@@ -92,10 +92,10 @@ class AjusteInventario(db.Model):
         Raises:
             ValueError: Si el producto no existe o los datos son inválidos
         """
-        from app.models.producto import Producto
+        from app.models.product import Product
 
         # Verificar que el producto existe
-        producto = Producto.query.get(producto_id)
+        producto = Product.query.get(producto_id)
         if not producto:
             raise ValueError('El producto no existe')
 

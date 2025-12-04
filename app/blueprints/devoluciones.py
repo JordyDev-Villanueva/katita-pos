@@ -11,7 +11,7 @@ from app import db
 from app.models.devolucion import Devolucion
 from app.models.venta import Venta
 from app.models.detalle_venta import DetalleVenta
-from app.models.producto import Product
+from app.models.product import Product
 from app.models.lote import Lote
 from app.models.cuadro_caja import CuadroCaja
 from app.decorators.auth_decorators import login_required, role_required
