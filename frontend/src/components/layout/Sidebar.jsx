@@ -107,23 +107,23 @@ export const Sidebar = () => {
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        {/* Logo */}
-        <div className="p-6 border-b border-primary-800">
-          <div className="flex items-center gap-3">
+        {/* Logo - Compacto */}
+        <div className="p-4 border-b border-primary-800">
+          <div className="flex items-center gap-2">
             <img
               src="/katita-logo.svg"
               alt="KATITA POS Logo"
-              className="h-12 w-12"
+              className="h-10 w-10"
             />
             <div>
-              <h1 className="text-xl font-bold text-white">KATITA POS</h1>
+              <h1 className="text-lg font-bold text-white">KATITA POS</h1>
               <p className="text-xs text-primary-200">Guadalupito, Perú</p>
             </div>
           </div>
         </div>
 
-        {/* Menu Items - Scrollable */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        {/* Menu Items - Scrollable con espaciado optimizado */}
+        <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto scrollbar-thin scrollbar-thumb-primary-700 scrollbar-track-primary-900">
           {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -132,25 +132,25 @@ export const Sidebar = () => {
                 to={item.path}
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                  `flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 ${
                     isActive
                       ? 'bg-primary-700 text-white shadow-lg'
                       : 'text-primary-100 hover:bg-sidebar-hover hover:text-white'
                   }`
                 }
               >
-                <Icon className="h-5 w-5" />
-                <span className="font-medium">{item.name}</span>
+                <Icon className="h-4 w-4 flex-shrink-0" />
+                <span className="font-medium text-sm">{item.name}</span>
               </NavLink>
             );
           })}
         </nav>
 
-        {/* User Info y Logout - Sticky at Bottom */}
-        <div className="p-4 border-t border-primary-800 bg-sidebar space-y-2">
-          <div className="bg-primary-800 rounded-lg p-3">
-            <p className="text-xs text-primary-200 mb-1">Usuario</p>
-            <p className="text-sm font-medium text-white">{user?.nombre_completo}</p>
+        {/* User Info y Logout - Compacto */}
+        <div className="p-3 border-t border-primary-800 bg-sidebar space-y-1.5">
+          <div className="bg-primary-800 rounded-lg p-2">
+            <p className="text-xs text-primary-200">Usuario</p>
+            <p className="text-sm font-medium text-white truncate">{user?.nombre_completo}</p>
             <p className="text-xs text-primary-300 capitalize">Rol: {user?.rol}</p>
           </div>
 
@@ -158,7 +158,7 @@ export const Sidebar = () => {
             to="/perfil"
             onClick={() => setIsOpen(false)}
             className={({ isActive }) =>
-              `w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-colors duration-200 font-medium ${
+              `w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-colors duration-200 text-sm font-medium ${
                 isActive
                   ? 'bg-primary-700 text-white'
                   : 'bg-primary-800 hover:bg-primary-700 text-primary-100 hover:text-white'
@@ -171,7 +171,7 @@ export const Sidebar = () => {
 
           <button
             onClick={logout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 font-medium"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
           >
             <LogOut className="h-4 w-4" />
             Cerrar Sesión
