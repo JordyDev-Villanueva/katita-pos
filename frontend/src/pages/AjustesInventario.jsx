@@ -147,11 +147,11 @@ const AjustesInventario = () => {
         <div className="mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
                 <Package className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
                   Ajustes de Inventario
                 </h1>
                 <p className="text-sm text-gray-600">
@@ -162,13 +162,13 @@ const AjustesInventario = () => {
 
             <button
               onClick={() => setShowModal(true)}
-              className="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all flex items-center gap-2 shadow-md transform hover:scale-105"
+              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2 shadow-md transform hover:scale-105"
             >
               <Plus className="w-4 h-4" />
               <span className="text-sm font-medium">Nuevo Ajuste</span>
             </button>
           </div>
-          <div className="h-0.5 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 rounded-full"></div>
+          <div className="h-0.5 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 rounded-full"></div>
         </div>
 
         {/* Filtros */}
@@ -182,7 +182,7 @@ const AjustesInventario = () => {
                 placeholder="Buscar producto o motivo..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
@@ -191,7 +191,7 @@ const AjustesInventario = () => {
               <select
                 value={tipoFiltro}
                 onChange={(e) => setTipoFiltro(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-purple-500"
               >
                 <option value="todos">Todos los tipos</option>
                 {tiposAjuste.map(tipo => (
@@ -207,7 +207,7 @@ const AjustesInventario = () => {
                 type="date"
                 value={fechaInicio}
                 onChange={(e) => setFechaInicio(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
@@ -218,7 +218,7 @@ const AjustesInventario = () => {
                 type="date"
                 value={fechaFin}
                 onChange={(e) => setFechaFin(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -260,7 +260,7 @@ const AjustesInventario = () => {
                 {loading ? (
                   <tr>
                     <td colSpan="8" className="px-6 py-12 text-center text-gray-500">
-                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                       <p className="mt-2">Cargando ajustes...</p>
                     </td>
                   </tr>
@@ -342,7 +342,7 @@ const AjustesInventario = () => {
                   <select
                     value={formData.producto_id}
                     onChange={(e) => setFormData({ ...formData, producto_id: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     required
                   >
                     <option value="">Seleccione un producto...</option>
@@ -364,7 +364,7 @@ const AjustesInventario = () => {
                       </div>
                       <div>
                         <span className="text-gray-600">Nuevo Stock:</span>
-                        <p className="text-lg font-bold text-purple-900">{formData.cantidad_nueva || '---'}</p>
+                        <p className="text-lg font-bold text-blue-900">{formData.cantidad_nueva || '---'}</p>
                       </div>
                       <div>
                         <span className="text-gray-600">Diferencia:</span>
@@ -386,7 +386,7 @@ const AjustesInventario = () => {
                     min="0"
                     value={formData.cantidad_nueva}
                     onChange={(e) => setFormData({ ...formData, cantidad_nueva: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="Ingrese la cantidad real contada..."
                     required
                   />
@@ -400,7 +400,7 @@ const AjustesInventario = () => {
                   <select
                     value={formData.tipo_ajuste}
                     onChange={(e) => setFormData({ ...formData, tipo_ajuste: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     required
                   >
                     {tiposAjuste.map(tipo => (
@@ -418,7 +418,7 @@ const AjustesInventario = () => {
                     type="text"
                     value={formData.motivo}
                     onChange={(e) => setFormData({ ...formData, motivo: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="Ej: Productos vencidos encontrados en revisión mensual"
                     required
                   />
@@ -433,7 +433,7 @@ const AjustesInventario = () => {
                     value={formData.observaciones}
                     onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
                     rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 resize-none"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
                     placeholder="Detalles adicionales..."
                   />
                 </div>
@@ -449,7 +449,7 @@ const AjustesInventario = () => {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                    className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                   >
                     Registrar Ajuste
                   </button>

@@ -11,10 +11,10 @@ import { es } from 'date-fns/locale';
  * Incluye: Logo, datos del negocio, productos, totales, método de pago.
  */
 export const TicketPrint = ({ venta, onPrintComplete }) => {
-  const componentRef = useRef();
+  const componentRef = useRef(null);
 
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle: `Ticket-${venta.numero_venta}`,
     onAfterPrint: () => {
       if (onPrintComplete) {
@@ -29,18 +29,10 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
     '';
 
   return (
-    <div>
-      {/* Botón de Imprimir */}
-      <button
-        onClick={handlePrint}
-        className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
-      >
-        <Printer className="w-5 h-5" />
-        Imprimir Ticket
-      </button>
-
-      {/* Ticket (Oculto, solo para imprimir) */}
-      <div style={{ display: 'none' }}>
+    <div className="space-y-4">
+      {/* Vista Previa del Ticket */}
+      <div className="max-w-md mx-auto bg-gray-50 p-4 rounded-lg border-2 border-gray-300">
+        <h3 className="text-center text-sm font-semibold text-gray-700 mb-2">Vista Previa del Ticket</h3>
         <div ref={componentRef}>
           <style>
             {`
@@ -241,6 +233,17 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Botón de Imprimir */}
+      <div className="flex justify-center">
+        <button
+          onClick={handlePrint}
+          className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 font-medium shadow-lg"
+        >
+          <Printer className="w-5 h-5" />
+          Imprimir Ticket
+        </button>
       </div>
     </div>
   );
