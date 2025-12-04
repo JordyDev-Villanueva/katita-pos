@@ -108,22 +108,22 @@ export const Sidebar = () => {
         }`}
       >
         {/* Logo - Compacto */}
-        <div className="p-4 border-b border-primary-800">
+        <div className="p-3 border-b border-primary-800">
           <div className="flex items-center gap-2">
             <img
               src="/katita-logo.svg"
               alt="KATITA POS Logo"
-              className="h-10 w-10"
+              className="h-8 w-8"
             />
             <div>
-              <h1 className="text-lg font-bold text-white">KATITA POS</h1>
+              <h1 className="text-base font-bold text-white">KATITA POS</h1>
               <p className="text-xs text-primary-200">Guadalupito, Perú</p>
             </div>
           </div>
         </div>
 
-        {/* Menu Items - Scrollable con espaciado optimizado */}
-        <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto scrollbar-thin scrollbar-thumb-primary-700 scrollbar-track-primary-900">
+        {/* Menu Items - Sin scroll */}
+        <nav className="flex-1 px-2 py-1.5 space-y-0 overflow-y-auto scrollbar-thin scrollbar-thumb-primary-700 scrollbar-track-primary-900">
           {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -132,7 +132,7 @@ export const Sidebar = () => {
                 to={item.path}
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                  `flex items-center gap-2 px-2.5 py-2 rounded-lg transition-all duration-200 ${
                     isActive
                       ? 'bg-primary-700 text-white shadow-lg'
                       : 'text-primary-100 hover:bg-sidebar-hover hover:text-white'
@@ -146,11 +146,10 @@ export const Sidebar = () => {
           })}
         </nav>
 
-        {/* User Info y Logout - Compacto */}
-        <div className="p-3 border-t border-primary-800 bg-sidebar space-y-1.5">
-          <div className="bg-primary-800 rounded-lg p-2">
-            <p className="text-xs text-primary-200">Usuario</p>
-            <p className="text-sm font-medium text-white truncate">{user?.nombre_completo}</p>
+        {/* User Info y Logout - Ultra compacto */}
+        <div className="p-2 border-t border-primary-800 bg-sidebar space-y-1">
+          <div className="bg-primary-800 rounded-lg p-1.5">
+            <p className="text-xs text-primary-100 font-medium truncate">{user?.nombre_completo}</p>
             <p className="text-xs text-primary-300 capitalize">Rol: {user?.rol}</p>
           </div>
 
@@ -158,22 +157,22 @@ export const Sidebar = () => {
             to="/perfil"
             onClick={() => setIsOpen(false)}
             className={({ isActive }) =>
-              `w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-colors duration-200 text-sm font-medium ${
+              `w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors duration-200 text-xs font-medium ${
                 isActive
                   ? 'bg-primary-700 text-white'
                   : 'bg-primary-800 hover:bg-primary-700 text-primary-100 hover:text-white'
               }`
             }
           >
-            <User className="h-4 w-4" />
+            <User className="h-3.5 w-3.5" />
             Mi Perfil
           </NavLink>
 
           <button
             onClick={logout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
+            className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 text-xs font-medium"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-3.5 w-3.5" />
             Cerrar Sesión
           </button>
         </div>
