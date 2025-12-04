@@ -109,23 +109,23 @@ export const Sidebar = () => {
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        {/* Logo - Profesional */}
-        <div className="p-3.5 border-b border-primary-800">
-          <div className="flex items-center gap-2.5">
+        {/* Logo */}
+        <div className="p-5 border-b border-primary-800">
+          <div className="flex items-center gap-3">
             <img
               src="/katita-logo.svg"
               alt="KATITA POS Logo"
-              className="h-9 w-9"
+              className="h-11 w-11"
             />
             <div>
-              <h1 className="text-base font-bold text-white">KATITA POS</h1>
-              <p className="text-xs text-primary-200">Guadalupito, Perú</p>
+              <h1 className="text-lg font-bold text-white">KATITA POS</h1>
+              <p className="text-sm text-primary-200">Guadalupito, Perú</p>
             </div>
           </div>
         </div>
 
-        {/* Menu Items - Profesional y balanceado */}
-        <nav className="flex-1 px-2.5 py-2 space-y-0.5 overflow-y-auto scrollbar-thin scrollbar-thumb-primary-700 scrollbar-track-primary-900">
+        {/* Menu Items */}
+        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-primary-700 scrollbar-track-primary-900">
           {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -134,47 +134,47 @@ export const Sidebar = () => {
                 to={item.path}
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-200 ${
+                  `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                     isActive
                       ? 'bg-primary-700 text-white shadow-lg'
                       : 'text-primary-100 hover:bg-sidebar-hover hover:text-white'
                   }`
                 }
               >
-                <Icon className="h-[18px] w-[18px] flex-shrink-0" />
-                <span className="font-medium text-[13px]">{item.name}</span>
+                <Icon className="h-5 w-5 flex-shrink-0" />
+                <span className="font-medium text-sm">{item.name}</span>
               </NavLink>
             );
           })}
         </nav>
 
-        {/* User Info y Logout - Balanceado */}
-        <div className="p-2.5 border-t border-primary-800 bg-sidebar space-y-1.5">
-          <div className="bg-primary-800 rounded-lg p-2">
-            <p className="text-xs text-primary-100 font-semibold truncate">{user?.nombre_completo}</p>
-            <p className="text-[11px] text-primary-300 capitalize">Rol: {user?.rol}</p>
+        {/* User Info y Logout */}
+        <div className="p-3 border-t border-primary-800 bg-sidebar space-y-2">
+          <div className="bg-primary-800 rounded-lg p-3">
+            <p className="text-sm text-primary-100 font-semibold truncate">{user?.nombre_completo}</p>
+            <p className="text-xs text-primary-300 capitalize">Rol: {user?.rol}</p>
           </div>
 
           <NavLink
             to="/perfil"
             onClick={() => setIsOpen(false)}
             className={({ isActive }) =>
-              `w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors duration-200 text-xs font-medium ${
+              `w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg transition-colors duration-200 text-sm font-medium ${
                 isActive
                   ? 'bg-primary-700 text-white'
                   : 'bg-primary-800 hover:bg-primary-700 text-primary-100 hover:text-white'
               }`
             }
           >
-            <User className="h-3.5 w-3.5" />
+            <User className="h-4 w-4" />
             Mi Perfil
           </NavLink>
 
           <button
             onClick={logout}
-            className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 text-xs font-medium"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
           >
-            <LogOut className="h-3.5 w-3.5" />
+            <LogOut className="h-4 w-4" />
             Cerrar Sesión
           </button>
         </div>
