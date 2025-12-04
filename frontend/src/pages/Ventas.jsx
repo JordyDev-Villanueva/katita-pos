@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { DevolucionModal } from '../components/ventas/DevolucionModal';
 import { TicketPrint } from '../components/pos/TicketPrint';
-import { ShoppingCart, Search, Calendar, Filter, RotateCcw, Printer, Eye, AlertCircle } from 'lucide-react';
+import { ShoppingCart, Search, Calendar, Filter, RotateCcw, Printer, Eye, AlertCircle, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '../api/axios';
 import { format } from 'date-fns';
@@ -218,11 +218,11 @@ const Ventas = () => {
           </div>
         </div>
 
-        {/* Tabla de Ventas */}
+        {/* Tabla de Ventas con scroll vertical fijo */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[520px] overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     N° Venta
