@@ -44,10 +44,12 @@ const AjustesInventario = () => {
     try {
       const response = await axiosInstance.get('/products');
       if (response.data?.success) {
-        setProductos(response.data.data || []);
+        const data = response.data.data || response.data.products || [];
+        setProductos(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error('Error cargando productos:', error);
+      setProductos([]);
     }
   };
 
