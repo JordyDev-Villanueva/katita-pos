@@ -21,6 +21,8 @@ export const Sidebar = () => {
   const { logout, user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
+  // FASE 8: Menú actualizado con Ventas y Ajustes Inventario
+
   const menuItems = [
     {
       name: 'Dashboard',
