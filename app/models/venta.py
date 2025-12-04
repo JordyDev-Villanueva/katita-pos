@@ -62,6 +62,7 @@ class Venta(db.Model):
 
     # Estado y sincronización
     estado = db.Column(String(20), default='completada', nullable=False, index=True)
+    devuelta = db.Column(Boolean, default=False, nullable=False, index=True)  # FASE 8: Marcar si fue devuelta
     notas = db.Column(Text, nullable=True)
     created_offline = db.Column(Boolean, default=False, nullable=False)
     synced = db.Column(Boolean, default=True, nullable=False, index=True)
@@ -437,6 +438,7 @@ class Venta(db.Model):
             'vendedor_id': self.vendedor_id,
             'cuadro_caja_id': self.cuadro_caja_id,
             'estado': self.estado,
+            'devuelta': self.devuelta,  # FASE 8: Incluir estado de devolución
             'notas': self.notas,
             'created_offline': self.created_offline,
             'synced': self.synced,

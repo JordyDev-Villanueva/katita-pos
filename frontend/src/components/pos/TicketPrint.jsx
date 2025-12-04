@@ -1,0 +1,247 @@
+import { useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
+import { Printer } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+
+/**
+ * Componente de Ticket para Impresión Térmica
+ *
+ * Genera un ticket de 80mm de ancho listo para imprimir en impresoras térmicas.
+ * Incluye: Logo, datos del negocio, productos, totales, método de pago.
+ */
+export const TicketPrint = ({ venta, onPrintComplete }) => {
+  const componentRef = useRef();
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+    documentTitle: `Ticket-${venta.numero_venta}`,
+    onAfterPrint: () => {
+      if (onPrintComplete) {
+        onPrintComplete();
+      }
+    }
+  });
+
+  // Formatear fecha
+  const fechaFormateada = venta.fecha ?
+    format(new Date(venta.fecha), "dd/MM/yyyy HH:mm", { locale: es }) :
+    '';
+
+  return (
+    <div>
+      {/* Botón de Imprimir */}
+      <button
+        onClick={handlePrint}
+        className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
+      >
+        <Printer className="w-5 h-5" />
+        Imprimir Ticket
+      </button>
+
+      {/* Ticket (Oculto, solo para imprimir) */}
+      <div style={{ display: 'none' }}>
+        <div ref={componentRef}>
+          <style>
+            {`
+              @media print {
+                @page {
+                  size: 80mm auto;
+                  margin: 0;
+                }
+                body {
+                  margin: 0;
+                  padding: 0;
+                }
+              }
+
+              .ticket-container {
+                width: 80mm;
+                font-family: 'Courier New', monospace;
+                font-size: 12px;
+                padding: 5mm;
+                background: white;
+                color: black;
+              }
+
+              .ticket-header {
+                text-align: center;
+                border-bottom: 2px dashed #000;
+                padding-bottom: 10px;
+                margin-bottom: 10px;
+              }
+
+              .ticket-logo {
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 5px;
+              }
+
+              .ticket-business-name {
+                font-size: 16px;
+                font-weight: bold;
+                margin-bottom: 3px;
+              }
+
+              .ticket-info {
+                font-size: 10px;
+                line-height: 1.4;
+              }
+
+              .ticket-section {
+                margin: 10px 0;
+                padding: 5px 0;
+                border-bottom: 1px dashed #000;
+              }
+
+              .ticket-item {
+                display: flex;
+                justify-content: space-between;
+                margin: 3px 0;
+                font-size: 11px;
+              }
+
+              .ticket-item-detail {
+                font-size: 10px;
+                color: #444;
+                margin-left: 10px;
+              }
+
+              .ticket-total {
+                font-size: 14px;
+                font-weight: bold;
+                margin-top: 10px;
+              }
+
+              .ticket-footer {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 10px;
+                line-height: 1.6;
+              }
+
+              .ticket-divider {
+                border-bottom: 2px solid #000;
+                margin: 10px 0;
+              }
+            `}
+          </style>
+
+          <div className="ticket-container">
+            {/* Header - Logo y Datos del Negocio */}
+            <div className="ticket-header">
+              <div className="ticket-logo">KATITA POS</div>
+              <div className="ticket-business-name">Minimarket Katita</div>
+              <div className="ticket-info">
+                Guadalupito, Perú<br />
+                RUC: 20123456789<br />
+                Telf: (044) 123-4567
+              </div>
+            </div>
+
+            {/* Información de la Venta */}
+            <div className="ticket-section">
+              <div className="ticket-item">
+                <span>N° Venta:</span>
+                <strong>{venta.numero_venta}</strong>
+              </div>
+              <div className="ticket-item">
+                <span>Fecha:</span>
+                <span>{fechaFormateada}</span>
+              </div>
+              <div className="ticket-item">
+                <span>Vendedor:</span>
+                <span>{venta.vendedor_nombre || 'N/A'}</span>
+              </div>
+              {venta.cliente_nombre && (
+                <div className="ticket-item">
+                  <span>Cliente:</span>
+                  <span>{venta.cliente_nombre}</span>
+                </div>
+              )}
+              {venta.cliente_dni && (
+                <div className="ticket-item">
+                  <span>DNI:</span>
+                  <span>{venta.cliente_dni}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Lista de Productos */}
+            <div className="ticket-section">
+              <strong style={{ fontSize: '12px' }}>PRODUCTOS</strong>
+              <div style={{ marginTop: '8px' }}>
+                {venta.detalles && venta.detalles.map((detalle, index) => (
+                  <div key={index} style={{ marginBottom: '8px' }}>
+                    <div className="ticket-item">
+                      <span style={{ flex: 1 }}>{detalle.producto_nombre}</span>
+                    </div>
+                    <div className="ticket-item-detail">
+                      {detalle.cantidad} x S/ {Number(detalle.precio_unitario).toFixed(2)} = S/ {Number(detalle.subtotal).toFixed(2)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Totales */}
+            <div className="ticket-section">
+              <div className="ticket-item">
+                <span>Subtotal:</span>
+                <span>S/ {Number(venta.subtotal || 0).toFixed(2)}</span>
+              </div>
+              {venta.descuento > 0 && (
+                <div className="ticket-item">
+                  <span>Descuento:</span>
+                  <span>-S/ {Number(venta.descuento).toFixed(2)}</span>
+                </div>
+              )}
+              <div className="ticket-divider"></div>
+              <div className="ticket-item ticket-total">
+                <span>TOTAL:</span>
+                <span>S/ {Number(venta.total).toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Método de Pago */}
+            <div className="ticket-section">
+              <strong style={{ fontSize: '11px' }}>FORMA DE PAGO</strong>
+              <div className="ticket-item" style={{ marginTop: '5px' }}>
+                <span>Método:</span>
+                <strong style={{ textTransform: 'uppercase' }}>
+                  {venta.metodo_pago}
+                </strong>
+              </div>
+              {venta.metodo_pago === 'efectivo' && (
+                <>
+                  <div className="ticket-item">
+                    <span>Monto Recibido:</span>
+                    <span>S/ {Number(venta.monto_recibido || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="ticket-item">
+                    <span>Cambio:</span>
+                    <span>S/ {Number(venta.cambio || 0).toFixed(2)}</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="ticket-footer">
+              <div style={{ marginBottom: '10px' }}>
+                ¡Gracias por su compra!
+              </div>
+              <div style={{ fontSize: '9px', color: '#666' }}>
+                Este documento no es válido como comprobante de pago<br />
+                Para factura electrónica solicítela al momento de la compra
+              </div>
+              <div style={{ marginTop: '10px', fontSize: '9px' }}>
+                Powered by KATITA POS v1.0
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

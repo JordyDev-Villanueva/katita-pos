@@ -280,6 +280,14 @@ def register_blueprints(app):
     from app.blueprints.cuadro_caja import cuadro_caja_bp
     app.register_blueprint(cuadro_caja_bp)
 
+    # FASE 8: Registrar blueprint de devoluciones
+    from app.blueprints.devoluciones import devoluciones_bp
+    app.register_blueprint(devoluciones_bp)
+
+    # FASE 8: Registrar blueprint de ajustes de inventario
+    from app.blueprints.ajustes_inventario import ajustes_bp
+    app.register_blueprint(ajustes_bp)
+
 
 def register_error_handlers(app):
     """
