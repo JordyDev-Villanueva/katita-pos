@@ -332,15 +332,32 @@ export const POS = () => {
 
         // Mostrar información de la venta
         const venta = response.data;
-        if (paymentData.metodo_pago === 'efectivo' && venta.cambio > 0) {
-          toast.success(`Cambio: S/ ${venta.cambio.toFixed(2)}`, { duration: 5000 });
+
+        // Calcular totales desde el carrito (datos locales confiables)
+        const subtotalCalculado = cart.reduce((sum, item) => sum + (item.cantidad * item.precio_unitario), 0);
+        const totalCalculado = subtotalCalculado - (discount || 0);
+        const cambioCalculado = paymentData.metodo_pago === 'efectivo'
+          ? (paymentData.monto_recibido || 0) - totalCalculado
+          : 0;
+
+        if (paymentData.metodo_pago === 'efectivo' && cambioCalculado > 0) {
+          toast.success(`Cambio: S/ ${cambioCalculado.toFixed(2)}`, { duration: 5000 });
         }
 
-        // FASE 8: Guardar venta completada con datos completos
+        // FASE 8: Construir venta completada con datos locales (más confiables)
         const ventaConDatos = {
-          ...venta,
+          id: venta.id,
+          numero_venta: venta.numero_venta,
+          fecha: venta.fecha || new Date().toISOString(),
           vendedor_nombre: user?.nombre_completo || 'N/A',
+          cliente_nombre: venta.cliente_nombre || null,
+          cliente_dni: venta.cliente_dni || null,
           metodo_pago: paymentData.metodo_pago,
+          monto_recibido: paymentData.monto_recibido || 0,
+          cambio: cambioCalculado,
+          subtotal: subtotalCalculado,
+          descuento: discount || 0,
+          total: totalCalculado,
           detalles: cart.map(item => ({
             producto_nombre: item.nombre,
             cantidad: item.cantidad,
@@ -348,6 +365,8 @@ export const POS = () => {
             subtotal: item.cantidad * item.precio_unitario
           }))
         };
+
+        console.log('✅ Venta completada construida:', ventaConDatos);
         setVentaCompletada(ventaConDatos);
         setShowTicketModal(true);
 
