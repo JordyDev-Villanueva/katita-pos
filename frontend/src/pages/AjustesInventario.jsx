@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
-import { Package, Plus, Search, Calendar, Filter, TrendingDown, TrendingUp, AlertCircle } from 'lucide-react';
+import { ClipboardList, Plus, Search, Calendar, Filter, TrendingDown, TrendingUp, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '../api/axios';
 import { format } from 'date-fns';
@@ -147,11 +147,11 @@ const AjustesInventario = () => {
         <div className="mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-                <Package className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <ClipboardList className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   Ajustes de Inventario
                 </h1>
                 <p className="text-sm text-gray-600">
