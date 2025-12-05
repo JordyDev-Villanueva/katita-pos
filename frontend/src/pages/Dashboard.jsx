@@ -635,9 +635,10 @@ export const Dashboard = () => {
       console.log('✅ Dashboard recargado exitosamente');
       console.log('='.repeat(70) + '\n');
 
-      // Solo mostrar badge verde, sin toast
+      // Mostrar badge verde y toast de confirmación
       setShowUpdatedBadge(true);
       setTimeout(() => setShowUpdatedBadge(false), 2000);
+      toast.success('Dashboard actualizado correctamente');
 
     } catch (error) {
       console.error('❌ Error recargando dashboard:', error);

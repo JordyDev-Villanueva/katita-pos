@@ -139,23 +139,37 @@ const Ventas = () => {
     venta.cliente_nombre?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Calcular totales
+  const totalVentas = ventasFiltradas.reduce((sum, v) => sum + Number(v.total || 0), 0);
+  const cantidadVentas = ventasFiltradas.length;
+
   return (
     <Layout>
       <div className="p-4 lg:p-6">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center gap-3 pb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <ShoppingCart className="w-5 h-5 text-white" />
+          <div className="flex items-center justify-between pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <ShoppingCart className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Historial de Ventas
+                </h1>
+                <p className="text-sm text-gray-600">
+                  Gestiona todas las ventas registradas en el sistema
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Historial de Ventas
-              </h1>
-              <p className="text-sm text-gray-600">
-                Gestiona todas las ventas registradas en el sistema
-              </p>
-            </div>
+            <button
+              onClick={loadVentas}
+              disabled={loading}
+              className="px-4 py-2 bg-white border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+            >
+              <RotateCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Recargar
+            </button>
           </div>
           <div className="h-0.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 rounded-full"></div>
         </div>
@@ -347,6 +361,25 @@ const Ventas = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Resumen de Totales */}
+          {!loading && ventasFiltradas.length > 0 && (
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-3 border-t-2 border-blue-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <ShoppingCart className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-700">Total de ventas:</span>
+                    <span className="text-sm font-bold text-blue-600">{cantidadVentas}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-700">Monto total:</span>
+                  <span className="text-lg font-bold text-blue-600">S/ {totalVentas.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Modal Detalle Venta */}
