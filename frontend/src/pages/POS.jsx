@@ -335,7 +335,7 @@ export const POS = () => {
 
         // Calcular totales desde el carrito (datos locales confiables)
         const subtotalCalculado = cart.reduce((sum, item) => sum + (item.cantidad * item.precio_unitario), 0);
-        const totalCalculado = subtotalCalculado - (discount || 0);
+        const totalCalculado = subtotalCalculado; // Sin descuentos por ahora
         const cambioCalculado = paymentData.metodo_pago === 'efectivo'
           ? (paymentData.monto_recibido || 0) - totalCalculado
           : 0;
@@ -356,7 +356,7 @@ export const POS = () => {
           monto_recibido: paymentData.monto_recibido || 0,
           cambio: cambioCalculado,
           subtotal: subtotalCalculado,
-          descuento: discount || 0,
+          descuento: 0, // Sin descuentos por ahora
           total: totalCalculado,
           detalles: cart.map(item => ({
             producto_nombre: item.nombre,
