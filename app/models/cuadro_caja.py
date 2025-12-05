@@ -460,6 +460,7 @@ class CuadroCaja(db.Model):
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
             # Propiedades calculadas
             'total_ventas': float(self.total_ventas),
+            'total_ventas_efectivo': float(self.total_efectivo) if self.total_efectivo else 0.0,  # Alias para frontend
             'total_ventas_digitales': float(self.total_ventas_digitales),
             'esta_abierto': self.esta_abierto,
             'esta_cerrado': self.esta_cerrado,

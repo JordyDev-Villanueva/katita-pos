@@ -138,8 +138,8 @@ export default function Profile() {
   return (
     <Layout>
       {/* DISEÑO RESPONSIVE */}
-      <div className="h-full flex flex-col overflow-hidden">
-        <div className="flex-1 flex flex-col gap-4 p-4 overflow-y-auto">
+      <div className="min-h-screen pb-20 md:pb-6">
+        <div className="flex flex-col gap-4 p-4">
 
           {/* FILA SUPERIOR: Tarjeta de Usuario */}
           <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl shrink-0">
@@ -175,7 +175,7 @@ export default function Profile() {
           </div>
 
           {/* FORMULARIOS - Stack en móvil, lado a lado en desktop (solo para admin/bodeguero) */}
-          <div className={`flex-1 grid grid-cols-1 gap-4 min-h-0 ${!isVendedor ? 'lg:grid-cols-2' : 'lg:max-w-2xl lg:mx-auto'}`}>
+          <div className={`grid grid-cols-1 gap-4 ${!isVendedor ? 'lg:grid-cols-2' : 'lg:max-w-2xl lg:mx-auto'}`}>
 
             {/* Información Personal - Vista diferente según rol */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
