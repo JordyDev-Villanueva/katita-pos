@@ -220,28 +220,28 @@ const AjustesInventario = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="hidden sm:table-cell px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     Fecha
                   </th>
-                  <th className="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     Producto
                   </th>
-                  <th className="hidden md:table-cell px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     Tipo
                   </th>
-                  <th className="hidden lg:table-cell px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     Stock Anterior
                   </th>
-                  <th className="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     Stock Nuevo
                   </th>
-                  <th className="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     Diferencia
                   </th>
-                  <th className="hidden md:table-cell px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     Motivo
                   </th>
-                  <th className="hidden lg:table-cell px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     Admin
                   </th>
                 </tr>
@@ -270,34 +270,34 @@ const AjustesInventario = () => {
 
                     return (
                       <tr key={ajuste.id} className="hover:bg-gray-50">
-                        <td className="hidden sm:table-cell px-2 sm:px-4 md:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
+                        <td className="px-3 sm:px-4 md:px-6 py-3 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                           {format(new Date(ajuste.fecha), 'dd/MM/yyyy HH:mm', { locale: es })}
                         </td>
-                        <td className="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-900">
+                        <td className="px-3 sm:px-4 md:px-6 py-3 text-xs sm:text-sm font-medium text-gray-900">
                           {ajuste.producto_nombre}
                         </td>
-                        <td className="hidden md:table-cell px-2 sm:px-4 md:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        <td className="px-3 sm:px-4 md:px-6 py-3 whitespace-nowrap">
                           <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-${tipo?.color}-100 text-${tipo?.color}-800`}>
                             <Icon className="w-3 h-3" />
                             {tipo?.label || ajuste.tipo_ajuste}
                           </span>
                         </td>
-                        <td className="hidden lg:table-cell px-2 sm:px-4 md:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
+                        <td className="px-3 sm:px-4 md:px-6 py-3 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                           {ajuste.cantidad_anterior}
                         </td>
-                        <td className="px-2 sm:px-4 md:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
+                        <td className="px-3 sm:px-4 md:px-6 py-3 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
                           {ajuste.cantidad_nueva}
                         </td>
-                        <td className="px-2 sm:px-4 md:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        <td className="px-3 sm:px-4 md:px-6 py-3 whitespace-nowrap">
                           <span className={`inline-flex items-center gap-1 text-xs sm:text-sm font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                            {isPositive ? <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" /> : <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />}
+                            {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                             {isPositive ? '+' : ''}{diferencia}
                           </span>
                         </td>
-                        <td className="hidden md:table-cell px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 max-w-xs truncate" title={ajuste.motivo}>
+                        <td className="px-3 sm:px-4 md:px-6 py-3 text-xs sm:text-sm text-gray-600 max-w-xs truncate" title={ajuste.motivo}>
                           {ajuste.motivo}
                         </td>
-                        <td className="hidden lg:table-cell px-2 sm:px-4 md:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-600">
+                        <td className="px-3 sm:px-4 md:px-6 py-3 whitespace-nowrap text-xs sm:text-sm text-gray-600">
                           {ajuste.admin_nombre}
                         </td>
                       </tr>
