@@ -145,9 +145,9 @@ const Ventas = () => {
 
   return (
     <Layout>
-      <div className="p-4 lg:p-5 max-h-screen overflow-hidden">
+      <div className="p-4 lg:p-5">
         {/* Header */}
-        <div className="mb-4">
+        <div className="mb-3">
           <div className="flex items-center justify-between pb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
@@ -175,7 +175,7 @@ const Ventas = () => {
         </div>
 
         {/* Filtros */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-4 border-2 border-gray-200">
+        <div className="bg-white rounded-lg shadow-md p-4 mb-3 border-2 border-gray-200">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Búsqueda */}
             <div className="relative">
@@ -235,8 +235,8 @@ const Ventas = () => {
         </div>
 
         {/* Tabla de Ventas - 7 filas exactas con borde profesional */}
-        <div className="bg-white rounded-lg shadow-lg border-2 border-gray-300">
-          <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: '400px' }}>
+        <div className="bg-white rounded-lg shadow-lg border-2 border-gray-300 mb-4">
+          <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: '445px' }}>
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
