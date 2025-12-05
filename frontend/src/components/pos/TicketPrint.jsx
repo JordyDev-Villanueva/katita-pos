@@ -30,10 +30,10 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
 
   return (
     <div className="space-y-3">
-      {/* Vista Previa del Ticket - Tamaño optimizado para adultos */}
-      <div className="max-w-2xl mx-auto bg-gray-50 p-6 rounded-lg border-2 border-gray-300">
-        <h3 className="text-center text-lg font-semibold text-gray-700 mb-5">Vista Previa del Ticket</h3>
-        <div ref={componentRef} className="mx-auto" style={{ width: '480px' }}>
+      {/* Vista Previa del Ticket */}
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-300">
+        <h3 className="text-center text-sm font-semibold text-gray-700 mb-3">Vista Previa del Ticket</h3>
+        <div ref={componentRef} className="mx-auto bg-white shadow-md" style={{ maxWidth: '100%', width: '350px' }}>
           <style>
             {`
               @media print {
@@ -47,16 +47,61 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
                 }
                 .ticket-container {
                   width: 80mm !important;
-                  font-size: 10px !important;
-                  padding: 3mm !important;
+                  max-width: 80mm !important;
+                  font-size: 9px !important;
+                  padding: 4mm !important;
+                  box-sizing: border-box;
+                }
+                .ticket-logo {
+                  font-size: 14px !important;
+                }
+                .ticket-business-name {
+                  font-size: 11px !important;
+                }
+                .ticket-info {
+                  font-size: 8px !important;
+                }
+                .ticket-item {
+                  font-size: 9px !important;
+                }
+                .ticket-item-detail {
+                  font-size: 8px !important;
+                }
+                .ticket-total {
+                  font-size: 11px !important;
+                }
+                .ticket-footer {
+                  font-size: 7px !important;
                 }
               }
 
               @media screen {
                 .ticket-container {
-                  width: 480px;
-                  font-size: 16px;
-                  padding: 24px;
+                  width: 100%;
+                  max-width: 350px;
+                  font-size: 12px;
+                  padding: 20px;
+                }
+                .ticket-logo {
+                  font-size: 18px;
+                }
+                .ticket-business-name {
+                  font-size: 14px;
+                }
+                .ticket-info {
+                  font-size: 10px;
+                }
+                .ticket-item {
+                  font-size: 11px;
+                }
+                .ticket-item-detail {
+                  font-size: 10px;
+                }
+                .ticket-total {
+                  font-size: 13px;
+                }
+                .ticket-footer {
+                  font-size: 9px;
                 }
               }
 
@@ -64,67 +109,78 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
                 font-family: 'Courier New', monospace;
                 background: white;
                 color: black;
+                box-sizing: border-box;
               }
 
               .ticket-header {
                 text-align: center;
                 border-bottom: 2px dashed #000;
-                padding-bottom: 6px;
-                margin-bottom: 6px;
+                padding-bottom: 8px;
+                margin-bottom: 8px;
               }
 
               .ticket-logo {
-                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 4px;
+              }
+
+              .ticket-business-name {
                 font-weight: bold;
                 margin-bottom: 3px;
               }
 
-              .ticket-business-name {
-                font-size: 13px;
-                font-weight: bold;
-                margin-bottom: 2px;
-              }
-
               .ticket-info {
-                font-size: 9px;
-                line-height: 1.3;
+                line-height: 1.4;
               }
 
               .ticket-section {
-                margin: 6px 0;
-                padding: 3px 0;
+                margin: 8px 0;
+                padding: 4px 0;
                 border-bottom: 1px dashed #000;
               }
 
               .ticket-item {
                 display: flex;
                 justify-content: space-between;
-                margin: 2px 0;
-                font-size: 10px;
+                margin: 3px 0;
+                gap: 8px;
+              }
+
+              .ticket-item span:first-child {
+                flex-shrink: 0;
+              }
+
+              .ticket-item span:last-child {
+                text-align: right;
+                word-break: break-word;
               }
 
               .ticket-item-detail {
-                font-size: 9px;
                 color: #444;
                 margin-left: 8px;
+                margin-top: 2px;
               }
 
               .ticket-total {
-                font-size: 12px;
                 font-weight: bold;
-                margin-top: 6px;
+                margin-top: 8px;
               }
 
               .ticket-footer {
                 text-align: center;
-                margin-top: 6px;
-                font-size: 8px;
-                line-height: 1.4;
+                margin-top: 8px;
+                line-height: 1.5;
               }
 
               .ticket-divider {
                 border-bottom: 2px solid #000;
-                margin: 6px 0;
+                margin: 8px 0;
+              }
+
+              .ticket-product-name {
+                word-break: break-word;
+                display: block;
+                margin-bottom: 2px;
               }
             `}
           </style>
@@ -171,12 +227,12 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
 
             {/* Lista de Productos */}
             <div className="ticket-section">
-              <strong style={{ fontSize: '10px' }}>PRODUCTOS</strong>
-              <div style={{ marginTop: '5px' }}>
+              <strong style={{ fontSize: '10px', display: 'block', marginBottom: '6px' }}>PRODUCTOS</strong>
+              <div>
                 {venta.detalles && venta.detalles.map((detalle, index) => (
-                  <div key={index} style={{ marginBottom: '5px' }}>
-                    <div className="ticket-item">
-                      <span style={{ flex: 1 }}>{detalle.producto_nombre}</span>
+                  <div key={index} style={{ marginBottom: '6px' }}>
+                    <div className="ticket-product-name" style={{ fontSize: '10px', fontWeight: '500' }}>
+                      {detalle.producto_nombre}
                     </div>
                     <div className="ticket-item-detail">
                       {detalle.cantidad} x S/ {Number(detalle.precio_unitario).toFixed(2)} = S/ {Number(detalle.subtotal).toFixed(2)}
@@ -207,8 +263,8 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
 
             {/* Método de Pago */}
             <div className="ticket-section">
-              <strong style={{ fontSize: '10px' }}>FORMA DE PAGO</strong>
-              <div className="ticket-item" style={{ marginTop: '3px' }}>
+              <strong style={{ fontSize: '10px', display: 'block', marginBottom: '4px' }}>FORMA DE PAGO</strong>
+              <div className="ticket-item">
                 <span>Método:</span>
                 <strong style={{ textTransform: 'uppercase' }}>
                   {venta.metodo_pago}
@@ -217,7 +273,7 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
               {venta.metodo_pago === 'efectivo' && (
                 <>
                   <div className="ticket-item">
-                    <span>Monto Recibido:</span>
+                    <span>Recibido:</span>
                     <span>S/ {Number(venta.monto_recibido || 0).toFixed(2)}</span>
                   </div>
                   <div className="ticket-item">
