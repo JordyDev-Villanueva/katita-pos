@@ -33,7 +33,7 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
       {/* Vista Previa del Ticket */}
       <div className="max-w-md mx-auto bg-gray-50 p-3 rounded-lg border-2 border-gray-300">
         <h3 className="text-center text-xs font-semibold text-gray-700 mb-2">Vista Previa del Ticket</h3>
-        <div ref={componentRef}>
+        <div ref={componentRef} className="mx-auto" style={{ width: '80mm' }}>
           <style>
             {`
               @media print {

@@ -340,11 +340,12 @@ export const POS = () => {
         const ventaConDatos = {
           ...venta,
           vendedor_nombre: user?.nombre_completo || 'N/A',
+          metodo_pago: paymentData.metodo_pago,
           detalles: cart.map(item => ({
             producto_nombre: item.nombre,
-            cantidad: item.quantity,
-            precio_unitario: item.precio_venta,
-            subtotal: item.quantity * item.precio_venta
+            cantidad: item.cantidad,
+            precio_unitario: item.precio_unitario,
+            subtotal: item.cantidad * item.precio_unitario
           }))
         };
         setVentaCompletada(ventaConDatos);
@@ -676,54 +677,54 @@ export const POS = () => {
       {showTicketModal && ventaCompletada && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[95vh] overflow-y-auto">
-            {/* Header Success */}
-            <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 text-white">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-white bg-opacity-20 backdrop-blur rounded-full flex items-center justify-center animate-pulse">
-                  <CheckCircle className="w-10 h-10" />
+            {/* Header Success - Compacto */}
+            <div className="bg-gradient-to-r from-green-500 to-green-600 p-4 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white bg-opacity-20 backdrop-blur rounded-full flex items-center justify-center animate-pulse">
+                  <CheckCircle className="w-7 h-7" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold">¡Venta Procesada Exitosamente!</h2>
-                  <p className="text-green-100 text-sm mt-1">
+                  <h2 className="text-lg font-bold">¡Venta Procesada Exitosamente!</h2>
+                  <p className="text-green-100 text-xs mt-0.5">
                     N° Venta: <span className="font-semibold">{ventaCompletada.numero_venta}</span>
                   </p>
                 </div>
                 <button
                   onClick={() => setShowTicketModal(false)}
-                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-colors"
+                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1.5 transition-colors"
                   title="Cerrar"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Resumen de Venta */}
-              <div className="mt-4 bg-white bg-opacity-10 backdrop-blur rounded-lg p-4">
-                <div className="grid grid-cols-2 gap-4">
+              {/* Resumen de Venta - Compacto */}
+              <div className="mt-3 bg-white bg-opacity-10 backdrop-blur rounded-lg p-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-green-100 text-xs mb-1">Total</p>
-                    <p className="text-3xl font-bold">S/ {Number(ventaCompletada.total || 0).toFixed(2)}</p>
+                    <p className="text-green-100 text-xs mb-0.5">Total</p>
+                    <p className="text-2xl font-bold">S/ {Number(ventaCompletada.total || 0).toFixed(2)}</p>
                   </div>
                   {ventaCompletada.metodo_pago === 'efectivo' && ventaCompletada.cambio > 0 && (
                     <div>
-                      <p className="text-green-100 text-xs mb-1">Cambio</p>
-                      <p className="text-2xl font-semibold">S/ {Number(ventaCompletada.cambio).toFixed(2)}</p>
+                      <p className="text-green-100 text-xs mb-0.5">Cambio</p>
+                      <p className="text-xl font-semibold">S/ {Number(ventaCompletada.cambio).toFixed(2)}</p>
                     </div>
                   )}
                   <div>
-                    <p className="text-green-100 text-xs mb-1">Método de Pago</p>
-                    <p className="text-lg font-semibold capitalize">{ventaCompletada.metodo_pago}</p>
+                    <p className="text-green-100 text-xs mb-0.5">Método de Pago</p>
+                    <p className="text-sm font-semibold capitalize">{ventaCompletada.metodo_pago}</p>
                   </div>
                   <div>
-                    <p className="text-green-100 text-xs mb-1">Productos</p>
-                    <p className="text-lg font-semibold">{ventaCompletada.detalles?.length || 0} items</p>
+                    <p className="text-green-100 text-xs mb-0.5">Productos</p>
+                    <p className="text-sm font-semibold">{ventaCompletada.detalles?.length || 0} items</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Ticket Preview */}
-            <div className="p-6">
+            <div className="p-4">
               <TicketPrint
                 venta={ventaCompletada}
                 onPrintComplete={() => {
@@ -731,7 +732,7 @@ export const POS = () => {
                 }}
               />
 
-              <div className="mt-4 pt-4 border-t flex justify-center gap-3">
+              <div className="mt-3 pt-3 border-t flex justify-center gap-3">
                 <button
                   onClick={() => setShowTicketModal(false)}
                   className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
