@@ -173,9 +173,9 @@ const AjustesInventario = () => {
 
         {/* Filtros */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-2 border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Búsqueda */}
-            <div className="relative">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+            {/* Búsqueda - Ocupa 3 columnas */}
+            <div className="relative md:col-span-3">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
@@ -186,12 +186,12 @@ const AjustesInventario = () => {
               />
             </div>
 
-            {/* Tipo de Ajuste */}
+            {/* Tipo de Ajuste - 1 columna */}
             <div>
               <select
                 value={tipoFiltro}
                 onChange={(e) => setTipoFiltro(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-purple-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="todos">Todos los tipos</option>
                 {tiposAjuste.map(tipo => (
@@ -200,8 +200,8 @@ const AjustesInventario = () => {
               </select>
             </div>
 
-            {/* Filtro de Fecha */}
-            <div className="relative">
+            {/* Filtro de Fecha - 2 columnas */}
+            <div className="relative md:col-span-2">
               <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="date"
