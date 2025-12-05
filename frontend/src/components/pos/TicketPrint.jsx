@@ -286,14 +286,14 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
 
             {/* Footer */}
             <div className="ticket-footer">
-              <div style={{ marginBottom: '5px' }}>
+              <div style={{ marginBottom: '8px', fontSize: '11px', fontWeight: 'bold' }}>
                 ¡Gracias por su compra!
               </div>
-              <div style={{ fontSize: '8px', color: '#666' }}>
+              <div style={{ fontSize: '9px', color: '#666', lineHeight: '1.6' }}>
                 Este documento no es válido como comprobante de pago<br />
                 Para factura electrónica solicítela al momento de la compra
               </div>
-              <div style={{ marginTop: '5px', fontSize: '8px' }}>
+              <div style={{ marginTop: '8px', fontSize: '9px', fontWeight: '500' }}>
                 Powered by KATITA POS v1.0
               </div>
             </div>
