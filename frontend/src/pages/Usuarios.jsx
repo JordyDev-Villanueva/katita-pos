@@ -247,8 +247,8 @@ export const Usuarios = () => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
-              <Users className="w-8 h-8 text-indigo-600" />
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent flex items-center gap-3">
+              <Users className="w-8 h-8 text-blue-600" />
               Gestión de Vendedores
             </h1>
             <p className="text-gray-600 mt-1">Administra vendedores y su información</p>
@@ -258,7 +258,7 @@ export const Usuarios = () => {
               resetForm();
               setShowModal(true);
             }}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition shadow-lg"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition shadow-lg"
           >
             <Plus className="w-5 h-5" />
             Nuevo Vendedor
@@ -274,7 +274,7 @@ export const Usuarios = () => {
               placeholder="Buscar por nombre o usuario..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full pl-10 pr-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
@@ -283,7 +283,7 @@ export const Usuarios = () => {
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+              <thead className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Usuario</th>
                   <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Contacto</th>
@@ -317,12 +317,12 @@ export const Usuarios = () => {
                       <td className="px-6 py-4">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 text-sm text-gray-700">
-                            <Mail className="w-4 h-4 text-indigo-600" />
+                            <Mail className="w-4 h-4 text-blue-600" />
                             {user.email}
                           </div>
                           {user.telefono && (
                             <div className="flex items-center gap-2 text-sm text-gray-700">
-                              <Phone className="w-4 h-4 text-indigo-600" />
+                              <Phone className="w-4 h-4 text-blue-600" />
                               {user.telefono}
                             </div>
                           )}
@@ -332,7 +332,7 @@ export const Usuarios = () => {
                         {user.hora_entrada && user.hora_salida ? (
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 text-sm text-gray-700">
-                              <Clock className="w-4 h-4 text-purple-600" />
+                              <Clock className="w-4 h-4 text-blue-600" />
                               {user.hora_entrada} - {user.hora_salida}
                             </div>
                             {user.dias_trabajo && (
@@ -379,7 +379,7 @@ export const Usuarios = () => {
                           </button>
                           <button
                             onClick={() => openPasswordModal(user)}
-                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition"
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                             title="Cambiar contraseña"
                           >
                             <Key className="w-5 h-5" />
@@ -444,7 +444,7 @@ export const Usuarios = () => {
                       type="text"
                       value={formData.username}
                       onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                       required
                       disabled={editingUser}
                     />
@@ -460,7 +460,7 @@ export const Usuarios = () => {
                           type={showPassword ? "text" : "password"}
                           value={formData.password}
                           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                          className="w-full px-3 py-2 pr-10 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          className="w-full px-3 py-2 pr-10 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                           required={!editingUser}
                           minLength={6}
                           placeholder="Mínimo 6 caracteres"
@@ -490,7 +490,7 @@ export const Usuarios = () => {
                     type="text"
                     value={formData.nombre_completo}
                     onChange={(e) => setFormData({ ...formData, nombre_completo: e.target.value })}
-                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     required
                   />
                 </div>
@@ -505,7 +505,7 @@ export const Usuarios = () => {
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                       required
                     />
                   </div>
@@ -518,7 +518,7 @@ export const Usuarios = () => {
                       type="tel"
                       value={formData.telefono}
                       onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                       placeholder="987654321"
                     />
                   </div>
@@ -527,7 +527,7 @@ export const Usuarios = () => {
                 {/* Horarios de Trabajo */}
                 <div className="border-t pt-3">
                   <h3 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-indigo-600" />
+                    <Clock className="w-4 h-4 text-blue-600" />
                     Horario de Trabajo
                   </h3>
 
@@ -540,7 +540,7 @@ export const Usuarios = () => {
                         type="time"
                         value={formData.hora_entrada}
                         onChange={(e) => setFormData({ ...formData, hora_entrada: e.target.value })}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                       />
                     </div>
 
@@ -552,7 +552,7 @@ export const Usuarios = () => {
                         type="time"
                         value={formData.hora_salida}
                         onChange={(e) => setFormData({ ...formData, hora_salida: e.target.value })}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                       />
                     </div>
                   </div>
