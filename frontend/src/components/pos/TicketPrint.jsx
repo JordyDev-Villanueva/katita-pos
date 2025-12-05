@@ -29,10 +29,10 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
     '';
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Vista Previa del Ticket */}
-      <div className="max-w-md mx-auto bg-gray-50 p-4 rounded-lg border-2 border-gray-300">
-        <h3 className="text-center text-sm font-semibold text-gray-700 mb-2">Vista Previa del Ticket</h3>
+      <div className="max-w-md mx-auto bg-gray-50 p-3 rounded-lg border-2 border-gray-300">
+        <h3 className="text-center text-xs font-semibold text-gray-700 mb-2">Vista Previa del Ticket</h3>
         <div ref={componentRef}>
           <style>
             {`
@@ -50,8 +50,8 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
               .ticket-container {
                 width: 80mm;
                 font-family: 'Courier New', monospace;
-                font-size: 12px;
-                padding: 5mm;
+                font-size: 10px;
+                padding: 3mm;
                 background: white;
                 color: black;
               }
@@ -59,62 +59,62 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
               .ticket-header {
                 text-align: center;
                 border-bottom: 2px dashed #000;
-                padding-bottom: 10px;
-                margin-bottom: 10px;
+                padding-bottom: 6px;
+                margin-bottom: 6px;
               }
 
               .ticket-logo {
-                font-size: 24px;
-                font-weight: bold;
-                margin-bottom: 5px;
-              }
-
-              .ticket-business-name {
-                font-size: 16px;
+                font-size: 18px;
                 font-weight: bold;
                 margin-bottom: 3px;
               }
 
+              .ticket-business-name {
+                font-size: 13px;
+                font-weight: bold;
+                margin-bottom: 2px;
+              }
+
               .ticket-info {
-                font-size: 10px;
-                line-height: 1.4;
+                font-size: 9px;
+                line-height: 1.3;
               }
 
               .ticket-section {
-                margin: 10px 0;
-                padding: 5px 0;
+                margin: 6px 0;
+                padding: 3px 0;
                 border-bottom: 1px dashed #000;
               }
 
               .ticket-item {
                 display: flex;
                 justify-content: space-between;
-                margin: 3px 0;
-                font-size: 11px;
+                margin: 2px 0;
+                font-size: 10px;
               }
 
               .ticket-item-detail {
-                font-size: 10px;
+                font-size: 9px;
                 color: #444;
-                margin-left: 10px;
+                margin-left: 8px;
               }
 
               .ticket-total {
-                font-size: 14px;
+                font-size: 12px;
                 font-weight: bold;
-                margin-top: 10px;
+                margin-top: 6px;
               }
 
               .ticket-footer {
                 text-align: center;
-                margin-top: 10px;
-                font-size: 10px;
-                line-height: 1.6;
+                margin-top: 6px;
+                font-size: 8px;
+                line-height: 1.4;
               }
 
               .ticket-divider {
                 border-bottom: 2px solid #000;
-                margin: 10px 0;
+                margin: 6px 0;
               }
             `}
           </style>
@@ -161,10 +161,10 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
 
             {/* Lista de Productos */}
             <div className="ticket-section">
-              <strong style={{ fontSize: '12px' }}>PRODUCTOS</strong>
-              <div style={{ marginTop: '8px' }}>
+              <strong style={{ fontSize: '10px' }}>PRODUCTOS</strong>
+              <div style={{ marginTop: '5px' }}>
                 {venta.detalles && venta.detalles.map((detalle, index) => (
-                  <div key={index} style={{ marginBottom: '8px' }}>
+                  <div key={index} style={{ marginBottom: '5px' }}>
                     <div className="ticket-item">
                       <span style={{ flex: 1 }}>{detalle.producto_nombre}</span>
                     </div>
@@ -197,8 +197,8 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
 
             {/* Método de Pago */}
             <div className="ticket-section">
-              <strong style={{ fontSize: '11px' }}>FORMA DE PAGO</strong>
-              <div className="ticket-item" style={{ marginTop: '5px' }}>
+              <strong style={{ fontSize: '10px' }}>FORMA DE PAGO</strong>
+              <div className="ticket-item" style={{ marginTop: '3px' }}>
                 <span>Método:</span>
                 <strong style={{ textTransform: 'uppercase' }}>
                   {venta.metodo_pago}
@@ -220,14 +220,14 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
 
             {/* Footer */}
             <div className="ticket-footer">
-              <div style={{ marginBottom: '10px' }}>
+              <div style={{ marginBottom: '5px' }}>
                 ¡Gracias por su compra!
               </div>
-              <div style={{ fontSize: '9px', color: '#666' }}>
+              <div style={{ fontSize: '8px', color: '#666' }}>
                 Este documento no es válido como comprobante de pago<br />
                 Para factura electrónica solicítela al momento de la compra
               </div>
-              <div style={{ marginTop: '10px', fontSize: '9px' }}>
+              <div style={{ marginTop: '5px', fontSize: '8px' }}>
                 Powered by KATITA POS v1.0
               </div>
             </div>
@@ -239,9 +239,9 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
       <div className="flex justify-center">
         <button
           onClick={handlePrint}
-          className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 font-medium shadow-lg"
+          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 font-medium shadow-lg text-sm"
         >
-          <Printer className="w-5 h-5" />
+          <Printer className="w-4 h-4" />
           Imprimir Ticket
         </button>
       </div>

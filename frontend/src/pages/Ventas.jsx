@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { DevolucionModal } from '../components/ventas/DevolucionModal';
 import { TicketPrint } from '../components/pos/TicketPrint';
-import { ShoppingCart, Search, Calendar, Filter, RotateCcw, Printer, Eye, AlertCircle, X } from 'lucide-react';
+import { ShoppingCart, Search, Calendar, RotateCcw, Printer, Eye, AlertCircle, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '../api/axios';
 import { format } from 'date-fns';
@@ -83,7 +83,13 @@ const Ventas = () => {
       // Cargar detalles completos de la venta
       const response = await axiosInstance.get(`/ventas/${venta.id}`);
       if (response.data?.success) {
-        setVentaSeleccionada(response.data.data);
+        // Combinar venta, detalles y vendedor en un solo objeto
+        const ventaCompleta = {
+          ...response.data.data.venta,
+          detalles: response.data.data.detalles,
+          vendedor_nombre: response.data.data.vendedor?.nombre || response.data.data.venta.vendedor_nombre || 'N/A'
+        };
+        setVentaSeleccionada(ventaCompleta);
         setShowDetalleModal(true);
       }
     } catch (error) {
@@ -97,7 +103,13 @@ const Ventas = () => {
       // Cargar detalles completos para el ticket
       const response = await axiosInstance.get(`/ventas/${venta.id}`);
       if (response.data?.success) {
-        setVentaSeleccionada(response.data.data);
+        // Combinar venta, detalles y vendedor en un solo objeto
+        const ventaCompleta = {
+          ...response.data.data.venta,
+          detalles: response.data.data.detalles,
+          vendedor_nombre: response.data.data.vendedor?.nombre || response.data.data.venta.vendedor_nombre || 'N/A'
+        };
+        setVentaSeleccionada(ventaCompleta);
         setShowTicketModal(true);
       }
     } catch (error) {
@@ -218,9 +230,9 @@ const Ventas = () => {
           </div>
         </div>
 
-        {/* Tabla de Ventas con scroll vertical fijo */}
+        {/* Tabla de Ventas con scroll vertical fijo - 7 filas */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="overflow-x-auto max-h-[520px] overflow-y-auto">
+          <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
@@ -274,7 +286,13 @@ const Ventas = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {format(new Date(venta.fecha), 'dd/MM/yyyy HH:mm', { locale: es })}
+                        {(() => {
+                          try {
+                            return format(new Date(venta.fecha), 'dd/MM/yyyy HH:mm', { locale: es });
+                          } catch (error) {
+                            return venta.fecha || 'Fecha inválida';
+                          }
+                        })()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {venta.vendedor_nombre}
@@ -358,7 +376,15 @@ const Ventas = () => {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-600">Fecha:</span>
-                    <p className="font-medium">{format(new Date(ventaSeleccionada.fecha), 'dd/MM/yyyy HH:mm', { locale: es })}</p>
+                    <p className="font-medium">
+                      {(() => {
+                        try {
+                          return format(new Date(ventaSeleccionada.fecha), 'dd/MM/yyyy HH:mm', { locale: es });
+                        } catch (error) {
+                          return ventaSeleccionada.fecha || 'Fecha inválida';
+                        }
+                      })()}
+                    </p>
                   </div>
                   <div>
                     <span className="text-gray-600">Vendedor:</span>
@@ -426,14 +452,14 @@ const Ventas = () => {
         {/* Modal Ticket */}
         {showTicketModal && ventaSeleccionada && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900">Imprimir Ticket</h2>
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-4 max-h-[95vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="text-lg font-bold text-gray-900">Imprimir Ticket</h2>
                 <button
                   onClick={() => setShowTicketModal(false)}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
@@ -441,7 +467,7 @@ const Ventas = () => {
 
               <button
                 onClick={() => setShowTicketModal(false)}
-                className="w-full mt-4 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="w-full mt-3 px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Cerrar
               </button>
