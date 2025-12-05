@@ -696,49 +696,28 @@ export const POS = () => {
       {showTicketModal && ventaCompletada && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[95vh] overflow-y-auto">
-            {/* Header Success - Compacto */}
-            <div className="bg-gradient-to-r from-green-500 to-green-600 p-4 text-white">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white bg-opacity-20 backdrop-blur rounded-full flex items-center justify-center animate-pulse">
-                  <CheckCircle className="w-7 h-7" />
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-lg font-bold">¡Venta Procesada Exitosamente!</h2>
-                  <p className="text-green-100 text-xs mt-0.5">
-                    N° Venta: <span className="font-semibold">{ventaCompletada.numero_venta}</span>
-                  </p>
+            {/* Header Success - Ultra Compacto */}
+            <div className="bg-gradient-to-r from-green-500 to-green-600 px-4 py-2.5 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-white bg-opacity-20 backdrop-blur rounded-full flex items-center justify-center animate-pulse">
+                    <CheckCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold leading-tight">¡Venta Procesada!</h2>
+                    <p className="text-green-100 text-xs">
+                      {ventaCompletada.numero_venta} • S/ {Number(ventaCompletada.total || 0).toFixed(2)} • {ventaCompletada.metodo_pago.toUpperCase()}
+                      {ventaCompletada.metodo_pago === 'efectivo' && ventaCompletada.cambio > 0 && ` • Cambio: S/ ${Number(ventaCompletada.cambio).toFixed(2)}`}
+                    </p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setShowTicketModal(false)}
-                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1.5 transition-colors"
+                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1 transition-colors"
                   title="Cerrar"
                 >
                   <X className="w-5 h-5" />
                 </button>
-              </div>
-
-              {/* Resumen de Venta - Compacto */}
-              <div className="mt-3 bg-white bg-opacity-10 backdrop-blur rounded-lg p-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-green-100 text-xs mb-0.5">Total</p>
-                    <p className="text-2xl font-bold">S/ {Number(ventaCompletada.total || 0).toFixed(2)}</p>
-                  </div>
-                  {ventaCompletada.metodo_pago === 'efectivo' && ventaCompletada.cambio > 0 && (
-                    <div>
-                      <p className="text-green-100 text-xs mb-0.5">Cambio</p>
-                      <p className="text-xl font-semibold">S/ {Number(ventaCompletada.cambio).toFixed(2)}</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-green-100 text-xs mb-0.5">Método de Pago</p>
-                    <p className="text-sm font-semibold capitalize">{ventaCompletada.metodo_pago}</p>
-                  </div>
-                  <div>
-                    <p className="text-green-100 text-xs mb-0.5">Productos</p>
-                    <p className="text-sm font-semibold">{ventaCompletada.detalles?.length || 0} items</p>
-                  </div>
-                </div>
               </div>
             </div>
 
