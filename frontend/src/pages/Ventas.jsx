@@ -230,9 +230,9 @@ const Ventas = () => {
           </div>
         </div>
 
-        {/* Tabla de Ventas con scroll vertical fijo - 8 filas */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="overflow-x-auto max-h-[480px] overflow-y-auto">
+        {/* Tabla de Ventas - 7 filas exactas con borde inferior */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-200">
+          <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: '445px' }}>
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
@@ -244,9 +244,6 @@ const Ventas = () => {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Vendedor
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cliente
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Total
@@ -265,14 +262,14 @@ const Ventas = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan="8" className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
                       <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                       <p className="mt-2">Cargando ventas...</p>
                     </td>
                   </tr>
                 ) : ventasFiltradas.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
                       <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                       <p>No hay ventas registradas</p>
                     </td>
@@ -296,9 +293,6 @@ const Ventas = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {venta.vendedor_nombre}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {venta.cliente_nombre || 'Sin registro'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                         S/ {Number(venta.total || 0).toFixed(2)}
