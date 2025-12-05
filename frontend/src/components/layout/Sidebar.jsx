@@ -13,7 +13,7 @@ import {
   Users,
   DollarSign,
   Receipt,
-  Settings
+  ClipboardList
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -62,7 +62,7 @@ export const Sidebar = () => {
     },
     {
       name: 'Ajustes Inventario', // FASE 8: Ajustes de stock
-      icon: Settings,
+      icon: ClipboardList,
       path: '/ajustes-inventario',
       roles: ['admin'],
     },

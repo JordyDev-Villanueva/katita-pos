@@ -245,24 +245,33 @@ export const Usuarios = () => {
     <Layout>
       <div className="p-6 space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent flex items-center gap-3">
-              <Users className="w-8 h-8 text-blue-600" />
-              Gestión de Vendedores
-            </h1>
-            <p className="text-gray-600 mt-1">Administra vendedores y su información</p>
+        <div className="mb-6">
+          <div className="flex items-center justify-between pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <Users className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Gestión de Vendedores
+                </h1>
+                <p className="text-sm text-gray-600">
+                  Administra vendedores y su información
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                resetForm();
+                setShowModal(true);
+              }}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 font-medium shadow-lg"
+            >
+              <Plus className="w-5 h-5" />
+              Nuevo Vendedor
+            </button>
           </div>
-          <button
-            onClick={() => {
-              resetForm();
-              setShowModal(true);
-            }}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition shadow-lg"
-          >
-            <Plus className="w-5 h-5" />
-            Nuevo Vendedor
-          </button>
+          <div className="h-0.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 rounded-full"></div>
         </div>
 
         {/* Filtros */}
