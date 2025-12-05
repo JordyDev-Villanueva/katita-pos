@@ -332,6 +332,7 @@ export const POS = () => {
 
         // Mostrar información de la venta
         const venta = response.data;
+        console.log('📊 Respuesta del backend:', venta);
 
         // Calcular totales desde el carrito (datos locales confiables)
         const subtotalCalculado = cart.reduce((sum, item) => sum + (item.cantidad * item.precio_unitario), 0);
@@ -696,24 +697,18 @@ export const POS = () => {
       {showTicketModal && ventaCompletada && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[95vh] overflow-y-auto">
-            {/* Header Success - Ultra Compacto */}
-            <div className="bg-gradient-to-r from-green-500 to-green-600 px-4 py-2.5 text-white">
+            {/* Header Success - Minimalista */}
+            <div className="bg-gradient-to-r from-green-500 to-green-600 px-4 py-3 text-white">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-white bg-opacity-20 backdrop-blur rounded-full flex items-center justify-center animate-pulse">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 bg-white bg-opacity-20 backdrop-blur rounded-full flex items-center justify-center animate-pulse">
                     <CheckCircle className="w-5 h-5" />
                   </div>
-                  <div>
-                    <h2 className="text-base font-bold leading-tight">¡Venta Procesada!</h2>
-                    <p className="text-green-100 text-xs">
-                      {ventaCompletada.numero_venta} • S/ {Number(ventaCompletada.total || 0).toFixed(2)} • {ventaCompletada.metodo_pago.toUpperCase()}
-                      {ventaCompletada.metodo_pago === 'efectivo' && ventaCompletada.cambio > 0 && ` • Cambio: S/ ${Number(ventaCompletada.cambio).toFixed(2)}`}
-                    </p>
-                  </div>
+                  <h2 className="text-lg font-bold">¡Venta Procesada!</h2>
                 </div>
                 <button
                   onClick={() => setShowTicketModal(false)}
-                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1 transition-colors"
+                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1.5 transition-colors"
                   title="Cerrar"
                 >
                   <X className="w-5 h-5" />

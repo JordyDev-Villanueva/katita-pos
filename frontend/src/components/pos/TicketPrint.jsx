@@ -31,9 +31,9 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
   return (
     <div className="space-y-3">
       {/* Vista Previa del Ticket - Más grande para mejor visualización */}
-      <div className="max-w-lg mx-auto bg-gray-50 p-4 rounded-lg border-2 border-gray-300">
-        <h3 className="text-center text-sm font-semibold text-gray-700 mb-3">Vista Previa del Ticket</h3>
-        <div ref={componentRef} className="mx-auto" style={{ width: '400px' }}>
+      <div className="max-w-xl mx-auto bg-gray-50 p-5 rounded-lg border-2 border-gray-300">
+        <h3 className="text-center text-base font-semibold text-gray-700 mb-4">Vista Previa del Ticket</h3>
+        <div ref={componentRef} className="mx-auto" style={{ width: '420px' }}>
           <style>
             {`
               @media print {
@@ -54,9 +54,9 @@ export const TicketPrint = ({ venta, onPrintComplete }) => {
 
               @media screen {
                 .ticket-container {
-                  width: 400px;
-                  font-size: 13px;
-                  padding: 16px;
+                  width: 420px;
+                  font-size: 14px;
+                  padding: 20px;
                 }
               }
 
