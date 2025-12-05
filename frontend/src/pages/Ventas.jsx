@@ -230,9 +230,9 @@ const Ventas = () => {
           </div>
         </div>
 
-        {/* Tabla de Ventas con scroll vertical fijo - 7 filas */}
+        {/* Tabla de Ventas con scroll vertical fijo - 8 filas */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
+          <div className="overflow-x-auto max-h-[480px] overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
