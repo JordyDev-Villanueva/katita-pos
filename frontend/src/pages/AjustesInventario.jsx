@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
-import { ClipboardList, Plus, Search, Calendar, Filter, TrendingDown, TrendingUp, AlertCircle } from 'lucide-react';
+import { ClipboardList, Package, Plus, Search, Calendar, Filter, TrendingDown, TrendingUp, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '../api/axios';
 import { format } from 'date-fns';
