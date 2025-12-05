@@ -145,10 +145,10 @@ const Ventas = () => {
 
   return (
     <Layout>
-      <div className="p-4 lg:p-5">
+      <div className="p-3 lg:p-4">
         {/* Header */}
-        <div className="mb-3">
-          <div className="flex items-center justify-between pb-4">
+        <div className="mb-2">
+          <div className="flex items-center justify-between pb-3">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
                 <ShoppingCart className="w-5 h-5 text-white" />
@@ -175,10 +175,10 @@ const Ventas = () => {
         </div>
 
         {/* Filtros */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-3 border-2 border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Búsqueda */}
-            <div className="relative">
+        <div className="bg-white rounded-lg shadow-md p-3 mb-2 border-2 border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+            {/* Búsqueda - Ocupa 3 columnas */}
+            <div className="relative md:col-span-3">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
@@ -189,23 +189,7 @@ const Ventas = () => {
               />
             </div>
 
-            {/* Vendedor (solo admin) */}
-            {user?.rol === 'admin' && (
-              <div>
-                <select
-                  value={vendedorFiltro}
-                  onChange={(e) => setVendedorFiltro(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="todos">Todos los vendedores</option>
-                  {vendedores.map(v => (
-                    <option key={v.id} value={v.id}>{v.nombre_completo}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Método de Pago */}
+            {/* Método de Pago - 1 columna */}
             <div>
               <select
                 value={metodoPago}
@@ -220,8 +204,8 @@ const Ventas = () => {
               </select>
             </div>
 
-            {/* Filtro de Fecha */}
-            <div className="relative">
+            {/* Filtro de Fecha - 2 columnas */}
+            <div className="relative md:col-span-2">
               <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="date"
@@ -235,8 +219,8 @@ const Ventas = () => {
         </div>
 
         {/* Tabla de Ventas - 7 filas exactas con borde profesional */}
-        <div className="bg-white rounded-lg shadow-lg border-2 border-gray-300 mb-4">
-          <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: '480px' }}>
+        <div className="bg-white rounded-lg shadow-lg border-2 border-gray-300">
+          <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: '430px' }}>
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
