@@ -220,32 +220,22 @@ const Ventas = () => {
               </select>
             </div>
 
-            {/* Fecha Inicio */}
+            {/* Filtro de Fecha */}
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="date"
                 value={fechaInicio}
                 onChange={(e) => setFechaInicio(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            {/* Fecha Fin */}
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="date"
-                value={fechaFin}
-                onChange={(e) => setFechaFin(e.target.value)}
+                placeholder="Filtrar por fecha"
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
         </div>
 
-        {/* Tabla de Ventas - 7 filas exactas con borde inferior */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-200">
+        {/* Tabla de Ventas - 7 filas exactas con borde profesional */}
+        <div className="bg-white rounded-lg shadow-lg border-2 border-gray-300 mx-1">
           <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: '445px' }}>
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0 z-10">
