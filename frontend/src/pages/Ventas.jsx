@@ -236,7 +236,7 @@ const Ventas = () => {
 
         {/* Tabla de Ventas - 7 filas exactas con borde profesional */}
         <div className="bg-white rounded-lg shadow-lg border-2 border-gray-300 mb-4">
-          <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: '445px' }}>
+          <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: '480px' }}>
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
