@@ -424,21 +424,101 @@ export const CuadroCaja = () => {
         <>
       {/* Estado del turno */}
       {!turnoActual ? (
-        <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-          <div className="bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Lock className="h-12 w-12 text-gray-400" />
+        <div className="space-y-6">
+          {/* Card principal de estado cerrado */}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl shadow-xl p-8 border-2 border-gray-200">
+            <div className="text-center mb-6">
+              <div className="bg-gradient-to-br from-gray-200 to-gray-300 w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Lock className="h-14 w-14 text-gray-600" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-800 mb-3">No hay turno abierto</h2>
+              <p className="text-gray-600 text-lg max-w-md mx-auto mb-6">
+                Inicia un nuevo turno para comenzar a registrar ventas y gestionar movimientos de caja
+              </p>
+              <button
+                onClick={() => setShowAbrirModal(true)}
+                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 inline-flex items-center gap-3 shadow-xl"
+              >
+                <Unlock className="h-6 w-6" />
+                Abrir Nuevo Turno
+              </button>
+            </div>
+
+            {/* Guía rápida */}
+            <div className="mt-8 bg-white rounded-xl p-6 border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <ClipboardList className="h-5 w-5 text-blue-600" />
+                Guía Rápida
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-100 p-2 rounded-lg">
+                    <span className="text-2xl">1️⃣</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Abre tu turno</p>
+                    <p className="text-xs text-gray-600">Registra el monto inicial en caja</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="bg-green-100 p-2 rounded-lg">
+                    <span className="text-2xl">2️⃣</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Registra ventas</p>
+                    <p className="text-xs text-gray-600">Realiza transacciones durante tu jornada</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="bg-purple-100 p-2 rounded-lg">
+                    <span className="text-2xl">3️⃣</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Cierra tu turno</p>
+                    <p className="text-xs text-gray-600">Cuenta el efectivo y finaliza</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">No hay turno abierto</h2>
-          <p className="text-gray-600 mb-6">
-            Abre un nuevo turno para comenzar a registrar ventas y movimientos de caja
-          </p>
-          <button
-            onClick={() => setShowAbrirModal(true)}
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-flex items-center gap-2"
-          >
-            <Unlock className="h-5 w-5" />
-            Abrir Turno
-          </button>
+
+          {/* Información de último turno (si existe historial) */}
+          {isAdmin && todosLosTurnos.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <History className="h-5 w-5 text-blue-600" />
+                Último Turno Cerrado
+              </h3>
+              {(() => {
+                const ultimoTurno = todosLosTurnos
+                  .filter(t => t.estado === 'cerrado')
+                  .sort((a, b) => new Date(b.fecha_cierre) - new Date(a.fecha_cierre))[0];
+
+                if (!ultimoTurno) return <p className="text-gray-500 text-sm">No hay turnos cerrados aún</p>;
+
+                return (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-xs text-gray-600 mb-1">Vendedor</p>
+                      <p className="font-semibold text-gray-900 text-sm">{ultimoTurno.vendedor_nombre}</p>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-xs text-gray-600 mb-1">Fecha Cierre</p>
+                      <p className="font-semibold text-gray-900 text-sm">{formatDateTime(ultimoTurno.fecha_cierre)}</p>
+                    </div>
+                    <div className="bg-green-50 p-3 rounded-lg">
+                      <p className="text-xs text-green-700 mb-1">Total Ventas</p>
+                      <p className="font-bold text-green-600">{formatCurrency(ultimoTurno.total_ventas_efectivo)}</p>
+                    </div>
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <p className="text-xs text-blue-700 mb-1">Duración</p>
+                      <p className="font-bold text-blue-600">{ultimoTurno.duracion_turno} hrs</p>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
         </div>
       ) : (
         <>
@@ -862,41 +942,98 @@ export const CuadroCaja = () => {
         </>
       )}
 
-      {/* Modal: Abrir Turno */}
+      {/* Modal: Abrir Turno - Mejorado */}
       {showAbrirModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="bg-green-600 text-white p-4 rounded-t-2xl">
-              <div className="flex items-center gap-3">
-                <div className="bg-white bg-opacity-20 p-3 rounded-lg">
-                  <Unlock className="h-8 w-8" />
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all">
+            {/* Header con gradiente mejorado */}
+            <div className="bg-gradient-to-r from-green-600 via-green-500 to-emerald-600 text-white p-6 rounded-t-3xl">
+              <div className="flex items-center gap-4">
+                <div className="bg-white bg-opacity-25 p-4 rounded-2xl backdrop-blur-sm">
+                  <Unlock className="h-10 w-10" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">Abrir Turno</h2>
-                  <p className="text-green-100 text-sm mt-1">Registra el monto inicial en caja</p>
+                  <h2 className="text-3xl font-bold mb-1">Abrir Turno</h2>
+                  <p className="text-green-50 text-sm">
+                    Inicia tu jornada de trabajo
+                  </p>
                 </div>
               </div>
             </div>
 
             <form onSubmit={handleAbrirTurno} className="p-6">
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Monto Inicial en Caja (S/)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={montoInicial}
-                  onChange={(e) => setMontoInicial(e.target.value)}
-                  placeholder="0.00"
-                  className="block w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 text-lg"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Deja en 0 si no hay dinero inicial en caja
-                </p>
+              {/* Información contextual */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-l-4 border-blue-500 rounded-xl p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-500 text-white p-2 rounded-lg">
+                    <Banknote className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-blue-900 mb-1">
+                      ¿Qué es el monto inicial?
+                    </p>
+                    <p className="text-xs text-blue-700 leading-relaxed">
+                      Es el dinero en efectivo que tienes en caja al comenzar tu turno.
+                      Si la caja está vacía, déjalo en S/ 0.00
+                    </p>
+                  </div>
+                </div>
               </div>
 
+              {/* Input mejorado */}
+              <div className="mb-6">
+                <label className="block text-sm font-bold text-gray-800 mb-3">
+                  Monto Inicial en Caja
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xl font-bold">
+                    S/
+                  </span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={montoInicial}
+                    onChange={(e) => setMontoInicial(e.target.value)}
+                    placeholder="0.00"
+                    autoFocus
+                    className="block w-full rounded-xl border-2 border-gray-300 pl-12 pr-4 py-4 focus:outline-none focus:ring-4 focus:ring-green-200 focus:border-green-500 text-2xl font-bold text-gray-900 transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Sugerencias de montos */}
+              <div className="mb-6">
+                <p className="text-xs font-semibold text-gray-600 mb-2">Montos sugeridos:</p>
+                <div className="flex gap-2">
+                  {[0, 50, 100, 200].map((monto) => (
+                    <button
+                      key={monto}
+                      type="button"
+                      onClick={() => setMontoInicial(monto.toString())}
+                      className="flex-1 px-3 py-2 bg-gray-100 hover:bg-green-100 hover:text-green-700 hover:border-green-300 border-2 border-transparent rounded-lg font-bold text-sm text-gray-700 transition-all"
+                    >
+                      S/ {monto}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Resumen antes de abrir */}
+              <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Turno iniciado por:</span>
+                  <span className="text-sm font-bold text-gray-900">{user?.nombre_completo}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Monto inicial:</span>
+                  <span className="text-xl font-bold text-green-600">
+                    S/ {montoInicial || '0.00'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Botones de acción */}
               <div className="flex gap-3">
                 <button
                   type="button"
@@ -904,13 +1041,13 @@ export const CuadroCaja = () => {
                     setShowAbrirModal(false);
                     setMontoInicial('');
                   }}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-lg font-semibold transition-colors"
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-3.5 rounded-xl font-bold transition-all border-2 border-gray-200"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors"
+                  className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   Abrir Turno
                 </button>

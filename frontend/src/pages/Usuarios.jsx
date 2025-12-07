@@ -288,11 +288,11 @@ export const Usuarios = () => {
           </div>
         </div>
 
-        {/* Tabla de vendedores */}
+        {/* Tabla de vendedores - 5 filas fijas con scroll */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+              <thead className="bg-gradient-to-r from-blue-600 to-blue-700 text-white sticky top-0 z-10">
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Usuario</th>
                   <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Contacto</th>
@@ -301,6 +301,11 @@ export const Usuarios = () => {
                   <th className="px-6 py-4 text-center text-sm font-bold uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
+            </table>
+          </div>
+          {/* Tbody con scroll - altura fija para 5 filas */}
+          <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: '400px' }}>
+            <table className="w-full">
               <tbody className="divide-y divide-gray-200">
                 {loading ? (
                   <tr>
