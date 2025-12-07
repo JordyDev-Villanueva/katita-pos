@@ -1311,21 +1311,22 @@ export const CuadroCaja = () => {
           </div>
         </div>
       ) : (
-        // Tab Historial (Admin)
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <div className="flex items-center justify-between mb-6">
+        // Tab Historial (Admin) - Con scroll optimizado
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          {/* Header y Filtros - STICKY */}
+          <div className="bg-white p-6 border-b-2 border-gray-200 sticky top-0 z-10">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
               <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                 <History className="h-7 w-7 text-blue-600" />
                 Historial de Turnos
               </h2>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setFiltroEstado('todos')}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                  className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${
                     filtroEstado === 'todos'
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-blue-600 text-white shadow-md'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
@@ -1333,9 +1334,9 @@ export const CuadroCaja = () => {
                 </button>
                 <button
                   onClick={() => setFiltroEstado('abierto')}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                  className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${
                     filtroEstado === 'abierto'
-                      ? 'bg-green-600 text-white'
+                      ? 'bg-green-600 text-white shadow-md'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
@@ -1343,9 +1344,9 @@ export const CuadroCaja = () => {
                 </button>
                 <button
                   onClick={() => setFiltroEstado('pendiente_cierre')}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                  className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${
                     filtroEstado === 'pendiente_cierre'
-                      ? 'bg-yellow-600 text-white'
+                      ? 'bg-yellow-600 text-white shadow-md'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
@@ -1353,9 +1354,9 @@ export const CuadroCaja = () => {
                 </button>
                 <button
                   onClick={() => setFiltroEstado('cerrado')}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                  className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${
                     filtroEstado === 'cerrado'
-                      ? 'bg-gray-600 text-white'
+                      ? 'bg-gray-600 text-white shadow-md'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
@@ -1363,7 +1364,10 @@ export const CuadroCaja = () => {
                 </button>
               </div>
             </div>
+          </div>
 
+          {/* Lista de turnos con scroll - Altura fija para 3-4 turnos */}
+          <div className="overflow-y-auto p-6" style={{ maxHeight: '600px' }}>
             {loadingHistorial ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
