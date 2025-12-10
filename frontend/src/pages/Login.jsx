@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, ShoppingBag, CheckCircle, LogIn, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, CheckCircle, LogIn, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 export const Login = () => {
@@ -55,7 +55,11 @@ export const Login = () => {
         {/* Logo y Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl mb-4 shadow-2xl">
-            <ShoppingBag className="w-10 h-10 text-blue-600" />
+            <img
+              src="/favicon.svg"
+              alt="KATITA POS Logo"
+              className="w-12 h-12"
+            />
           </div>
           <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">KATITA POS</h1>
           <p className="text-blue-200">Sistema de Punto de Venta</p>
@@ -67,6 +71,50 @@ export const Login = () => {
           <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
             Iniciar Sesión
           </h2>
+
+          {/* Banner de Credenciales Demo */}
+          <div className="mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="bg-blue-500 text-white p-2.5 rounded-lg shadow-md flex-shrink-0">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
+                  <span>🎯</span> Credenciales Demo
+                </p>
+                <div className="space-y-2">
+                  <div className="bg-white rounded-lg p-3 border border-blue-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-semibold text-gray-700">👑 Admin (Acceso Total)</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <code className="bg-blue-100 text-blue-700 px-2 py-1 rounded font-mono font-semibold">admin</code>
+                      <span className="text-gray-400">/</span>
+                      <code className="bg-blue-100 text-blue-700 px-2 py-1 rounded font-mono font-semibold">admin123</code>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg p-3 border border-green-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-semibold text-gray-700">👤 Vendedor</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <code className="bg-green-100 text-green-700 px-2 py-1 rounded font-mono font-semibold">vendedor1</code>
+                      <span className="text-gray-400">/</span>
+                      <code className="bg-green-100 text-green-700 px-2 py-1 rounded font-mono font-semibold">vendedor1</code>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-start gap-2 bg-blue-100 bg-opacity-50 rounded-lg p-2">
+                  <span className="text-blue-600 text-sm flex-shrink-0">ℹ️</span>
+                  <p className="text-xs text-blue-800 leading-relaxed">
+                    Sistema demo. Los datos se resetean diariamente a las 3 AM.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Mensaje de error */}
           {error && (
