@@ -25,17 +25,25 @@ from sqlalchemy import func, and_
 from decimal import Decimal
 from datetime import datetime, timezone, date, timedelta
 from io import BytesIO
+import matplotlib
+matplotlib.use('Agg')  # Backend sin GUI
+import matplotlib.pyplot as plt
+from matplotlib.patches import Wedge
+import os
 
 # Zona horaria de Perú (UTC-5)
 PERU_TZ = timezone(timedelta(hours=-5))
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, A4
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image as RLImage, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.lib.enums import TA_CENTER, TA_RIGHT
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
+from reportlab.pdfgen import canvas
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.chart import BarChart, PieChart, Reference
+from openpyxl.chart.label import DataLabelList
 from app import db
 from app.models.venta import Venta
 from app.models.detalle_venta import DetalleVenta
@@ -1320,21 +1328,128 @@ def resumen_ventas():
 
 
 # ==================================================================================
-# ENDPOINT: GET /api/ventas/reportes/pdf - Exportar reporte a PDF
+# FUNCIONES AUXILIARES PARA GRÁFICOS
+# ==================================================================================
+
+def crear_grafico_metodos_pago(metodos_data, output_path):
+    """Crea un gráfico de pie para métodos de pago"""
+    fig, ax = plt.subplots(figsize=(6, 4), facecolor='white')
+
+    metodos = [m['metodo'] for m in metodos_data]
+    totales = [float(m['total']) for m in metodos_data]
+
+    colors_chart = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
+    explode = [0.05] * len(metodos)  # Separar un poco cada slice
+
+    wedges, texts, autotexts = ax.pie(
+        totales,
+        labels=metodos,
+        autopct='%1.1f%%',
+        colors=colors_chart[:len(metodos)],
+        explode=explode,
+        shadow=True,
+        startangle=90,
+        textprops={'fontsize': 10, 'weight': 'bold'}
+    )
+
+    # Mejorar el texto de porcentajes
+    for autotext in autotexts:
+        autotext.set_color('white')
+        autotext.set_fontsize(11)
+        autotext.set_weight('bold')
+
+    ax.set_title('Distribución por Método de Pago', fontsize=13, weight='bold', pad=15)
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='white')
+    plt.close()
+
+def crear_grafico_top_productos(top_productos, output_path):
+    """Crea un gráfico de barras horizontales para top productos"""
+    fig, ax = plt.subplots(figsize=(7, 5), facecolor='white')
+
+    # Tomar solo top 5 para que se vea mejor
+    top_5 = top_productos[:5]
+    nombres = [p['nombre'][:25] + '...' if len(p['nombre']) > 25 else p['nombre'] for p in top_5]
+    totales = [float(p['total']) for p in top_5]
+
+    # Invertir para que el #1 esté arriba
+    nombres.reverse()
+    totales.reverse()
+
+    bars = ax.barh(nombres, totales, color='#10b981', edgecolor='#059669', linewidth=1.5)
+
+    # Agregar valores al final de cada barra
+    for i, (bar, val) in enumerate(zip(bars, totales)):
+        ax.text(val + max(totales) * 0.02, i, f'S/ {val:.2f}',
+                va='center', fontsize=10, weight='bold', color='#047857')
+
+    ax.set_xlabel('Total Vendido (S/)', fontsize=11, weight='bold')
+    ax.set_title('Top 5 Productos Más Vendidos', fontsize=13, weight='bold', pad=15)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.grid(axis='x', alpha=0.3, linestyle='--')
+
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='white')
+    plt.close()
+
+def crear_grafico_vendedores(ventas_por_vendedor, output_path):
+    """Crea un gráfico de barras para ventas por vendedor"""
+    if not ventas_por_vendedor or len(ventas_por_vendedor) == 0:
+        return None
+
+    fig, ax = plt.subplots(figsize=(7, 4), facecolor='white')
+
+    vendedores = [v['vendedor_nombre'][:20] for v in ventas_por_vendedor]
+    totales = [float(v['total']) for v in ventas_por_vendedor]
+
+    bars = ax.bar(vendedores, totales, color='#3b82f6', edgecolor='#1e40af', linewidth=1.5)
+
+    # Agregar valores encima de cada barra
+    for bar in bars:
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2., height + max(totales) * 0.02,
+                f'S/ {height:.2f}',
+                ha='center', va='bottom', fontsize=10, weight='bold')
+
+    ax.set_ylabel('Total Vendido (S/)', fontsize=11, weight='bold')
+    ax.set_title('Ventas por Vendedor', fontsize=13, weight='bold', pad=15)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.grid(axis='y', alpha=0.3, linestyle='--')
+
+    # Rotar etiquetas si son muchas
+    if len(vendedores) > 3:
+        plt.xticks(rotation=45, ha='right')
+
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='white')
+    plt.close()
+
+    return output_path
+
+# ==================================================================================
+# ENDPOINT: GET /api/ventas/reportes/pdf - Exportar reporte a PDF PROFESIONAL
 # ==================================================================================
 
 @ventas_bp.route('/reportes/pdf', methods=['GET'])
 @jwt_required()
 def exportar_reporte_pdf():
     """
-    Genera un reporte de ventas profesional en formato PDF con Top 10 productos.
+    Genera un reporte de ventas PROFESIONAL en formato PDF con:
+    - Logo de KATITA POS
+    - Gráficos visuales (pie charts, bar charts)
+    - Diseño corporativo con gradientes
+    - Métricas destacadas con íconos
+    - Top 10 productos con formato premium
+    - Análisis de tendencias y comparaciones
 
     Query Parameters:
         - fecha_inicio: Fecha inicio (YYYY-MM-DD)
         - fecha_fin: Fecha fin (YYYY-MM-DD)
 
     Returns:
-        PDF file con el reporte de ventas
+        PDF file profesional con el reporte de ventas
     """
     try:
         # Obtener parámetros
