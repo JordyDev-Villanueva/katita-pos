@@ -106,10 +106,15 @@ const Reportes = () => {
         params.vendedor_id = vendedorSeleccionado;
       }
 
+      toast.loading('Generando PDF con gráficos...', { id: 'pdf-loading' });
+
       const response = await axiosInstance.get('/ventas/reportes/pdf', {
         params,
-        responseType: 'blob'
+        responseType: 'blob',
+        timeout: 60000 // 60 segundos para generar gráficos
       });
+
+      toast.dismiss('pdf-loading');
 
       // Crear enlace de descarga
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -121,8 +126,16 @@ const Reportes = () => {
       link.remove();
       toast.success('PDF descargado exitosamente');
     } catch (error) {
-      console.error('Error al exportar PDF:', error);
-      toast.error('Error al exportar PDF. Verifica que haya datos para exportar.');
+      toast.dismiss('pdf-loading');
+      console.error('❌ ERROR EXPORTANDO PDF:', error);
+
+      if (error.code === 'ECONNABORTED') {
+        toast.error('La generación del PDF está tomando más tiempo de lo esperado. Por favor intenta nuevamente.', { duration: 5000 });
+      } else if (error.response?.status === 500) {
+        toast.error('Error en el servidor al generar PDF. Verifica que haya datos en el rango seleccionado.', { duration: 5000 });
+      } else {
+        toast.error('Error al exportar PDF. Verifica tu conexión e intenta nuevamente.');
+      }
     }
   };
 
@@ -138,10 +151,15 @@ const Reportes = () => {
         params.vendedor_id = vendedorSeleccionado;
       }
 
+      toast.loading('Generando Excel...', { id: 'excel-loading' });
+
       const response = await axiosInstance.get('/ventas/reportes/excel', {
         params,
-        responseType: 'blob'
+        responseType: 'blob',
+        timeout: 60000 // 60 segundos para generar el archivo
       });
+
+      toast.dismiss('excel-loading');
 
       // Crear enlace de descarga
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -153,8 +171,16 @@ const Reportes = () => {
       link.remove();
       toast.success('Excel descargado exitosamente');
     } catch (error) {
-      console.error('Error al exportar Excel:', error);
-      toast.error('Error al exportar Excel. Verifica que haya datos para exportar.');
+      toast.dismiss('excel-loading');
+      console.error('❌ ERROR EXPORTANDO EXCEL:', error);
+
+      if (error.code === 'ECONNABORTED') {
+        toast.error('La generación del Excel está tomando más tiempo de lo esperado. Por favor intenta nuevamente.', { duration: 5000 });
+      } else if (error.response?.status === 500) {
+        toast.error('Error en el servidor al generar Excel. Verifica que haya datos en el rango seleccionado.', { duration: 5000 });
+      } else {
+        toast.error('Error al exportar Excel. Verifica tu conexión e intenta nuevamente.');
+      }
     }
   };
 
