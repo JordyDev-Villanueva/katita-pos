@@ -1541,141 +1541,61 @@ def exportar_reporte_pdf():
         elif len(ventas_anterior) == 0 and len(ventas) > 0:
             comparacion = '↑ Nuevo período (sin ventas previas)'
 
-        # Crear PDF en memoria
-        buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=0.5*inch, bottomMargin=0.5*inch)
-        elements = []
+        # Preparar datos de métodos de pago para gráficos
+        metodos_data_grafico = []
+        metodos_totales = {}
+        for venta in ventas:
+            metodo = venta.metodo_pago.upper()
+            if metodo in metodos_totales:
+                metodos_totales[metodo] += venta.total
+            else:
+                metodos_totales[metodo] = venta.total
 
-        # Estilos
-        styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            'CustomTitle',
-            parent=styles['Heading1'],
-            fontSize=22,
-            textColor=colors.HexColor('#1e40af'),
-            spaceAfter=20,
-            alignment=TA_CENTER,
-            fontName='Helvetica-Bold'
+        for metodo, total in metodos_totales.items():
+            metodos_data_grafico.append({
+                'metodo': metodo,
+                'total': float(total)
+            })
+
+        # Calcular ventas por vendedor para el gráfico
+        por_vendedor = {}
+        for venta in ventas:
+            vendedor_id = venta.vendedor_id
+            if vendedor_id:
+                if vendedor_id in por_vendedor:
+                    por_vendedor[vendedor_id]['cantidad'] += 1
+                    por_vendedor[vendedor_id]['total'] += float(venta.total)
+                else:
+                    vendedor_nombre = venta.vendedor.nombre_completo if venta.vendedor else 'Sin nombre'
+                    por_vendedor[vendedor_id] = {
+                        'vendedor_id': vendedor_id,
+                        'vendedor_nombre': vendedor_nombre,
+                        'cantidad': 1,
+                        'total': float(venta.total)
+                    }
+
+        ventas_por_vendedor = list(por_vendedor.values())
+
+        # 🎨 USAR EL GENERADOR PROFESIONAL CON GRÁFICOS
+        from app.utils.pdf_generator import generar_pdf_profesional
+
+        buffer = generar_pdf_profesional(
+            fecha_inicio=fecha_inicio,
+            fecha_fin=fecha_fin,
+            ventas=ventas,
+            total_vendido=float(total_vendido),
+            ganancia_total=float(ganancia_total),
+            total_unidades=total_unidades,
+            margen_porcentaje=float(margen_porcentaje),
+            top_productos=top_productos,
+            metodo_mas_usado=metodo_mas_usado,
+            hora_pico=hora_pico,
+            comparacion=comparacion,
+            metodos_data=metodos_data_grafico,
+            vendedores_data=ventas_por_vendedor
         )
 
-        # Título
-        elements.append(Paragraph('KATITA POS - Reporte de Ventas', title_style))
-        elements.append(Spacer(1, 0.15*inch))
-
-        # Período
-        periodo_text = f'Período: {fecha_inicio.strftime("%d/%m/%Y")} - {fecha_fin.strftime("%d/%m/%Y")}'
-        elements.append(Paragraph(periodo_text, styles['Normal']))
-        elements.append(Spacer(1, 0.25*inch))
-
-        # Resumen de métricas
-        resumen_data = [
-            ['RESUMEN DE VENTAS', ''],
-            ['Total de Ventas:', f'{len(ventas)} ventas'],
-            ['Total Vendido:', f'S/ {total_vendido:.2f}'],
-            ['Ganancia Total:', f'S/ {ganancia_total:.2f}'],
-            ['Margen de Ganancia:', f'{margen_porcentaje:.1f}%'],
-            ['Ticket Promedio:', f'S/ {(total_vendido / len(ventas)):.2f}' if len(ventas) > 0 else 'S/ 0.00'],
-            ['Unidades Vendidas:', f'{total_unidades} unidades'],
-            ['Método Más Usado:', metodo_mas_usado],
-            ['Hora Pico:', hora_pico],
-            ['Comparación:', comparacion]
-        ]
-
-        resumen_table = Table(resumen_data, colWidths=[3.2*inch, 2.5*inch])
-        resumen_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e40af')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 13),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-            ('TOPPADDING', (0, 0), (-1, 0), 10),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 1), (-1, -1), 10),
-            ('TOPPADDING', (0, 1), (-1, -1), 6),
-            ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
-        ]))
-
-        elements.append(resumen_table)
-        elements.append(Spacer(1, 0.3*inch))
-
-        # Top 10 Productos
-        if top_productos:
-            elements.append(Paragraph('TOP 10 PRODUCTOS MÁS VENDIDOS', styles['Heading2']))
-            elements.append(Spacer(1, 0.15*inch))
-
-            top_data = [['#', 'Producto', 'Cant.', 'Total Vendido', 'Ganancia']]
-            for idx, prod in enumerate(top_productos, 1):
-                top_data.append([
-                    str(idx),
-                    prod['nombre'][:30],
-                    str(prod['cantidad']),
-                    f"S/ {float(prod['total']):.2f}",
-                    f"S/ {float(prod['ganancia']):.2f}"
-                ])
-
-            top_table = Table(top_data, colWidths=[0.4*inch, 2.5*inch, 0.8*inch, 1.2*inch, 1.2*inch])
-            top_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#16a34a')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('ALIGN', (1, 1), (1, -1), 'LEFT'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-                ('TOPPADDING', (0, 0), (-1, 0), 10),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.lightgreen),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ('FONTSIZE', (0, 1), (-1, -1), 9),
-                ('TOPPADDING', (0, 1), (-1, -1), 5),
-                ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
-            ]))
-
-            elements.append(top_table)
-            elements.append(Spacer(1, 0.3*inch))
-
-        # Detalle de ventas
-        if ventas:
-            elements.append(Paragraph('DETALLE DE VENTAS', styles['Heading2']))
-            elements.append(Spacer(1, 0.15*inch))
-
-            ventas_data = [['Fecha', 'ID', 'Método', 'Vendedor', 'Total', 'Ganancia']]
-
-            for venta in ventas:
-                vendedor_nombre = venta.vendedor.nombre_completo if venta.vendedor else 'Sin asignar'
-                ventas_data.append([
-                    venta.created_at.strftime('%d/%m/%Y %H:%M'),
-                    f'#{venta.id}',
-                    venta.metodo_pago.upper(),
-                    vendedor_nombre,
-                    f'S/ {venta.total:.2f}',
-                    f'S/ {venta.ganancia_total:.2f}'
-                ])
-
-            ventas_table = Table(ventas_data, colWidths=[1.2*inch, 0.5*inch, 1.1*inch, 1.5*inch, 0.9*inch, 0.9*inch])
-            ventas_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e40af')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 9),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                ('TOPPADDING', (0, 0), (-1, 0), 8),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ('FONTSIZE', (0, 1), (-1, -1), 8),
-                ('TOPPADDING', (0, 1), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
-            ]))
-
-            elements.append(ventas_table)
-
-        # Generar PDF
-        doc.build(elements)
-        buffer.seek(0)
-
+        # El buffer ya viene listo del generador profesional
         # Nombre del archivo
         filename = f'reporte_ventas_{fecha_inicio}_{fecha_fin}.pdf'
 
