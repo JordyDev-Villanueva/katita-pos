@@ -252,8 +252,19 @@ def generar_pdf_profesional(
     )
 
     # ===== HEADER CON LOGO =====
-    logo_path = os.path.join('app', 'static', 'logo.svg')
-    logo_img = convertir_svg_a_imagen(logo_path)
+    # Intentar primero PNG (más confiable), luego SVG
+    logo_path_png = os.path.join('app', 'static', 'logo.png')
+    logo_path_svg = os.path.join('app', 'static', 'logo.svg')
+
+    logo_img = None
+    if os.path.exists(logo_path_png):
+        try:
+            logo_img = RLImage(logo_path_png, width=0.8*inch, height=0.8*inch)
+        except Exception as e:
+            print(f"⚠️ No se pudo cargar logo PNG: {e}")
+
+    if not logo_img:
+        logo_img = convertir_svg_a_imagen(logo_path_svg)
 
     if logo_img:
         # Crear tabla para poner logo al lado del título
