@@ -11,6 +11,84 @@ Sistema completo de gestión de inventario, ventas y reportes con sistema FIFO a
 
 ---
 
+## 🎯 Demo en Vivo
+
+**Backend:** [https://katita-pos-production.up.railway.app](https://katita-pos-production.up.railway.app)
+
+**Credenciales de prueba:**
+- Usuario: `admin` | Contraseña: `admin123`
+- Usuario: `vendedor` | Contraseña: `vendedor123`
+
+---
+
+## 📸 Screenshots
+
+### 🔐 Login & Dashboard
+
+<div align="center">
+
+| Login | Dashboard Superior |
+|:---:|:---:|
+| ![Login](docs/screenshots/01-login.png) | ![Dashboard Top](docs/screenshots/02-dashboard-top.png) |
+
+| Dashboard - Gráficos y Analytics |
+|:---:|
+| ![Dashboard Bottom](docs/screenshots/03-dashboard-bottom.png) |
+
+</div>
+
+### 🛒 Punto de Venta (POS)
+
+<div align="center">
+
+| Interfaz Principal | Métodos de Pago | Pago en Efectivo |
+|:---:|:---:|:---:|
+| ![POS](docs/screenshots/04-pos.png) | ![Pago](docs/screenshots/05-pos-pago.png) | ![Efectivo](docs/screenshots/06-pos-efectivo.png) |
+
+</div>
+
+### 📊 Reportes & Analytics
+
+<div align="center">
+
+| Reportes - Sección Superior | Reportes - Gráficos |
+|:---:|:---:|
+| ![Reportes Top](docs/screenshots/07-reportes.png) | ![Reportes Bottom](docs/screenshots/08-reportes-bottom.png) |
+
+</div>
+
+### 💰 Cuadro de Caja
+
+<div align="center">
+
+| Gestión de Caja | Abrir Turno | Historial |
+|:---:|:---:|:---:|
+| ![Cuadro Caja](docs/screenshots/09-cuadro-caja.png) | ![Abrir Caja](docs/screenshots/10-cuadro-caja-abrir.png) | ![Historial](docs/screenshots/11-cuadro-caja-historial.png) |
+
+</div>
+
+### 📦 Gestión de Inventario
+
+<div align="center">
+
+| Lotes FIFO | Productos |
+|:---:|:---:|
+| ![Lotes](docs/screenshots/12-lotes.png) | ![Productos](docs/screenshots/13-productos.png) |
+
+</div>
+
+### 📄 Reportes PDF Profesionales
+
+<div align="center">
+
+| Página 1 - Header con Logo | Página 2 - Gráficos | Página 3 - Detalles |
+|:---:|:---:|:---:|
+| ![PDF Page 1](docs/screenshots/14-pdf-page1.png) | ![PDF Page 2](docs/screenshots/15-pdf-page2.png) | ![PDF Page 3](docs/screenshots/16-pdf-page3.png) |
+
+</div>
+
+---
+
 ## 📋 Características Principales
 
 ### 🏪 **Punto de Venta (POS)**
