@@ -23,6 +23,47 @@ from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 from reportlab.pdfgen import canvas
 
+# Para convertir SVG a PNG
+try:
+    from svglib.svglib import svg2rlg
+    from reportlab.graphics import renderPM
+    SVG_SUPPORT = True
+except ImportError:
+    SVG_SUPPORT = False
+
+
+def convertir_svg_a_imagen(svg_path):
+    """
+    Convierte un archivo SVG a un objeto Image de ReportLab.
+
+    Args:
+        svg_path: Ruta al archivo SVG
+
+    Returns:
+        RLImage o None si no se pudo convertir
+    """
+    if not os.path.exists(svg_path):
+        return None
+
+    if SVG_SUPPORT:
+        try:
+            # Usar svglib para convertir SVG a drawing de ReportLab
+            drawing = svg2rlg(svg_path)
+            if drawing:
+                # Convertir a PNG en memoria
+                img_buffer = BytesIO()
+                renderPM.drawToFile(drawing, img_buffer, fmt='PNG', dpi=150)
+                img_buffer.seek(0)
+
+                # Crear imagen de ReportLab con tamaño fijo
+                img = RLImage(img_buffer, width=0.8*inch, height=0.8*inch)
+                return img
+        except Exception as e:
+            print(f"⚠️ No se pudo convertir SVG con svglib: {e}")
+            return None
+
+    return None
+
 
 def crear_grafico_metodos_pago(metodos_data):
     """Crea un gráfico de pie para métodos de pago y retorna buffer"""
@@ -210,19 +251,34 @@ def generar_pdf_profesional(
         borderPadding=5
     )
 
-    # ===== LOGO (si existe) =====
+    # ===== HEADER CON LOGO =====
     logo_path = os.path.join('app', 'static', 'logo.svg')
-    if os.path.exists(logo_path):
-        try:
-            # SVG no es soportado directamente, necesitaríamos convertirlo
-            # Por ahora agregamos el título sin logo
-            pass
-        except:
-            pass
+    logo_img = convertir_svg_a_imagen(logo_path)
 
-    # ===== HEADER =====
-    elements.append(Paragraph('KATITA POS', title_style))
-    elements.append(Paragraph('Sistema de Punto de Venta - Minimarket Guadalupito', subtitle_style))
+    if logo_img:
+        # Crear tabla para poner logo al lado del título
+        header_data = [
+            [
+                logo_img,
+                Paragraph('KATITA POS<br/><font size="11" color="#6b7280">Sistema de Punto de Venta - Minimarket Guadalupito</font>', title_style)
+            ]
+        ]
+
+        header_table = Table(header_data, colWidths=[1.2*inch, 5*inch])
+        header_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+            ('TOPPADDING', (0, 0), (-1, -1), 0),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+        ]))
+
+        elements.append(header_table)
+    else:
+        # Si no hay logo, usar el header tradicional
+        elements.append(Paragraph('KATITA POS', title_style))
+        elements.append(Paragraph('Sistema de Punto de Venta - Minimarket Guadalupito', subtitle_style))
 
     # Título principal
     elements.append(Paragraph('Reporte de Ventas', section_title_style))
