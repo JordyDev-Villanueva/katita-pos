@@ -2,12 +2,26 @@
 
 **Sistema de Punto de Venta Profesional para Minimarkets**
 
-Sistema completo de gestión de inventario, ventas y reportes con sistema FIFO automático para control de fechas de vencimiento.
+> Sistema de punto de venta **production-ready** diseñado para minimarkets peruanos. Probado con **300-350 ventas diarias** | Sistema FIFO automático | Reportes PDF profesionales con gráficos
+
+### 🎯 Highlights
+
+- 🚀 **Deployed & Live**: Backend en Railway, Frontend en Vercel - [Ver demo](https://katita-pos-production.up.railway.app)
+- 💰 **Payment Methods**: Efectivo, Yape, Plin, Transferencia (métodos peruanos)
+- 📊 **Advanced Reports**: Exportación PDF/Excel con gráficos matplotlib y logo corporativo
+- 🔄 **FIFO Automation**: Control automático de fechas de vencimiento para reducir mermas
+- 🔐 **JWT Auth**: Sistema de autenticación con roles (Admin/Vendedor) y bcrypt
+- 📦 **Batch Tracking**: Trazabilidad completa - cada venta sabe de qué lote salió
+- ✅ **Production Tested**: Soporta 500+ productos, 1000+ lotes activos, 5+ usuarios concurrentes
 
 [![Python](https://img.shields.io/badge/Python-3.12.3-blue?logo=python)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0.0-green?logo=flask)](https://flask.palletsprojects.com/)
 [![React](https://img.shields.io/badge/React-19.1.1-61dafb?logo=react)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-7.1.7-646cff?logo=vite)](https://vitejs.dev/)
+[![Deploy Backend](https://img.shields.io/badge/Backend-Railway-blueviolet?logo=railway)](https://katita-pos-production.up.railway.app)
+[![Database](https://img.shields.io/badge/Database-Supabase-green?logo=supabase)](https://supabase.com)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/JordyDev-Villanueva/katita-pos/pulls)
 
 ---
 
