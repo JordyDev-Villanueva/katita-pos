@@ -6,7 +6,7 @@
 
 ### 🎯 Highlights
 
-- 🚀 **Deployed & Live**: Backend en Railway, Frontend en Vercel - [Ver demo](https://katita-pos-production.up.railway.app)
+- 🚀 **Deployed & Live**: Backend en Railway, Frontend en Vercel - [Ver demo](https://katita-pos.vercel.app)
 - 💰 **Payment Methods**: Efectivo, Yape, Plin, Transferencia (métodos peruanos)
 - 📊 **Advanced Reports**: Exportación PDF/Excel con gráficos matplotlib y logo corporativo
 - 🔄 **FIFO Automation**: Control automático de fechas de vencimiento para reducir mermas
@@ -27,11 +27,13 @@
 
 ## 🎯 Demo en Vivo
 
-**Backend:** [https://katita-pos-production.up.railway.app](https://katita-pos-production.up.railway.app)
+**🌐 Aplicación:** [https://katita-pos.vercel.app](https://katita-pos.vercel.app)
 
 **Credenciales de prueba:**
 - Usuario: `admin` | Contraseña: `admin123`
 - Usuario: `vendedor` | Contraseña: `vendedor123`
+
+**Backend API:** [https://katita-pos-production.up.railway.app](https://katita-pos-production.up.railway.app)
 
 ---
 
