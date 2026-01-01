@@ -45,6 +45,17 @@ instance/
 .env
 .env.local
 .env.*.local
+.env.production
+
+# Security: Scripts with hardcoded credentials (DO NOT COMMIT)
+*_connection.py
+fix_*.py
+test_*.py
+diagnose_*.py
+add_*.py
+check_*.py
+init_supabase.py
+RAILWAY_VARIABLES.txt
 
 # Logs
 logs/
