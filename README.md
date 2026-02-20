@@ -31,7 +31,7 @@
 
 **Credenciales de prueba:**
 - Usuario: `admin` | Contraseña: `admin123`
-- Usuario: `vendedor` | Contraseña: `vendedor123`
+- Usuario: `vendedor1` | Contraseña: `vendedor123`
 
 **Backend API:** [https://katita-pos-production.up.railway.app](https://katita-pos-production.up.railway.app)
 
